@@ -8,9 +8,17 @@ import { NoMatchCounterStorage, StorageData, StorageType } from '../types';
 
 type NoMatchNode = Node<any, { noMatches?: string[]; randomize?: boolean }>;
 
+export const EMPTY_AUDIO_STRING = '<audio src=""/>';
+
+const removeEmptyNoMatches = (noMatchArray?: string[]) => noMatchArray?.filter((noMatch) => noMatch != null && noMatch !== EMPTY_AUDIO_STRING);
+
 export const NoMatchHandler = () => ({
   canHandle: (node: NoMatchNode, context: Context) => {
-    return Array.isArray(node.noMatches) && node.noMatches.length > (context.storage.get<NoMatchCounterStorage>(StorageType.NO_MATCHES_COUNTER) ?? 0);
+    const nonEmptyNoMatches = removeEmptyNoMatches(node.noMatches);
+
+    return (
+      Array.isArray(nonEmptyNoMatches) && nonEmptyNoMatches.length > (context.storage.get<NoMatchCounterStorage>(StorageType.NO_MATCHES_COUNTER) ?? 0)
+    );
   },
   handle: (node: NoMatchNode, context: Context, variables: Store) => {
     context.storage.produce<StorageData>((draft) => {
@@ -19,10 +27,11 @@ export const NoMatchHandler = () => ({
       draft[StorageType.NO_MATCHES_COUNTER] = counter ? counter + 1 : 1;
     });
 
+    const nonEmptyNoMatches = removeEmptyNoMatches(node.noMatches);
     const speak =
       (node.randomize
-        ? _.sample(node.noMatches)
-        : node.noMatches?.[context.storage.get<NoMatchCounterStorage>(StorageType.NO_MATCHES_COUNTER)! - 1]) || '';
+        ? _.sample(nonEmptyNoMatches)
+        : nonEmptyNoMatches?.[context.storage.get<NoMatchCounterStorage>(StorageType.NO_MATCHES_COUNTER)! - 1]) || '';
 
     const sanitizedVars = sanitizeVariables(variables.getState());
     const output = replaceVariables(speak, sanitizedVars);
