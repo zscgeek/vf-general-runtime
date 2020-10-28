@@ -8,7 +8,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
   const router = express.Router();
 
   router.get('/health', (_, res) => res.send('Healthy'));
-  router.use('/state/prototype', PrototypeRouter(middlewares, controllers));
+  router.use('/state/test', PrototypeRouter(middlewares, controllers));
 
   return router;
 };
