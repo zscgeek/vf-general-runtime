@@ -64,7 +64,6 @@ export enum TurnType {
   REQUEST = 'request',
   REPROMPT = 'reprompt',
   NEW_STACK = 'newStack',
-  HANDLER_INPUT = 'handlerInput',
   PREVIOUS_OUTPUT = 'lastOutput',
 }
 
