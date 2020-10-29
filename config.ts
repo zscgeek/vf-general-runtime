@@ -19,8 +19,6 @@ const CONFIG: Config = {
 
   DYNAMO_ENDPOINT: optionalProcessEnv('DYNAMO_ENDPOINT'),
 
-  // Secrets configuration
-  SECRETS_PROVIDER: getProcessEnv('SECRETS_PROVIDER'),
   API_KEYS_SECRET: optionalProcessEnv('API_KEYS_SECRET'),
   MAIN_DB_SECRET: optionalProcessEnv('MAIN_DB_SECRET'),
   LOGGING_DB_SECRET: optionalProcessEnv('LOGGING_DB_SECRET'),
@@ -39,10 +37,13 @@ const CONFIG: Config = {
   SESSIONS_DYNAMO_TABLE: getProcessEnv('SESSIONS_DYNAMO_TABLE'),
 
   VF_DATA_ENDPOINT: getProcessEnv('VF_DATA_ENDPOINT'),
+  VF_DATA_SECRET: getProcessEnv('VF_DATA_SECRET'),
 
   // Logging
   LOG_LEVEL: optionalProcessEnv('LOG_LEVEL'),
   MIDDLEWARE_VERBOSITY: optionalProcessEnv('MIDDLEWARE_VERBOSITY'),
+
+  DATADOG_API_KEY: getProcessEnv('DATADOG_API_KEY'),
 
   PROJECT_SOURCE: optionalProcessEnv('PROJECT_SOURCE'),
   SESSIONS_SOURCE: optionalProcessEnv('SESSIONS_SOURCE'),

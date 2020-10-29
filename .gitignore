@@ -49,9 +49,6 @@ tests/output
 package-lock.json
 scratch.*
 
-# Local secrets file
-local_secrets.yaml
-
 # build folder
 build
 

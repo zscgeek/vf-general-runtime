@@ -10,10 +10,9 @@ export interface Config {
   AWS_REGION: string | null;
   AWS_ENDPOINT: string | null;
 
+  DATADOG_API_KEY: string;
   DYNAMO_ENDPOINT: string | null;
 
-  // Secrets configuration
-  SECRETS_PROVIDER: string;
   API_KEYS_SECRET: string | null;
   MAIN_DB_SECRET: string | null;
   LOGGING_DB_SECRET: string | null;
@@ -30,6 +29,7 @@ export interface Config {
 
   SESSIONS_DYNAMO_TABLE: string;
 
+  VF_DATA_SECRET: string;
   VF_DATA_ENDPOINT: string;
   // Logging
   LOG_LEVEL: string | null;

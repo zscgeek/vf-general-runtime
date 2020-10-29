@@ -89,7 +89,7 @@ class PrototypeManager extends AbstractManager<{ utils: typeof utils }> {
     context.turn.set(TurnType.REQUEST, request);
     context.variables.set(Variables.TIMESTAMP, Math.floor(Date.now() / 1000));
 
-    context.turn.set(TurnType.PREVIOUS_OUTPUT, context.storage.get(StorageType.OUTPUT) ?? '');
+    context.turn.set(TurnType.PREVIOUS_OUTPUT, context.storage.get(StorageType.OUTPUT));
     context.storage.set(StorageType.OUTPUT, '');
 
     await context.update();

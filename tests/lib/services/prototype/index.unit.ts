@@ -28,6 +28,7 @@ describe('prototype manager unit tests', () => {
           set: sinon.stub(),
         },
         storage: {
+          set: sinon.stub(),
           get: sinon.stub().returns(null), // no stream
         },
         stack: {
@@ -76,7 +77,10 @@ describe('prototype manager unit tests', () => {
       const event = { context: { foo4: 'bar3' }, node: { id: 'node-id' } };
       fn(event);
       expect(context.trace.addTrace.args).to.eql([[{ type: 'block', payload: { blockID: event.node.id } }]]);
-      expect(context.turn.set.args).to.eql([[TurnType.REQUEST, request]]);
+      expect(context.turn.set.args).to.eql([
+        [TurnType.REQUEST, request],
+        [TurnType.PREVIOUS_OUTPUT, null],
+      ]);
       expect(context.variables.set.args).to.eql([[Variables.TIMESTAMP, Math.floor(clock.now / 1000)]]);
       expect(context.update.callCount).to.eql(1);
     });
@@ -92,6 +96,7 @@ describe('prototype manager unit tests', () => {
           get: sinon.stub(),
         },
         storage: {
+          set: sinon.stub(),
           get: sinon.stub().returns({ action: 'random' }), // stream
         },
         stack: {
