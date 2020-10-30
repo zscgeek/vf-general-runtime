@@ -32,7 +32,6 @@ repeat all steps each time a user speaks/types to the prototype tool, to perform
 | name                            | example/values               |                                                                                                                desc | required |
 | ------------------------------- | :--------------------------- | ------------------------------------------------------------------------------------------------------------------: | -------- |
 | `PORT`                          | `4000`                       |                                                                                  http port that service will run on | YES      |
-| `SECRETS_PROVIDER`              | `local`                      |                                                 `local` will configure secrets to be read from `local_secrets.yaml` | YES      |
 | `PROJECT_SOURCE`                | `VF-Project-nPDdD6qZJ9.json` |            JSON File inside `/projects` to read version/program metadata - if undefined will use `VF_DATA_ENDPOINT` | NO       |
 | `SESSIONS_SOURCE`               | `local` \| `remote`          |           if `local` read/write sessions to memory, otherwise if `remote` or undefined read/write to DynamoDB` | NO |
 | `VF_DATA_ENDPOINT`              | `http://localhost:8200`      | cloud endpoint to read Voiceflow version and program metadata, doesn't matter if `PROJECT_SOURCE` is a defined file | YES      |
@@ -65,8 +64,6 @@ Add your VF-Project JSON file under `projects/`
 
 Also add the following files to the local repository:
 
-> `local_secrets.yaml`
->
 > ```
 > VF_DATA_SECRET: 'none'
 > DATADOG_API_KEY: 'none'
@@ -79,7 +76,6 @@ Also add the following files to the local repository:
 > PROJECT_SOURCE='[YOUR EXPORTED PROJECT FILE HERE (i.e. VF-Project-nPDdD6qZJ9.json)]'
 >
 > PORT=4000
-> SECRETS_PROVIDER="local"
 > SESSIONS_DYNAMO_TABLE="none"
 > VF_DATA_ENDPOINT="none"
 >

@@ -1,5 +1,4 @@
 import { DataAPI, LocalDataApi, ServerDataApi } from '@voiceflow/client';
-import secretsProvider from '@voiceflow/secrets-provider';
 
 import { Config } from '@/types';
 
@@ -17,7 +16,7 @@ export interface ClientMap extends StaticType {
 const buildClients = (config: Config): ClientMap => {
   const dataAPI = config.PROJECT_SOURCE
     ? new LocalDataApi({ projectSource: config.PROJECT_SOURCE }, { fs: Static.fs, path: Static.path })
-    : new ServerDataApi({ dataSecret: secretsProvider.get('VF_DATA_SECRET'), dataEndpoint: config.VF_DATA_ENDPOINT }, { axios: Static.axios });
+    : new ServerDataApi({ dataSecret: config.VF_DATA_SECRET, dataEndpoint: config.VF_DATA_ENDPOINT }, { axios: Static.axios });
   const metrics = Metrics(config);
 
   return {
