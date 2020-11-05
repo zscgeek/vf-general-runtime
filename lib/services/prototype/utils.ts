@@ -1,5 +1,5 @@
-import { Context, formatIntentName, replaceVariables, Store, transformStringVariableToNumber } from '@voiceflow/client';
 import { IntentRequestSlot, SlotMapping } from '@voiceflow/general-types';
+import { Context, formatIntentName, replaceVariables, Store, transformStringVariableToNumber } from '@voiceflow/runtime';
 import _ from 'lodash';
 
 import { TurnType } from './types';

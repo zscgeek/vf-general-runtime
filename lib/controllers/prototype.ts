@@ -1,5 +1,5 @@
-import { State } from '@voiceflow/client';
 import { StateRequest } from '@voiceflow/general-types';
+import { State } from '@voiceflow/runtime';
 
 import { AbstractController } from './utils';
 

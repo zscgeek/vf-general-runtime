@@ -1,5 +1,5 @@
-import { Frame, Program } from '@voiceflow/client';
 import { IntentName, NodeType, Prompt, Voice } from '@voiceflow/general-types';
+import { Frame, Program } from '@voiceflow/runtime';
 
 export const RESUME_PROGRAM_ID = '__RESUME_FLOW__';
 

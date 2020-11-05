@@ -1,7 +1,7 @@
 import { Command } from '@voiceflow/api-sdk';
-import { Context, extractFrameCommand, Frame, Store } from '@voiceflow/client';
 import { CommandMapping, IntentName, IntentRequest, StateRequestType } from '@voiceflow/general-types';
 import { Command as IntentCommand } from '@voiceflow/general-types/build/nodes/command';
+import { Context, extractFrameCommand, Frame, Store } from '@voiceflow/runtime';
 import _ from 'lodash';
 
 import { TurnType } from '../types';

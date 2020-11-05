@@ -1,5 +1,5 @@
-import { Context } from '@voiceflow/client';
 import { IntentName, IntentRequest, RepeatType } from '@voiceflow/general-types';
+import { Context } from '@voiceflow/runtime';
 
 import { FrameType, PreviousOutputTurn, SpeakFrame, StorageData, StorageType, TurnType } from '../types';
 

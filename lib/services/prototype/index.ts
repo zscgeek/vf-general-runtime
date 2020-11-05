@@ -1,8 +1,8 @@
-import Client, { EventType, State } from '@voiceflow/client';
 import { BlockTraceFrame, StateRequest, TraceType as GeneralTraceType, TraceType } from '@voiceflow/general-types';
 import { TraceFrame as ExitTraceFrame } from '@voiceflow/general-types/build/nodes/exit';
 import { TraceFrame as FlowTraceFrame } from '@voiceflow/general-types/build/nodes/flow';
 import { TraceFrame as SpeakTraceFrame } from '@voiceflow/general-types/build/nodes/speak';
+import Client, { EventType, State } from '@voiceflow/runtime';
 
 import { FullServiceMap } from '../index';
 import { AbstractManager, Config, injectServices } from '../utils';

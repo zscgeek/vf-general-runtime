@@ -1,6 +1,6 @@
-import { formatIntentName, HandlerFactory } from '@voiceflow/client';
 import { IntentRequest, SlotMapping, StateRequestType, TraceType } from '@voiceflow/general-types';
 import { Node, TraceFrame } from '@voiceflow/general-types/build/nodes/interaction';
+import { formatIntentName, HandlerFactory } from '@voiceflow/runtime';
 
 import { StorageType, TurnType } from '../types';
 import { addRepromptIfExists, mapSlots } from '../utils';

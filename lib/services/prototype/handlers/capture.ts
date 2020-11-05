@@ -1,6 +1,6 @@
-import { HandlerFactory } from '@voiceflow/client';
 import { IntentRequest, StateRequestType } from '@voiceflow/general-types';
 import { Node } from '@voiceflow/general-types/build/nodes/capture';
+import { HandlerFactory } from '@voiceflow/runtime';
 import _ from 'lodash';
 import wordsToNumbers from 'words-to-numbers';
 
