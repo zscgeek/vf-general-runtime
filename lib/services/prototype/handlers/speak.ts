@@ -26,8 +26,10 @@ const SpeakHandler: HandlerFactory<Node> = () => ({
         draft[StorageType.OUTPUT] += output;
       });
 
+      const choices = node?.interactions?.map((choice: { intent: string }) => ({ name: choice.intent }));
+
       context.stack.top().storage.set<SpeakFrame>(FrameType.SPEAK, output);
-      context.trace.addTrace<TraceFrame>({ type: TraceType.SPEAK, payload: { message: output } });
+      context.trace.addTrace<TraceFrame>({ type: TraceType.SPEAK, payload: { message: output, choices } });
     }
 
     return node.nextId ?? null;
