@@ -46,7 +46,7 @@ describe('prototype manager unit tests', () => {
       };
 
       const services = {
-        dataAPI: { getTestProgram: 'api' },
+        dataAPI: { getProgram: 'api' },
       };
 
       const utils = {
@@ -67,7 +67,7 @@ describe('prototype manager unit tests', () => {
           state,
           request,
           {
-            api: { getTestProgram: services.dataAPI.getTestProgram },
+            api: { getProgram: services.dataAPI.getProgram },
             handlers: 'foo',
           },
         ],
@@ -114,7 +114,7 @@ describe('prototype manager unit tests', () => {
       };
 
       const services = {
-        dataAPI: { getTestProgram: 'api' },
+        dataAPI: { getProgram: 'api' },
       };
 
       const utils = {

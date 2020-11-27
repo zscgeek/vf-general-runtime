@@ -8,7 +8,7 @@ import fixtures from './fixture';
 const tests = [
   {
     method: 'post',
-    calledPath: '/state/test',
+    calledPath: '/state',
     expected: {
       controllers: {
         prototype: {

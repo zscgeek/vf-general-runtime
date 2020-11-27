@@ -1,8 +1,9 @@
-import { DataAPI, LocalDataApi, ServerDataApi } from '@voiceflow/runtime';
+import { DataAPI, LocalDataApi } from '@voiceflow/runtime';
 
 import { Config } from '@/types';
 
 import Metrics, { MetricsType } from './metrics';
+import PrototypeServerDataApi from './prototypeServerDataApi';
 import Static, { StaticType } from './static';
 
 export interface ClientMap extends StaticType {
@@ -16,7 +17,10 @@ export interface ClientMap extends StaticType {
 const buildClients = (config: Config): ClientMap => {
   const dataAPI = config.PROJECT_SOURCE
     ? new LocalDataApi({ projectSource: config.PROJECT_SOURCE }, { fs: Static.fs, path: Static.path })
-    : new ServerDataApi({ adminToken: config.ADMIN_SERVER_DATA_API_TOKEN, dataEndpoint: config.VF_DATA_ENDPOINT }, { axios: Static.axios });
+    : new PrototypeServerDataApi(
+        { platform: 'general', adminToken: config.ADMIN_SERVER_DATA_API_TOKEN, dataEndpoint: config.VF_DATA_ENDPOINT },
+        { axios: Static.axios }
+      );
   const metrics = Metrics(config);
 
   return {
