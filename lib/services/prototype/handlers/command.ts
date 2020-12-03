@@ -1,5 +1,5 @@
-import { Command } from '@voiceflow/api-sdk';
-import { CommandMapping, IntentName, IntentRequest, StateRequestType } from '@voiceflow/general-types';
+import { Command, CommandMapping } from '@voiceflow/api-sdk';
+import { IntentName, IntentRequest, StateRequestType } from '@voiceflow/general-types';
 import { Command as IntentCommand } from '@voiceflow/general-types/build/nodes/command';
 import { Context, extractFrameCommand, Frame, Store } from '@voiceflow/runtime';
 import _ from 'lodash';
