@@ -1,4 +1,5 @@
-import { IntentRequestSlot, SlotMapping } from '@voiceflow/general-types';
+import { SlotMapping } from '@voiceflow/api-sdk';
+import { IntentRequestSlot } from '@voiceflow/general-types';
 import { Context, formatIntentName, replaceVariables, Store, transformStringVariableToNumber } from '@voiceflow/runtime';
 import _ from 'lodash';
 
