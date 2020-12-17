@@ -27,7 +27,7 @@ describe('metrics client unit tests', () => {
       [
         {
           apiKey: 'key',
-          prefix: `vf_server.${NODE_ENV}.`,
+          prefix: `vf_general_runtime.${NODE_ENV}.`,
           flushIntervalSeconds: 5,
         },
       ],
