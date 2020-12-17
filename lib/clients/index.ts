@@ -2,11 +2,13 @@ import { DataAPI, LocalDataApi } from '@voiceflow/runtime';
 
 import { Config } from '@/types';
 
+import Luis from './luis';
 import Metrics, { MetricsType } from './metrics';
 import RemoteDataAPI from './remoteDataAPI';
 import Static, { StaticType } from './static';
 
 export interface ClientMap extends StaticType {
+  luis: Luis;
   dataAPI: DataAPI;
   metrics: MetricsType;
 }
@@ -21,12 +23,12 @@ const buildClients = (config: Config): ClientMap => {
         { platform: 'general', adminToken: config.ADMIN_SERVER_DATA_API_TOKEN, dataEndpoint: config.VF_DATA_ENDPOINT },
         { axios: Static.axios }
       );
-  const metrics = Metrics(config);
 
   return {
     ...Static,
+    luis: new Luis(config),
     dataAPI,
-    metrics,
+    metrics: Metrics(config),
   };
 };
 

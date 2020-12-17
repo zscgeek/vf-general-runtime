@@ -7,7 +7,19 @@ export const utils = {};
 @injectServices({ utils })
 class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHandler {
   // TODO: implement NLU handler
-  handle = (context: Context) => context;
+  handle = async (context: Context) => {
+    const { nlp, query } = context.request;
+
+    if (!query) {
+      return context;
+    }
+
+    const data = await this.services.luis.predict({ query, appID: nlp!.appID });
+
+    console.log(data);
+
+    return context;
+  };
 }
 
 export default NLU;

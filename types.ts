@@ -1,3 +1,4 @@
+import { ProjectPrototypeNLP } from '@voiceflow/api-sdk';
 import * as Runtime from '@voiceflow/runtime';
 import * as Express from 'express';
 import * as ExpressValidator from 'express-validator';
@@ -10,6 +11,8 @@ export interface Config {
   AWS_SECRET_ACCESS_KEY: string | null;
   AWS_REGION: string | null;
   AWS_ENDPOINT: string | null;
+  LUIS_PREDICTION_KEY: string;
+  LUIS_PREDICTION_ENDPOINT: string;
 
   DATADOG_API_KEY: string;
   DYNAMO_ENDPOINT: string | null;
@@ -70,7 +73,10 @@ export enum ContextRequestType {
 }
 
 // TODO DEFINE REQUEST TYPE
-export type ContextRequest = {};
+export type ContextRequest = Partial<{
+  nlp: ProjectPrototypeNLP;
+  query: string;
+}>;
 
 export type Context = Runtime.Context<ContextRequest>;
 export type ContextHandler = Runtime.ContextHandler<ContextRequest>;

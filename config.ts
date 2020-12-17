@@ -32,6 +32,9 @@ const CONFIG: Config = {
   AWS_SECRET_ACCESS_KEY: optionalProcessEnv('AWS_SECRET_ACCESS_KEY'),
   AWS_REGION: optionalProcessEnv('AWS_REGION'),
 
+  LUIS_PREDICTION_KEY: getProcessEnv('LUIS_PREDICTION_KEY'),
+  LUIS_PREDICTION_ENDPOINT: getProcessEnv('LUIS_PREDICTION_ENDPOINT'),
+
   // Release information
   GIT_SHA: optionalProcessEnv('GIT_SHA'),
   BUILD_NUM: optionalProcessEnv('BUILD_NUM'),

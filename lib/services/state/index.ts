@@ -1,3 +1,4 @@
+import { TraceFrame } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import _ from 'lodash';
 
@@ -51,12 +52,13 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
     if (!context.versionID) {
       throw new Error('context versionID not defined');
     }
+
     return {
       ...context,
       versionID: context.versionID,
       state: context.state || (await this.generate(context.versionID)),
       request: context.request || {}, // TODO: default input if empty
-      trace: [],
+      trace: [] as TraceFrame[],
     };
   }
 }
