@@ -30,7 +30,6 @@ class Server {
     await this.serviceManager.start();
 
     const app = express();
-    const server = http.createServer(app);
 
     const { middlewares, controllers } = this.serviceManager;
 
@@ -52,7 +51,7 @@ class Server {
 
     ExpressMiddleware.attach(app, middlewares, controllers);
 
-    await Promise.fromCallback((cb: any) => server.listen(this.config.PORT, cb));
+    await Promise.fromCallback((cb: any) => this.server!.listen(this.config.PORT, cb));
 
     // eslint-disable-next-line no-console
     console.log(`${name} listening on port ${this.config.PORT}`);
