@@ -1,10 +1,20 @@
 import { Config } from '@/types';
 
 import { ClientMap } from '../clients';
-import Prototype from './prototype';
+import ASR from './asr';
+import Dialog from './dialog';
+import NLU from './nlu';
+import Runtime from './runtime';
+import State from './state';
+import TTS from './tts';
 
 export interface ServiceMap {
-  prototype: Prototype;
+  runtime: Runtime;
+  state: State;
+  asr: ASR;
+  nlu: NLU;
+  dialog: Dialog;
+  tts: TTS;
 }
 
 export interface FullServiceMap extends ClientMap, ServiceMap {}
@@ -17,7 +27,12 @@ const buildServices = (config: Config, clients: ClientMap): FullServiceMap => {
     ...clients,
   } as FullServiceMap;
 
-  services.prototype = new Prototype(services, config);
+  services.runtime = new Runtime(services, config);
+  services.state = new State(services, config);
+  services.asr = new ASR(services, config);
+  services.nlu = new NLU(services, config);
+  services.tts = new TTS(services, config);
+  services.dialog = new Dialog(services, config);
 
   return services;
 };
