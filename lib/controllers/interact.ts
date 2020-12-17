@@ -14,7 +14,7 @@ class InteractController extends AbstractController {
   async handler(req: Request<{ versionID: string }, null, { state?: State; request?: Omit<ContextRequest, 'nlp'> }>) {
     const { runtime, metrics, nlu, tts, dialog, asr, state: stateManager, dataAPI } = this.services;
 
-    metrics.prototypeRequest();
+    metrics.generalRequest();
 
     const {
       body: { state, request },

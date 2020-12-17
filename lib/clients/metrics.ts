@@ -13,8 +13,8 @@ export class Metrics {
     });
   }
 
-  prototypeRequest() {
-    this.client.increment('test.request');
+  generalRequest() {
+    this.client.increment('general.request');
   }
 }
 
