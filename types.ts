@@ -1,3 +1,4 @@
+import { GeneralRequest } from '@voiceflow/general-types';
 import * as Runtime from '@voiceflow/runtime';
 import * as Express from 'express';
 import * as ExpressValidator from 'express-validator';
@@ -25,6 +26,8 @@ export interface Config {
   BUILD_URL: string | null;
 
   SESSIONS_DYNAMO_TABLE: string;
+
+  GENERAL_SERVICE_ENDPOINT: string;
 
   ADMIN_SERVER_DATA_API_TOKEN: string;
   VF_DATA_ENDPOINT: string;
@@ -63,15 +66,6 @@ export type MiddlewareGroup = Record<string, Middleware>;
 export type Class<T, A extends any[]> = { new (...args: A): T };
 export type AnyClass = Class<any, any[]>;
 
-export enum ContextRequestType {
-  TEXT,
-  DATA,
-  INTENT,
-}
-
-// TODO DEFINE REQUEST TYPE
-export type ContextRequest = {};
-
-export type Context = Runtime.Context<ContextRequest>;
-export type ContextHandler = Runtime.ContextHandler<ContextRequest>;
-export type InitContextHandler = Runtime.InitContextHandler<ContextRequest>;
+export type Context = Runtime.Context<GeneralRequest>;
+export type ContextHandler = Runtime.ContextHandler<GeneralRequest>;
+export type InitContextHandler = Runtime.InitContextHandler<GeneralRequest>;
