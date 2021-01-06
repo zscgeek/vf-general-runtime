@@ -36,7 +36,7 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
       };
     }
 
-    const version = await this.services.dataAPI.getVersion(context.versionID);
+    const version = await context.data.getVersion();
 
     if (!version) {
       throw new Error('Version not found!');

@@ -1,6 +1,6 @@
-import { RequestType, TraceFrame } from '@voiceflow/general-types';
+import { Version } from '@voiceflow/api-sdk';
+import { GeneralTrace } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
-import _ from 'lodash';
 
 import { Context, InitContextHandler } from '@/types';
 
@@ -20,9 +20,7 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
    * generate a context for a new session
    * @param versionID - project version to generate the context for
    */
-  async generate(versionID: string): Promise<State> {
-    const { prototype, variables, rootDiagramID } = await this.services.dataAPI.getVersion(versionID);
-
+  generate({ prototype, variables, rootDiagramID }: Version<any>): State {
     const entities = prototype?.model.slots.map(({ name }) => name) || [];
 
     const DEFAULT_STACK = [{ programID: rootDiagramID, storage: {}, variables: {} }];
@@ -52,12 +50,19 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
     if (!context.versionID) {
       throw new Error('context versionID not defined');
     }
+
+    let version: undefined | Version<any>;
+    const getVersion = async (): Promise<Version<any>> => {
+      return version || this.services.dataAPI.getVersion(context.versionID!);
+    };
+
     return {
       ...context,
-      state: context.state || (await this.generate(context.versionID)),
-      trace: [] as TraceFrame[],
-      request: context.request || { type: RequestType.TEXT, payload: '' },
+      state: context.state || this.generate(await getVersion()),
+      trace: [] as GeneralTrace[],
+      request: context.request || null,
       versionID: context.versionID,
+      data: { ...context.data, getVersion },
     };
   }
 }
