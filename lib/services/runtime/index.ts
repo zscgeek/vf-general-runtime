@@ -1,3 +1,4 @@
+import { GeneralTrace } from '@voiceflow/general-types';
 import Client from '@voiceflow/runtime';
 
 import { Config, Context, ContextHandler } from '@/types';
@@ -33,7 +34,7 @@ class RuntimeManager extends AbstractManager<{ utils: typeof utils }> implements
     init(this.client);
   }
 
-  public async handle({ versionID, state, request }: Context) {
+  public async handle({ versionID, state, request, ...context }: Context) {
     if (!isRuntimeRequest(request)) throw new Error(`invalid runtime request type: ${JSON.stringify(request)}`);
 
     const runtime = this.client.createRuntime(versionID, state, request);
@@ -41,10 +42,11 @@ class RuntimeManager extends AbstractManager<{ utils: typeof utils }> implements
     await runtime.update();
 
     return {
+      ...context,
       request,
       versionID,
       state: runtime.getFinalState(),
-      trace: runtime.trace.get(),
+      trace: runtime.trace.get() as GeneralTrace[],
     };
   }
 }
