@@ -53,7 +53,10 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
 
     let version: undefined | Version<any>;
     const getVersion = async (): Promise<Version<any>> => {
-      return version || this.services.dataAPI.getVersion(context.versionID!);
+      if (!version) {
+        version = await this.services.dataAPI.getVersion(context.versionID!);
+      }
+      return version;
     };
 
     return {
