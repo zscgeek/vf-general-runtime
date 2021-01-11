@@ -10,7 +10,16 @@ import { handleNLCDialog } from '../nlu/nlc';
 import { getNoneIntentRequest, NONE_INTENT } from '../nlu/utils';
 import { isIntentRequest } from '../runtime/types';
 import { AbstractManager, injectServices } from '../utils';
-import { dmPrefix, fillStringEntities, getDMPrefixIntentName, getIntentEntityList, getUnfulfilledEntity, inputToString, VF_DM_PREFIX } from './utils';
+import {
+  dmPrefix,
+  fillStringEntities,
+  getDMPrefixIntentName,
+  getIntentEntityList,
+  getUnfulfilledEntity,
+  inputToString,
+  rectifyEntityValue,
+  VF_DM_PREFIX,
+} from './utils';
 
 export const utils = {};
 
@@ -164,7 +173,7 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
     }
 
     // No more unfulfilled required entities -> populate the request object with the final intent and extracted entities from the DM state store
-    context.request = dmStateStore!.intentRequest;
+    context.request = rectifyEntityValue(dmStateStore!.intentRequest, version.prototype.model);
 
     // Clear the DM state store
     return DialogManagement.setDMStore(context, undefined);

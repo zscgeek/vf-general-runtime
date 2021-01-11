@@ -56,3 +56,16 @@ export const getIntentEntityList = (intentName: string, model: PrototypeModel) =
   const intentEntityIDs = intentModel?.slots?.map((entity) => entity.id);
   return intentEntityIDs?.map((id) => model.slots.find((entity) => entity.key === id));
 };
+
+export const rectifyEntityValue = (intentReq: IntentRequest, model: PrototypeModel) => {
+  intentReq.payload.entities.forEach((entity) => {
+    const entityValueList = model.slots.find((item) => item.name === entity.name);
+    const entitySubCategory = entityValueList?.inputs.find((item) => item.includes(entity.value));
+    if (!entitySubCategory) return;
+
+    const [primaryValue] = entitySubCategory.split(',');
+    entity.value = primaryValue;
+  });
+
+  return intentReq;
+};

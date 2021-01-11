@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-expressions */
-import { expect } from 'chai';
+import { expect, util } from 'chai';
 import sinon from 'sinon';
 
 import * as utils from '@/lib/services/dialog/utils';
 
-import { mockFulfilledIntentRequest, mockLM, mockUnfulfilledIntentRequest } from './fixture';
+import { mockEntityNonSynonymRequest, mockEntitySynonymRequest, mockFulfilledIntentRequest, mockLM, mockUnfulfilledIntentRequest } from './fixture';
 
 describe('dialog manager utilities unit tests', () => {
   afterEach(() => {
@@ -63,6 +63,20 @@ describe('dialog manager utilities unit tests', () => {
       const result = utils.getUnfulfilledEntity(mockFulfilledIntentRequest, mockLM);
 
       expect(result).to.be.undefined;
+    });
+  });
+
+  describe('rectifyEntityValues', () => {
+    it('Converts entity synonyms into the primary entity value', () => {
+      const result = utils.rectifyEntityValue(mockEntitySynonymRequest, mockLM);
+
+      expect(result.payload.entities[0].value).to.be.equal('big');
+    });
+
+    it('Preserves entity value if it is not a synonym of any primary entity values', () => {
+      const result = utils.rectifyEntityValue(mockEntityNonSynonymRequest, mockLM);
+
+      expect(result.payload.entities[0].value).to.be.equal('medium');
     });
   });
 });
