@@ -101,6 +101,10 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
     const incomingRequest = context.request;
     const dmStateStore: DMStore = { ...context.state.storage.dm };
 
+    if (!dmStateStore?.intentRequest) {
+      dmStateStore.intentRequest = incomingRequest;
+    }
+
     if (dmStateStore?.intentRequest) {
       logger.debug('@DM - In dialog management context');
 
