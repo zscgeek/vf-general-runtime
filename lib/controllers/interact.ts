@@ -8,7 +8,8 @@ import { AbstractController } from './utils';
 
 class InteractController extends AbstractController {
   async state(req: { params: { versionID: string } }) {
-    return this.services.state.generate(req.params.versionID);
+    const version = await this.services.dataAPI.getVersion(req.params.versionID);
+    return this.services.state.generate(version);
   }
 
   async handler(req: Request<{ versionID: string }, null, { state?: State; request?: GeneralRequest }, { locale?: string }>) {
