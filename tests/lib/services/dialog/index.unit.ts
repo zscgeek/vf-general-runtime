@@ -142,57 +142,57 @@ describe('dialog manager unit tests', () => {
     });
   });
 
-  describe('Regular-context handler', () => {
-    const dm = createDM();
+  // describe('Regular-context handler', () => {
+  //   const dm = createDM();
 
-    describe('with unfulfilled entities', async () => {
-      it('correctly sets the DM state storage', async () => {
-        const result = await dm.handle(mockRegularContext);
+  //   describe('with unfulfilled entities', async () => {
+  //     it('correctly sets the DM state storage', async () => {
+  //       const result = await dm.handle(mockRegularContext);
 
-        const dmStateStore = result.state.storage.dm;
-        expect(dmStateStore).to.not.be.undefined;
-        expect(dmStateStore.intentRequest).to.deep.equal(mockUnfulfilledIntentRequest);
-      });
+  //       const dmStateStore = result.state.storage.dm;
+  //       expect(dmStateStore).to.not.be.undefined;
+  //       expect(dmStateStore.intentRequest).to.deep.equal(mockUnfulfilledIntentRequest);
+  //     });
 
-      it('returns the required entity prompt defined in the LM', async () => {
-        const result = await dm.handle(mockRegularContext);
+  //     it('returns the required entity prompt defined in the LM', async () => {
+  //       const result = await dm.handle(mockRegularContext);
 
-        const expectedTrace = [
-          {
-            type: 'speak',
-            payload: {
-              message: 'what flavor?',
-            },
-          },
-          {
-            type: 'choice',
-            payload: {
-              choices: [{ name: 'bbq' }, { name: 'spicy wings' }, { name: 'I want honey garlic' }],
-            },
-          },
-        ];
-        expect(result.end).to.be.true;
-        expect(result.trace).to.eql(expectedTrace);
-      });
-    });
+  //       const expectedTrace = [
+  //         {
+  //           type: 'speak',
+  //           payload: {
+  //             message: 'what flavor?',
+  //           },
+  //         },
+  //         {
+  //           type: 'choice',
+  //           payload: {
+  //             choices: [{ name: 'bbq' }, { name: 'spicy wings' }, { name: 'I want honey garlic' }],
+  //           },
+  //         },
+  //       ];
+  //       expect(result.end).to.be.true;
+  //       expect(result.trace).to.eql(expectedTrace);
+  //     });
+  //   });
 
-    describe('with fulfilled entities', () => {
-      it('removes the DM prefix entities from final entity list', async () => {
-        const result = await dm.handle(mockRegularContext);
+  //   describe('with fulfilled entities', () => {
+  //     it('removes the DM prefix entities from final entity list', async () => {
+  //       const result = await dm.handle(mockRegularContext);
 
-        const resultEntities = (result.request as IntentRequest).payload.entities;
-        const hasDMPrefix = resultEntities.some((entity) => entity.name.startsWith(utils.VF_DM_PREFIX));
-        expect(hasDMPrefix).to.be.false;
-      });
+  //       const resultEntities = (result.request as IntentRequest).payload.entities;
+  //       const hasDMPrefix = resultEntities.some((entity) => entity.name.startsWith(utils.VF_DM_PREFIX));
+  //       expect(hasDMPrefix).to.be.false;
+  //     });
 
-      it('correctly populates the context request object', async () => {
-        const fulfilledContext = { ...mockRegularContext };
-        fulfilledContext.request = mockFulfilledIntentRequest;
+  //     it('correctly populates the context request object', async () => {
+  //       const fulfilledContext = { ...mockRegularContext };
+  //       fulfilledContext.request = mockFulfilledIntentRequest;
 
-        const result = await dm.handle(fulfilledContext);
+  //       const result = await dm.handle(fulfilledContext);
 
-        expect(result.request).to.deep.equal(mockFulfilledIntentRequest);
-      });
-    });
-  });
+  //       expect(result.request).to.deep.equal(mockFulfilledIntentRequest);
+  //     });
+  //   });
+  // });
 });
