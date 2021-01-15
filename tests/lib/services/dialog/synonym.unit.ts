@@ -11,6 +11,34 @@ describe('intent entity synonyms unit tests', () => {
     sinon.restore();
   });
 
+  describe('getSynonym', () => {
+    it('ignores single synonyms', () => {
+      const inputs = ['quere', 'querys', 'queri'];
+
+      expect(synonym.getSynonym('query', inputs)).to.eql('query');
+    });
+
+    it('accounts for misspellings', () => {
+      const inputs = ['missisauga, sauga', 'toronto, 6six'];
+
+      expect(synonym.getSynonym('missisaga', inputs)).to.eql('missisauga');
+      expect(synonym.getSynonym('tornto', inputs)).to.eql('toronto');
+    });
+
+    it('resolves to first instance', () => {
+      const inputs = ['missisauga, sauga', 'toronto, 6six'];
+
+      expect(synonym.getSynonym('sauga', inputs)).to.eql('missisauga');
+      expect(synonym.getSynonym('6sixx', inputs)).to.eql('toronto');
+    });
+
+    it('sanitizes', () => {
+      const inputs = ['dessert, Crème Brulée'];
+
+      expect(synonym.getSynonym('CrEmeBruLe', inputs)).to.eql('dessert');
+    });
+  });
+
   describe('rectifyEntityValues', () => {
     it('Converts entity synonyms into the primary entity value', () => {
       const result = synonym.rectifyEntityValue(mockEntitySynonymRequest, mockLM);

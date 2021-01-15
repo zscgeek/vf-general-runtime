@@ -26,7 +26,7 @@ export const sanitize = (input: string): string =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
-export const getSynonym = (_query: string, _samples: string[] = [], tolerance = 0.6): string => {
+export const getSynonym = (_query: string, _samples: string[] = [], tolerance = 70): string => {
   // ['small, tiny, petite', 'big, large', 'medium'] => [['small', 'tiny', 'petite'], ['big', 'large']]
   const samples = _samples.reduce<string[][]>((acc, input = '') => {
     const values = input.split(',');
