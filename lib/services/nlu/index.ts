@@ -2,64 +2,57 @@ import { IntentRequest, RequestType } from '@voiceflow/general-types';
 
 import { Context, ContextHandler } from '@/types';
 
+import { getNoneIntentRequest } from '../dialog/utils';
 import { AbstractManager, injectServices } from '../utils';
 import { handleNLCCommand } from './nlc';
 
 export const utils = {};
 
-export const EMPTY_INTENT = '_empty';
-
 @injectServices({ utils })
 class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHandler {
-  static getEmptyIntentRequest(): IntentRequest {
-    return {
-      type: RequestType.INTENT,
-      payload: {
-        query: '',
-        intent: { name: EMPTY_INTENT },
-        entities: [],
-      },
-    };
-  }
+  predict = async (query: string, projectID: string) => {
+    const { data } = await this.services.axios.post<IntentRequest>(`${this.config.GENERAL_SERVICE_ENDPOINT}/runtime/${projectID}/predict`, {
+      query,
+    });
 
-  // TODO: implement NLU handler
+    return data;
+  };
+
   handle = async (context: Context) => {
+    // only try to convert text requests to intent requests
     if (context.request?.type !== RequestType.TEXT) {
       return context;
     }
+    const query = context.request.payload;
 
     // empty string input - we can also consider return request: null as well (this won't advance the conversation)
-    if (!context.request.payload) {
+    if (!query?.trim()) {
       return {
         ...context,
-        request: NLU.getEmptyIntentRequest(),
+        request: getNoneIntentRequest(),
       };
     }
 
     const version = await context.data.api.getVersion(context.versionID);
-
     if (!version) {
       throw new Error('Version not found!');
     }
 
+    let request: IntentRequest;
     try {
-      const { data } = await this.services.axios.post<IntentRequest>(`${this.config.GENERAL_SERVICE_ENDPOINT}/runtime/${version.projectID}/predict`, {
-        query: context.request.payload,
-      });
-
-      return { ...context, request: data };
+      request = await this.predict(query, version.projectID);
     } catch (err) {
       if (!version.prototype?.model) {
         throw new Error('Model not found!');
       }
 
-      const request = await handleNLCCommand(context.request.payload, version.prototype.model);
-
-      return {
-        ...context,
-        request: request || NLU.getEmptyIntentRequest(),
-      };
+      request = (await handleNLCCommand(context.request.payload, version.prototype.model)) || getNoneIntentRequest();
     }
+
+    return {
+      ...context,
+      request,
+    };
   };
 }
 

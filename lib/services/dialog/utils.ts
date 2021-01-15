@@ -50,27 +50,20 @@ export const getDMPrefixIntentName = (intentName: string) => {
   return `${VF_DM_PREFIX}${dmPrefix(intentName)}_${intentName}`;
 };
 
-export const fallbackIntent = (context: Context) => {
-  const incomingRequest = context.request as IntentRequest;
-  const intentRequest: IntentRequest = {
-    type: RequestType.INTENT,
-    payload: {
-      query: incomingRequest.payload.query,
-      intent: {
-        name: 'None',
-      },
-      entities: [],
-    },
-  };
-  return {
-    ...context,
-    request: intentRequest,
-    state: { ...context.state, storage: { ...context.state.storage, dm: undefined } },
-  };
-};
-
 export const getIntentEntityList = (intentName: string, model: PrototypeModel) => {
   const intentModel = model.intents.find((intent) => intent.name === intentName);
   const intentEntityIDs = intentModel?.slots?.map((entity) => entity.id);
   return intentEntityIDs?.map((id) => model.slots.find((entity) => entity.key === id));
+};
+
+export const NONE_INTENT = 'None';
+export const getNoneIntentRequest = (query = ''): IntentRequest => {
+  return {
+    type: RequestType.INTENT,
+    payload: {
+      query,
+      intent: { name: NONE_INTENT },
+      entities: [],
+    },
+  };
 };
