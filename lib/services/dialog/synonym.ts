@@ -16,7 +16,7 @@ export const comparison = (a: string, b: string) => {
     score += 0.1;
   }
 
-  return Math.floor(score / 0.011);
+  return Math.floor(score / 0.021);
 };
 
 // convert to lowercase and strip all accents: Crème Brulée => Creme Brulee
@@ -26,7 +26,7 @@ export const sanitize = (input: string): string =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
-export const getSynonym = (_query: string, _samples: string[] = [], tolerance = 70): string => {
+export const getSynonym = (_query: string, _samples: string[] = [], tolerance = 60): string => {
   // ['small, tiny, petite', 'big, large', 'medium'] => [['small', 'tiny', 'petite'], ['big', 'large']]
   const samples = _samples.reduce<string[][]>((acc, input = '') => {
     const values = input.split(',');
