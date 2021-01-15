@@ -10,16 +10,8 @@ import { handleNLCDialog } from '../nlu/nlc';
 import { getNoneIntentRequest, NONE_INTENT } from '../nlu/utils';
 import { isIntentRequest } from '../runtime/types';
 import { AbstractManager, injectServices } from '../utils';
-import {
-  dmPrefix,
-  fillStringEntities,
-  getDMPrefixIntentName,
-  getIntentEntityList,
-  getUnfulfilledEntity,
-  inputToString,
-  rectifyEntityValue,
-  VF_DM_PREFIX,
-} from './utils';
+import { rectifyEntityValue } from './synonym';
+import { dmPrefix, fillStringEntities, getDMPrefixIntentName, getIntentEntityList, getUnfulfilledEntity, inputToString, VF_DM_PREFIX } from './utils';
 
 export const utils = {};
 
