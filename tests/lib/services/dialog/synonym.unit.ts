@@ -37,6 +37,19 @@ describe('intent entity synonyms unit tests', () => {
 
       expect(synonym.getSynonym('CrEmeBruLe', inputs)).to.eql('dessert');
     });
+
+    // uh oh non-deterministic test
+    it('speed (non-deterministic)', () => {
+      const randomString = () =>
+        Math.random()
+          .toString(36)
+          .substring(7);
+      const inputs = Array<string>(1000).fill(`${randomString()},${randomString()}`);
+
+      const startTime = Date.now();
+      expect(synonym.getSynonym('should not match', inputs)).to.eql('should not match');
+      expect(Date.now() - startTime < 200).to.be.true;
+    });
   });
 
   describe('rectifyEntityValues', () => {
