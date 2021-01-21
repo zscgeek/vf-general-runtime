@@ -58,3 +58,5 @@ build
 
 /projects/*
 !/projects/README.md
+
+/docs
