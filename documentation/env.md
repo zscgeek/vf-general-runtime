@@ -15,6 +15,8 @@ CODE_HANDLER_ENDPOINT="none"
 INTEGRATIONS_HANDLER_ENDPOINT="none"
 API_HANDLER_ENDPOINT="none"
 
+GENERAL_SERVICE_ENDPOINT='https://general-service.voiceflow.com'
+
 CREATOR_API_ENDPOINT='https://api.voiceflow.com'
 CREATOR_API_AUTHORIZATION='[YOUR JWT TOKEN HERE]'
 
@@ -29,6 +31,7 @@ CREATOR_API_AUTHORIZATION='[YOUR JWT TOKEN HERE]'
 - `PORT` **required** - http port that service will run on. [eg. `4000`]
 - `LOG_LEVEL` **required** - logging verbosity and detail [eg. `info` | `warn` | `trace` | `error` | `fatal`]
 - `MIDDLEWARE_VERBOSITY` **required** - express request/response logging verbosity and detail (only appears on `LOG_LEVEL='info'`) [eg. `none` | `full` | `short` | `debug`]
+- `GENERAL_SERVICE_ENDPOINT` **required** - pointer to a general-service for NLP/NLU and TTS capabilities
 
 ---
 
