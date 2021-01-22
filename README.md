@@ -9,28 +9,37 @@
 # how interaction works
 
 A `Context` consists of the `request`, the `state`, and the the `trace`.
-The `general-runtime` recieves a `Context` without trace, and responds with a `Context` with the trace.
-`request` is an object representing something the user has done, the `state` is their metadata on the voiceflow project,
-and the `trace` is an list of things for whatever is calling the `general-runtime` to show.
+
+- `request` is an object representing something the user has done
+- `state` is the user metadata - what block they are currently on, what flow they are on, their variables
+- `trace` is an list of things for whatever client is calling the `general-runtime` to show.
+
+The `general-runtime` recieves a `Context` without `trace`, and responds with a `Context` with the `trace`. Here's what it looks like:
 
 1. user says/types something to the client, add the `request` to the `Context` and sends it via webhook to `general-runtime`
-2. fetch project version data based on parameters from the [env file](documentation/env.md)
-3. fetch the current program (flow) that the user is on from [env file](documentation/env.md)
-4. go through each block/flow and update the user `state`
+2. fetch project version data based on [env file](documentation/env.md)
+3. fetch the current program (flow) that the user is on based on [env file](documentation/env.md)
+4. go through each block and update the user `state`, if the user enters a new flow, go back to step 3.
 5. generate a `Context` based on the final user state, send back to prototype tool
 6. client interprets response and presents it to the user
 
 repeat all steps each time a user speaks/types to the prototype tool, to perform a conversation.
 
-An simplified example **request** `Context` going into `general-runtime`:
+Let's take a look at this interaction, the blue user text is the request.
+![Screen Shot 2021-01-22 at 12 21 49 PM](https://user-images.githubusercontent.com/5643574/105523483-6c894d80-5cac-11eb-900c-076ed15c1486.png)
+
+The simplified example **request** `Context`
 
 ```
 {
-  "request": { type: "text", payload: "What is the balance in my chequing account" },
+  "request": {
+    "type": "text",
+    "payload": "What is the balance in my chequing account"
+  },
   "state": {
     "stack": [{
       programID: "home flow",
-      nodeID: "start block"
+      nodeID: "prompt node"
     }],
     "storage": {},
     "variables": {
@@ -40,14 +49,14 @@ An simplified example **request** `Context` going into `general-runtime`:
 }
 ```
 
-An simplified example **response** `Context` coming out of `general-runtime`:
+The simplified example **response** `Context`
 
 ```
 {
   "request": {
     "type": "intent",
     "payload": {
-      "name": "balance_intent",
+      "name": "check_balance_intent",
       "entities": {
         "name": "account",
         "value": "chequing"
@@ -58,18 +67,18 @@ An simplified example **response** `Context` coming out of `general-runtime`:
   "state": {
     "stack": [{
       programID: "home flow",
-      nodeID: "choice block 2"
+      nodeID: "yes no choice node"
     }],
     "storage": {},
     "variables": {
-      "chequing_balance": 120
+      "balance": 0
     }
   },
   "trace": [{
     "type": "speak",
     "payload": {
       "type": "message",
-      "message": "the balance in your chequing account is 120 dollars, is that all?"
+      "message": "the balance in your chequing account is 0 dollars, is that all?"
     },
   }, {
     "type": "choice",
