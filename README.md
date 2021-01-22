@@ -14,7 +14,7 @@ A `Context` consists of the `request`, the `state`, and the the `trace`.
 - `state` is the user metadata - what block they are currently on, what flow they are on, their variables
 - `trace` is an list of things for whatever client is calling the `general-runtime` to show.
 
-The `general-runtime` recieves a `Context` without `trace`, and responds with a `Context` with the `trace`. Here's what it looks like:
+The `general-runtime` receives a `Context` without `trace`, and responds with a `Context` with the `trace`. Here's what it looks like:
 
 1. user says/types something to the client, add the `request` to the `Context` and sends it via webhook to `general-runtime`
 2. fetch project version data based on [env file](documentation/env.md)
