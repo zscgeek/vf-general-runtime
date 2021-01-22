@@ -25,7 +25,6 @@ const CONFIG: Config = {
 
   PROJECT_SOURCE: optionalProcessEnv('PROJECT_SOURCE'),
   SESSIONS_SOURCE: optionalProcessEnv('SESSIONS_SOURCE'),
-  SESSIONS_DYNAMO_TABLE: getProcessEnv('SESSIONS_DYNAMO_TABLE'), // diagrams table
 
   GENERAL_SERVICE_ENDPOINT: getProcessEnv('GENERAL_SERVICE_ENDPOINT'), // voiceflow nlu/tts services
 
