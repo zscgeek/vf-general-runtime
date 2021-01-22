@@ -6,7 +6,7 @@
 
 > ⚠️ **This repository is still undergoing active development**: Major breaking changes may be pushed periodically and the documentation may become outdated - a stable version has not been released
 
-### anatomy of an interaction
+# how interaction works
 
 A `Context` consists of the `request`, the `state`, and the the `trace`.
 The `general-runtime` recieves a `Context` without trace, and responds with a `Context` with the trace.
@@ -22,7 +22,7 @@ and the `trace` is an list of things for whatever is calling the `general-runtim
 
 repeat all steps each time a user speaks/types to the prototype tool, to perform a conversation.
 
-An simplified example **request** `Context`:
+An simplified example **request** `Context` going into `general-runtime`:
 
 ```
 {
@@ -36,10 +36,11 @@ An simplified example **request** `Context`:
     "variables": {
       "chequing_balance": null
     }
-  },
+  }
+}
 ```
 
-An simplified example **response** `Context`:
+An simplified example **response** `Context` coming out of `general-runtime`:
 
 ```
 {
@@ -80,7 +81,7 @@ An simplified example **response** `Context`:
 ```
 
 Notice that the text `request` got processed by the NLP handler to become an intent type `request`.
-The state is updated, and a trace is generated.
+The `state` is updated, and a `trace` is generated.
 
 # setup
 
