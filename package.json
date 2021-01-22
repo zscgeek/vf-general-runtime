@@ -135,7 +135,7 @@
     "build": "yarn clean && ttsc --project ./tsconfig.build.json && cp app.config.js yarn.lock build/",
     "clean": "rimraf build",
     "deploy:staging": "git push origin $(git branch | grep \\* | cut -d ' ' -f2):staging -f",
-    "docs:gen": "typedoc ./lib",
+    "docs:gen": "typedoc ./lib ./config.ts",
     "gen-certs": "scripts/generate_certs.sh",
     "lint": "eslint \"./**/*.{js,ts}\"",
     "lint:dockerfiles": "hadolint --ignore DL3018 ./Dockerfile",

@@ -118,10 +118,10 @@ Add the following file to the local repository:
 > # PROJECT_SOURCE='file.vfr'
 > ```
 >
-> For more info on [Environment Variables](documentation/env.md)
+> For more info on [Environment Variables](https://voiceflow-general-runtime.netlify.app/modules/config.html)
 
 # Notable Code Locations
 
 [Documentation](https://voiceflow-general-runtime.netlify.app)<br/>
-[Context Handlers](https://voiceflow-general-runtime.netlify.app/modules/controllers_interact.html) - handlers for processing request<br/>
+[Context Handlers](https://voiceflow-general-runtime.netlify.app/modules/lib_controllers_interact.html) - handlers for processing request<br/>
 [lib/services/runtime/handlers](https://github.com/voiceflow/general-runtime/tree/master/lib/services/runtime/handlers) - handlers for all the various blocks and defining their behavior

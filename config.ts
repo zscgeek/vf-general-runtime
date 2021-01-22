@@ -1,3 +1,8 @@
+/**
+ * [[include:env.md]]
+ * @packageDocumentation
+ */
+
 import './envSetup';
 
 import * as Common from '@voiceflow/common';

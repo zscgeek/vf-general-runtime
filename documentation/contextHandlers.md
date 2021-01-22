@@ -7,9 +7,9 @@ Each pipe is an ordered array of [Context Handlers](https://github.com/voiceflow
 The system is extensible and depending on the use case handlers can be added or removed.
 Here's a list of the handlers used in this project:
 
-- [ASR](https://voiceflow-general-runtime.netlify.app/modules/services_asr.html)
-- [NLU](https://voiceflow-general-runtime.netlify.app/modules/services_nlu.html)
-- [DIALOG](https://voiceflow-general-runtime.netlify.app/modules/services_dialog.html)
-- [RUNTIME](https://voiceflow-general-runtime.netlify.app/modules/services_runtime.html)
-- [TTS](https://voiceflow-general-runtime.netlify.app/modules/services_tts.html)
-- [CHIPS](https://voiceflow-general-runtime.netlify.app/modules/services_chips.html)
+- [ASR](https://voiceflow-general-runtime.netlify.app/modules/lib_services_asr.html)
+- [NLU](https://voiceflow-general-runtime.netlify.app/modules/lib_services_nlu.html)
+- [DIALOG](https://voiceflow-general-runtime.netlify.app/modules/lib_services_dialog.html)
+- [RUNTIME](https://voiceflow-general-runtime.netlify.app/modules/lib_services_runtime.html)
+- [TTS](https://voiceflow-general-runtime.netlify.app/modules/lib_services_tts.html)
+- [CHIPS](https://voiceflow-general-runtime.netlify.app/modules/lib_services_chips.html)
