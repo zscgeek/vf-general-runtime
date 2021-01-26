@@ -102,9 +102,15 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
       const { query } = incomingRequest.payload;
 
       try {
+        const prefix = dmPrefix(dmStateStore.intentRequest.payload.intent.name);
         const dmPrefixedResult = await this.services.nlu.predict({
-          query: `${dmPrefix(dmStateStore.intentRequest.payload.intent.name)} ${query}`,
+          query: `${prefix} ${query}`,
           projectID: version.projectID,
+        });
+
+        // Remove the dmPrefix from entity values that it has accidentally been attached to
+        dmPrefixedResult.payload.entities.forEach((entity) => {
+          entity.value = entity.value.replace(prefix, '').trim();
         });
 
         const isFallback = this.handleDMContext(dmStateStore, dmPrefixedResult, incomingRequest, version.prototype.model);
