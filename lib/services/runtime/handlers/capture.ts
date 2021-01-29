@@ -3,7 +3,7 @@ import { Action, HandlerFactory } from '@voiceflow/runtime';
 import wordsToNumbers from 'words-to-numbers';
 
 import { isIntentRequest } from '../types';
-import { addRepromptIfExists } from '../utils';
+import { addChipsIfExists, addRepromptIfExists } from '../utils';
 import CommandHandler from './command';
 import RepeatHandler from './repeat';
 
@@ -12,6 +12,7 @@ const utilsObj = {
   wordsToNumbers,
   commandHandler: CommandHandler(),
   addRepromptIfExists,
+  addChipsIfExists,
 };
 
 export const CaptureHandler: HandlerFactory<Node, typeof utilsObj> = (utils) => ({
@@ -19,6 +20,7 @@ export const CaptureHandler: HandlerFactory<Node, typeof utilsObj> = (utils) => 
   handle: (node, runtime, variables) => {
     if (runtime.getAction() === Action.RESPONSE) {
       utils.addRepromptIfExists(node, runtime, variables);
+      utils.addChipsIfExists(node, runtime, variables);
       // quit cycleStack without ending session by stopping on itself
       return node.id;
     }

@@ -1,6 +1,7 @@
 import { SlotMapping } from '@voiceflow/api-sdk';
-import { formatIntentName, replaceVariables, transformStringVariableToNumber } from '@voiceflow/common';
-import { IntentRequest } from '@voiceflow/general-types';
+import { formatIntentName, replaceVariables, SLOT_REGEXP, transformStringVariableToNumber } from '@voiceflow/common';
+import { Chip, IntentRequest, TraceType } from '@voiceflow/general-types';
+import { TraceFrame as ChoiceFrame } from '@voiceflow/general-types/build/nodes/interaction';
 import { Runtime, Store } from '@voiceflow/runtime';
 import _ from 'lodash';
 
@@ -36,8 +37,23 @@ export const mapEntities = (mappings: SlotMapping[], entities: IntentRequest['pa
   return variables;
 };
 
-export const addRepromptIfExists = <B extends { reprompt?: string }>(node: B, runtime: Runtime, variables: Store): void => {
+export const addRepromptIfExists = <N extends { reprompt?: string }>(node: N, runtime: Runtime, variables: Store): void => {
   if (node.reprompt) {
     runtime.turn.set(TurnType.REPROMPT, replaceVariables(node.reprompt, variables.getState()));
   }
+};
+
+export const replaceIDVariables = (input: string, variables: Record<string, string>) =>
+  input.replace(SLOT_REGEXP, (_match, inner) => variables[inner] || inner);
+
+export const addChipsIfExists = <N extends { chips?: Chip[] }>(node: N, runtime: Runtime, variables: Store): boolean => {
+  if (!node.chips?.length) return false;
+
+  runtime.trace.addTrace<ChoiceFrame>({
+    type: TraceType.CHOICE,
+    payload: {
+      choices: node.chips.map(({ label }) => ({ name: replaceVariables(label, variables.getState()) })),
+    },
+  });
+  return true;
 };

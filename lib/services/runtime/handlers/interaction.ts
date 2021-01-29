@@ -4,7 +4,7 @@ import { Node, TraceFrame } from '@voiceflow/general-types/build/nodes/interacti
 import { Action, HandlerFactory } from '@voiceflow/runtime';
 
 import { StorageType } from '../types';
-import { addRepromptIfExists } from '../utils';
+import { addChipsIfExists, addRepromptIfExists } from '../utils';
 import CommandHandler from './command';
 import { findEventMatcher } from './event';
 import NoMatchHandler from './noMatch';
@@ -15,6 +15,7 @@ const utilsObj = {
   commandHandler: CommandHandler(),
   noMatchHandler: NoMatchHandler(),
   findEventMatcher,
+  addChipsIfExists,
   addRepromptIfExists,
 };
 
@@ -24,18 +25,20 @@ export const InteractionHandler: HandlerFactory<Node, typeof utilsObj> = (utils)
     if (runtime.getAction() === Action.RESPONSE) {
       utils.addRepromptIfExists(node, runtime, variables);
 
-      runtime.trace.addTrace<TraceFrame>({
-        type: TraceType.CHOICE,
-        payload: {
-          choices: node.interactions.reduce<{ name: string; intent?: string }[]>((acc, interaction) => {
-            if (interaction?.event?.type === EventType.INTENT) {
-              const { intent } = interaction.event;
-              acc.push({ intent, name: intent });
-            }
-            return acc;
-          }, []),
-        },
-      });
+      if (!utils.addChipsIfExists(node, runtime, variables)) {
+        runtime.trace.addTrace<TraceFrame>({
+          type: TraceType.CHOICE,
+          payload: {
+            choices: node.interactions.reduce<{ name: string; intent?: string }[]>((acc, interaction) => {
+              if (interaction?.event?.type === EventType.INTENT) {
+                const { intent } = interaction.event;
+                acc.push({ intent, name: intent });
+              }
+              return acc;
+            }, []),
+          },
+        });
+      }
 
       // clean up no matches counter on new interaction
       runtime.storage.delete(StorageType.NO_MATCHES_COUNTER);
