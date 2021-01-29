@@ -1,6 +1,7 @@
 import { SlotMapping } from '@voiceflow/api-sdk';
+import { formatIntentName, replaceVariables, transformStringVariableToNumber } from '@voiceflow/common';
 import { IntentRequest } from '@voiceflow/general-types';
-import { formatIntentName, replaceVariables, Runtime, Store, transformStringVariableToNumber } from '@voiceflow/runtime';
+import { Runtime, Store } from '@voiceflow/runtime';
 import _ from 'lodash';
 
 import { TurnType } from './types';
