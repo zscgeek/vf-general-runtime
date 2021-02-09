@@ -32,11 +32,13 @@ export const CaptureHandler: HandlerFactory<Node, typeof utilsObj> = (utils) => 
     if (utils.commandHandler.canHandle(runtime)) {
       return utils.commandHandler.handle(runtime, variables);
     }
+
     if (utils.repeatHandler.canHandle(runtime)) {
       return utils.repeatHandler.handle(runtime);
     }
 
     const request = runtime.getRequest();
+
     if (isIntentRequest(request)) {
       const { query } = request.payload;
       if (query) {
