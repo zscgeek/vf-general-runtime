@@ -46,7 +46,7 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
         // CASE-B1 || CASE-B2_4: The prefixed and regular calls match the same intent OR
         //                       the prefixed intent only contains entities that are in the target intent's entity list
         // Action: Use the entities extracted from the prefixed intent to overwrite any existing filled entities
-        dmPrefixedResult.payload.entities.map((entity) => {
+        dmPrefixedResult.payload.entities.forEach((entity) => {
           const storedEntity = dmStateStore.intentRequest!.payload.entities.find((stored) => stored.name === entity.name);
           if (!storedEntity) {
             dmStateStore.intentRequest!.payload.entities.push(entity); // Append entity
