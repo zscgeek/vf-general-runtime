@@ -46,7 +46,22 @@ describe('state manager unit tests', () => {
 
       const stateManager = new StateManager({ ...services, utils: { ...defaultUtils } } as any, {} as any);
 
-      expect(await stateManager.generate(version as any)).to.eql(state);
+      expect(await stateManager.generate(version as any)).to.eql({ ...state, variables: { variable1: 1, variable2: 2 } });
+      expect(services.dataAPI.getVersion.callCount).to.eql(0);
+    });
+  });
+
+  describe('initializeVariables', () => {
+    it('works', async () => {
+      const services = {
+        dataAPI: {
+          getVersion: sinon.stub(),
+        },
+      };
+
+      const stateManager = new StateManager({ ...services, utils: { ...defaultUtils } } as any, {} as any);
+
+      expect(await stateManager.initializeVariables(version as any, {} as any)).to.eql({ variables: { variable1: 0, slot1: 0 } });
       expect(services.dataAPI.getVersion.callCount).to.eql(0);
     });
   });

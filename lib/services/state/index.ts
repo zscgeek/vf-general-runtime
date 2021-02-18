@@ -22,9 +22,7 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
    * generate a context for a new session
    * @param versionID - project version to generate the context for
    */
-  generate({ prototype, variables, rootDiagramID }: Version<any>, state?: State): State {
-    const entities = prototype?.model.slots.map(({ name }) => name) || [];
-
+  generate({ prototype, rootDiagramID }: Version<any>, state?: State): State {
     const DEFAULT_STACK = [{ programID: rootDiagramID, storage: {}, variables: {} }];
 
     const stack =
@@ -37,15 +35,26 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
     return {
       stack,
       variables: {
-        // initialize all entities and variables to 0
-        ...initializeStore(entities),
-        ...initializeStore(variables),
         ...prototype?.context.variables,
         ...state?.variables,
       },
       storage: {
         ...prototype?.context.storage,
         ...state?.storage,
+      },
+    };
+  }
+
+  // initialize all entities and variables to 0, it is important that they are defined
+  initializeVariables({ prototype, variables }: Version<any>, state: State) {
+    const entities = prototype?.model.slots.map(({ name }) => name) || [];
+
+    return {
+      ...state,
+      variables: {
+        ...initializeStore(entities),
+        ...initializeStore(variables),
+        ...state.variables,
       },
     };
   }
@@ -63,16 +72,14 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
 
     let { state } = context;
 
-    if (!state) {
-      state = this.generate(version);
-    } else if (!state.stack.length) {
-      // if stack is empty, repopulate the stack
+    // if stack or state is empty, repopulate the stack
+    if (!state?.stack?.length) {
       state = this.generate(version, state);
     }
 
     return {
       ...context,
-      state,
+      state: this.initializeVariables(version, state),
       trace: [] as GeneralTrace[],
       request: context.request || null,
       versionID: context.versionID,
