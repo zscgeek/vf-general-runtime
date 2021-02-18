@@ -11,7 +11,7 @@ const utilsObj = {
 
 export const OneShotIntentHandler: HandlerFactory<Node, typeof utilsObj> = (utils) => ({
   canHandle: (node, runtime) => {
-    return isIntentRequest(runtime.getRequest()) && node.type === NodeType.START;
+    return isIntentRequest(runtime.getRequest()) && runtime.stack.getSize() === 1 && node.type === NodeType.START;
   },
   handle: (node, runtime, variables) => {
     // request for this turn has been processed, set action to response
