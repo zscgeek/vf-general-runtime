@@ -42,6 +42,14 @@ export interface Config {
 
   PROJECT_SOURCE: string | null;
   SESSIONS_SOURCE: string | null;
+
+  REDIS_CLUSTER_HOST: string;
+  REDIS_CLUSTER_PORT: number;
+
+  RATE_LIMITER_POINTS_PUBLIC: number;
+  RATE_LIMITER_DURATION_PUBLIC: number;
+  RATE_LIMITER_POINTS_PRIVATE: number;
+  RATE_LIMITER_DURATION_PRIVATE: number;
 }
 
 export interface Request<P extends {} = {}> extends Express.Request<P> {
