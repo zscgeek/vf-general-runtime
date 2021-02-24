@@ -32,6 +32,8 @@ export interface Config {
   CREATOR_API_ENDPOINT: string | null;
   CREATOR_API_AUTHORIZATION: string | null;
 
+  CREATOR_APP_ORIGIN: string | null;
+
   ADMIN_SERVER_DATA_API_TOKEN: string | null;
   VF_DATA_ENDPOINT: string | null;
   // Logging
@@ -72,6 +74,10 @@ export type AnyClass = Class<any, any[]>;
 export type ContextData = {
   locale?: string;
   api: CacheDataAPI;
+  reqHeaders?: {
+    authorization?: string;
+    origin?: string;
+  };
 };
 
 export type Context = Runtime.Context<GeneralRequest, GeneralTrace, ContextData>;
