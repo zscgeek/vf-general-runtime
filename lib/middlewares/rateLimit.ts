@@ -9,8 +9,9 @@ class RateLimit extends AbstractMiddleware {
       !this.config.PROJECT_SOURCE &&
       (!this.config.CREATOR_APP_ORIGIN || req.headers.origin !== this.config.CREATOR_APP_ORIGIN) &&
       !req.headers.authorization
-    )
+    ) {
       throw new VError('Auth Key Required', VError.HTTP_STATUS.UNAUTHORIZED);
+    }
 
     next();
   }
