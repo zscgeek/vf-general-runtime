@@ -12,11 +12,11 @@
     }
   },
   "dependencies": {
-    "@voiceflow/api-sdk": "v1.27.0",
-    "@voiceflow/backend-utils": "^2.2.0",
+    "@voiceflow/api-sdk": "1.27.1",
+    "@voiceflow/backend-utils": "2.2.1",
     "@voiceflow/common": "6.5.0",
-    "@voiceflow/general-types": "^1.31.0",
-    "@voiceflow/logger": "^1.4.2",
+    "@voiceflow/general-types": "1.31.3",
+    "@voiceflow/logger": "1.5.2",
     "@voiceflow/natural-language-commander": "^0.5.1",
     "@voiceflow/runtime": "1.24.1",
     "@voiceflow/verror": "^1.1.0",

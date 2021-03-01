@@ -25,7 +25,7 @@ export const registerSlots = (nlc: NLC, { slots }: PrototypeModel, openSlot: boo
         nlc.addSlotType({ type: slot.name, matcher });
       }
     } catch (err) {
-      logger.debug('NLC Unable To Register Slot', slot, err);
+      logger.debug(`NLC Unable To Register Slot ${slot} ${err}`);
     }
   });
 };
@@ -64,7 +64,7 @@ export const registerIntents = (nlc: NLC, { slots, intents }: PrototypeModel) =>
         utterances: samples,
       });
     } catch (err) {
-      logger.debug('NLC Unable To Register Custom Intent', intent, err);
+      logger.debug(`NLC Unable To Register Custom Intent ${intent} ${err}`);
     }
   });
 };
@@ -79,7 +79,7 @@ export const registerBuiltInIntents = (nlc: NLC, locale = Locale.EN_US) => {
     try {
       nlc.registerIntent({ intent: name, utterances: samples });
     } catch (err) {
-      logger.debug('NLC Unable To Register Built In Intent', err);
+      logger.debug(`NLC Unable To Register Built In Intent ${err}`);
     }
   });
 };
