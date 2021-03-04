@@ -1,7 +1,7 @@
-import { DataRequest, GeneralRequest, IntentRequest, NodeID, RequestType } from '@voiceflow/general-types';
+import { DataRequest, GeneralRequest, IntentRequest, NodeID, RequestType, TraceEventRequest, TracePathRequest } from '@voiceflow/general-types';
 import { Runtime } from '@voiceflow/runtime';
 
-export type RuntimeRequest = IntentRequest | DataRequest | null;
+export type RuntimeRequest = IntentRequest | DataRequest | TraceEventRequest | TracePathRequest | null;
 
 export type GeneralRuntime = Runtime<RuntimeRequest>;
 
@@ -10,7 +10,18 @@ export const isIntentRequest = (request: GeneralRequest): request is IntentReque
 };
 
 export const isRuntimeRequest = (request: GeneralRequest): request is RuntimeRequest => {
-  return request === null || !!([RequestType.INTENT, RequestType.DATA, RequestType.TRACE].includes(request?.type!) && request!.payload);
+  return (
+    request === null ||
+    !!([RequestType.INTENT, RequestType.DATA, RequestType.TRACE_EVENT, RequestType.TRACE_PATH].includes(request?.type!) && request!.payload)
+  );
+};
+
+export const isTraceEventRequest = (request: GeneralRequest | null): request is TraceEventRequest => {
+  return request?.type === RequestType.TRACE_EVENT;
+};
+
+export const isTracePathRequest = (request: GeneralRequest | null): request is TracePathRequest => {
+  return request?.type === RequestType.TRACE_PATH;
 };
 
 export enum StorageType {
