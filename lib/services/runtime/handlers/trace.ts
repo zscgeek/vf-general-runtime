@@ -17,8 +17,9 @@ const TraceHandler: HandlerFactory<Node, typeof utilsObj> = (utils) => ({
 
     const request: GeneralRequest | null = runtime.getRequest();
 
-    // process req if not process before (action == REQUEST) and is of type trace
+    // process req if not process before (action == REQUEST)
     if (runtime.getAction() === Action.REQUEST) {
+      // is of type trace and matches this trace node
       if (isTracePathRequest(request) && request.payload.name === node.name) {
         // request for this turn has been processed, set action to response
         runtime.setAction(Action.RESPONSE);
@@ -30,6 +31,8 @@ const TraceHandler: HandlerFactory<Node, typeof utilsObj> = (utils) => ({
       if (utils.commandHandler.canHandle(runtime)) {
         return utils.commandHandler.handle(runtime, variables);
       }
+
+      return null;
     }
 
     runtime.trace.addTrace<TraceFrame>({
