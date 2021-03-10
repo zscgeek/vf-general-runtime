@@ -1,17 +1,17 @@
 import { formatIntentName } from '@voiceflow/common';
-import { EventType, GeneralEvent, IntentEvent, IntentRequest } from '@voiceflow/general-types';
+import { Event, EventType, IntentEvent, IntentRequest, Request } from '@voiceflow/general-types';
 import { Runtime, Store } from '@voiceflow/runtime';
 
-import { GeneralRuntime, isIntentRequest } from '@/lib/services/runtime/types';
+import { GeneralRuntime, isGeneralRequest, isIntentRequest } from '@/lib/services/runtime/types';
 
 import { mapEntities } from '../../utils';
 
 export const intentEventMatcher = {
-  match: (context: { runtime: GeneralRuntime; event: GeneralEvent | null }): context is { runtime: Runtime<IntentRequest>; event: IntentEvent } => {
+  match: (context: { runtime: GeneralRuntime; event: Event | null }): context is { runtime: Runtime<IntentRequest>; event: IntentEvent } => {
     const request = context.runtime.getRequest();
     if (!isIntentRequest(request)) return false;
     if (context.event?.type !== EventType.INTENT) return false;
-    if (formatIntentName(context.event.intent) !== formatIntentName(request.payload.intent.name)) return false;
+    if (formatIntentName((context.event as IntentEvent).intent) !== formatIntentName(request.payload.intent.name)) return false;
     return true;
   },
   sideEffect: (context: { runtime: Runtime<IntentRequest>; event: IntentEvent; variables: Store }) => {
@@ -21,13 +21,32 @@ export const intentEventMatcher = {
   },
 };
 
-const EventMatchers = [intentEventMatcher];
+type GeneralEvent = Event<string, { name: string }>;
+export const generalEventMatcher = {
+  match: (context: {
+    runtime: GeneralRuntime;
+    event: Event | null;
+  }): context is { runtime: Runtime<Request>; event: Event<string, GeneralEvent> } => {
+    const request = context.runtime.getRequest();
+    if (!isGeneralRequest(request)) return false;
+    if (!context.event?.type) return false;
+    if ((context.event as GeneralEvent).name !== request.payload.name) return false;
 
-export const findEventMatcher = (context: { event: GeneralEvent | null; runtime: GeneralRuntime; variables: Store }) => {
+    return true;
+  },
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  sideEffect: (_context: { runtime: Runtime<IntentRequest>; event: GeneralEvent; variables: Store }) => {
+    // to-do: trace event side effect management
+  },
+};
+
+const EventMatchers = [intentEventMatcher, generalEventMatcher];
+
+export const findEventMatcher = (context: { event: Event | null; runtime: GeneralRuntime; variables: Store }) => {
   const matcher = EventMatchers.find((m) => m.match(context));
 
   if (!matcher) return null;
   return { ...matcher, sideEffect: () => matcher.sideEffect(context as any) };
 };
 
-export const hasEventMatch = (event: GeneralEvent | null, runtime: GeneralRuntime) => !!EventMatchers.find((m) => m.match({ event, runtime }));
+export const hasEventMatch = (event: Event | null, runtime: GeneralRuntime) => !!EventMatchers.find((m) => m.match({ event, runtime }));
