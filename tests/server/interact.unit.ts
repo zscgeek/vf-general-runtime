@@ -44,7 +44,7 @@ const tests = [
   },
 ];
 
-describe('test route unit tests', () => {
+describe('interact route unit tests', () => {
   let app;
   let server;
 

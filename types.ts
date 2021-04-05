@@ -2,6 +2,7 @@ import { Config as RequestConfig, GeneralTrace } from '@voiceflow/general-types'
 import * as Runtime from '@voiceflow/runtime';
 import * as Express from 'express';
 import * as ExpressValidator from 'express-validator';
+import http from 'http';
 
 import { RuntimeRequest } from '@/lib/services/runtime/types';
 import CacheDataAPI from '@/lib/services/state/cacheDataAPI';
@@ -42,7 +43,6 @@ export interface Config {
   MIDDLEWARE_VERBOSITY: string | null;
 
   PROJECT_SOURCE: string | null;
-  SESSIONS_SOURCE: string | null;
 
   REDIS_CLUSTER_HOST: string | null;
   REDIS_CLUSTER_PORT: number | null;
@@ -51,12 +51,14 @@ export interface Config {
   RATE_LIMITER_DURATION_PUBLIC: number;
   RATE_LIMITER_POINTS_PRIVATE: number;
   RATE_LIMITER_DURATION_PRIVATE: number;
+
+  SESSIONS_SOURCE: string | null;
+  MONGO_URI: string | null;
+  MONGO_DB: string | null;
 }
 
-export interface Request<P extends {} = {}> extends Express.Request<P> {
-  headers: Record<string, string>;
-  platform?: string;
-  // timedout?: boolean;
+export interface Request<P extends {} = {}, B = any, H extends {} = {}, Q = any, RB = any> extends Express.Request<P, RB, B, Q> {
+  headers: http.IncomingHttpHeaders & H;
 }
 
 export type Response = Express.Response;
