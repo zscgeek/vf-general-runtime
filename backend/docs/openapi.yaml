@@ -28,7 +28,7 @@ info:
       <details>
         <summary>cURL command line</summary>
 
-        curl --request POST 'https://general-runtime.voiceflow.com/state/{versionID}/user/steve' \
+        curl --request POST 'https://general-runtime.voiceflow.com/state/{versionID}/user/steve/interact' \
              --header "Authorization: {apiKey}" \
              --header 'Content-Type: application/json' \
              --data-raw '{
@@ -45,7 +45,7 @@ info:
 
         const requestOptions = {
           method: 'post',
-          uri: 'https://general-runtime.voiceflow.com/state/{versionID}/user/steve',
+          uri: 'https://general-runtime.voiceflow.com/state/{versionID}/user/steve/interact',
           headers: {
             Authorization: '{apiKey}'
           },
@@ -70,7 +70,7 @@ info:
         /* Example in Python 3 using requests library */
         import requests
 
-        url = 'https://general-runtime.voiceflow.com/state/{versionID}/user/steve'
+        url = 'https://general-runtime.voiceflow.com/state/{versionID}/user/steve/interact'
         request = { 'type': 'text', 'payload': 'hello' }
         headers = {'Authorization': '{apiKey}'}
 
@@ -120,7 +120,7 @@ tags:
       - `request` is an object representing a user's action or event
       - `trace` is an list of things for whatever client is calling the API to show
 paths:
-  '/state/user/{userID}/interact/{versionID}':
+  '/state/{versionID}/user/{userID}/interact/':
     post:
       tags:
         - State API
