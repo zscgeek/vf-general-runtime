@@ -119,8 +119,56 @@ tags:
       - `state` is the user metadata - what block they are currently on, what flow they are on, their variables
       - `request` is an object representing a user's action or event
       - `trace` is an list of things for whatever client is calling the API to show
+  - name: Custom Actions
+    description: |
+      Take advantage of the Custom Action step to allow you Voiceflow project to repeatably perform any kind of integration action/side effect.
+
+      Examples can include triggering navigation your website or app, processing a credit card payment, 
+      opening the windows on a car, handing off to a human on a phone call, and much much more.
+
+      Let's take a look at an example Custom Action step where we want to use a third party integration like *stripe* for actually charging a credit card:
+      ![Credit Card Custom Action](https://user-images.githubusercontent.com/5643574/115419275-333b7d80-a1c8-11eb-9a70-30398f4c9358.png)
+
+      In your request body call, you can specific which Custom Actions to **stop** on in the `config.stopTypes` field:
+      ```
+      { 
+        "request": { "type": "text", "payload": "hello!" } // any request type here, 
+        "config": {
+          "stopTypes": ["Pay Credit Card"]
+        }
+      }
+      ```
+      This will inform the dialog manager to stop on any `Pay Credit Card` Custom Action, ensuring that the last trace is always the Custom Action. 
+      By default, Custom Action steps will always go out the default port, but still leave a trace.
+
+      Here's what the Custom Action `trace` for the "Pay Credit Card" block above might look like:
+      ```
+      [
+        ...other_traces,
+        {
+          "type": "Pay Credit Card",
+          "payload": "{ 'amount': 25 }",
+          "defaultPath": 0,
+          "paths": [
+            { "event": { "type": "success" } },
+            { "event": { "type": "denied" } },
+            { "event": { "type": "pending" } }
+          ]
+        }
+      ]
+      ```
+      Now whenever we come across a `Pay Credit Card` trace, we can actually trigger a side effect such as the stripe API and perform the action.
+      Depending on the result of that, we can now select which path we want to go down. In the subsequent request body, you simply have to do this:
+
+      `"request": { "type": "success" }`
+
+      Where the `type` of the request is the same as the name of the path you've labelled in Voiceflow. 
+      If the next request is an invalid path, your project will simply behave as if there were no lines coming out of the Custom Action step.
+
+      In summary - all that is happening is we send out a request saying to stop on certain types of Custom Actions, 
+      we get a response stopping on it, and in the next request, we specify the path to go down.
 paths:
-  '/state/{versionID}/user/{userID}/interact/':
+  '/state/{versionID}/user/{userID}/interact':
     post:
       tags:
         - State API
