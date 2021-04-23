@@ -121,8 +121,6 @@
     "commit": "cz",
     "connect:cli": "vfcli mesh connect general-runtime -c \"/bin/bash\"",
     "docs:gen": "typedoc ./lib ./config.ts",
-    "e2e": "NODE_ENV=e2e ts-node --files -r tsconfig-paths/register start.ts",
-    "gen-certs:e2e": "scripts/generate_e2e_certs.sh",
     "lint": "eslint \"./**/*.{js,ts}\"",
     "lint:dockerfiles": "hadolint --ignore DL3018 ./Dockerfile",
     "lint:fix": "yarn lint --fix",
