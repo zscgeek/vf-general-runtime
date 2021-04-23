@@ -119,6 +119,7 @@
     "build": "yarn clean && ttsc --project ./tsconfig.build.json && cp app.config.js yarn.lock build/",
     "clean": "rimraf build",
     "commit": "cz",
+    "connect:cli": "vfcli mesh connect general-runtime -c \"/bin/bash\"",
     "docs:gen": "typedoc ./lib ./config.ts",
     "e2e": "NODE_ENV=e2e ts-node --files -r tsconfig-paths/register start.ts",
     "gen-certs:e2e": "scripts/generate_e2e_certs.sh",
@@ -127,12 +128,13 @@
     "lint:fix": "yarn lint --fix",
     "lint:quiet": "yarn lint --quiet",
     "lint:report": "yarn lint --format json -o sonar/report.json",
-    "local": "vfcli mesh connect general-runtime",
+    "local": "rm -f .env.local && vfcli mesh connect general-runtime",
     "start": "NODE_ENV=production node --max-old-space-size=8192 build/start.js",
     "start:meshed": "NODE_TLS_REJECT_UNAUTHORIZED=0  NODE_ENV=local ts-node-dev --files --respawn --exit-child --transpile-only -r tsconfig-paths/register -- start.ts",
-    "test": "NODE_ENV=test nyc ts-mocha --paths --opts ./config/tests/mocha.opts 'tests/**/*.{unit,it}.ts'",
+    "test": "yarn test:run",
     "test:dependencies": "depcheck",
     "test:integration": "NODE_ENV=test nyc ts-mocha --paths --opts ./config/tests/mocha.opts 'tests/**/*.it.ts'",
+    "test:run": "NODE_ENV=test nyc ts-mocha --paths --opts ./config/tests/mocha.opts 'tests/**/*.{unit,it}.ts'",
     "test:single": "NODE_ENV=test ts-mocha --paths --opts ./config/tests/mocha.opts",
     "test:unit": "NODE_ENV=test nyc ts-mocha --paths --opts ./config/tests/mocha.opts 'tests/**/*.unit.ts'"
   }
