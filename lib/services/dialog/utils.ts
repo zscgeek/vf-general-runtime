@@ -1,7 +1,16 @@
+/* eslint-disable no-restricted-syntax */
 import { IntentInput, PrototypeModel } from '@voiceflow/api-sdk';
 import { SLOT_REGEXP } from '@voiceflow/common';
 import { IntentRequest } from '@voiceflow/general-types';
+import { Action, Store } from '@voiceflow/runtime';
+import Client from '@voiceflow/runtime/build/lib/Client';
 import * as crypto from 'crypto';
+
+import CommandHandler from '@/lib/services/runtime/handlers/command';
+import { findEventMatcher } from '@/lib/services/runtime/handlers/event';
+import { Context } from '@/types';
+
+import { eventHandlers } from '../runtime/handlers/state/preliminary';
 
 export const VF_DM_PREFIX = 'dm_';
 
@@ -59,4 +68,38 @@ export const getIntentEntityList = (intentName: string, model: PrototypeModel) =
   const intentModel = model.intents.find((intent) => intent.name === intentName);
   const intentEntityIDs = intentModel?.slots?.map((entity) => entity.id);
   return intentEntityIDs?.map((id) => model.slots.find((entity) => entity.key === id));
+};
+
+export const isIntentInScope = async ({ data: { api }, versionID, state, request }: Context) => {
+  const client = new Client({
+    api,
+  });
+
+  const runtime = client.createRuntime(versionID, state, request);
+
+  // check if there is a command in the stack that fulfills request
+  if (CommandHandler().canHandle(runtime)) {
+    return true;
+  }
+
+  const currentFrame = runtime.stack.top();
+  const program = await runtime.getProgram(currentFrame?.getProgramID()).catch(() => null);
+  const node = program?.getNode(currentFrame.getNodeID());
+  const variables = Store.merge(runtime.variables, currentFrame.variables);
+
+  if (runtime.getAction() === Action.RESPONSE || !node) return false;
+
+  // if no event handler can handle, intent req is out of scope => no dialog management required
+  if (!eventHandlers.find((h) => h.canHandle(node as any, runtime, variables, program!))) return false;
+
+  // if interaction node - check if req intent matches one of the node intents
+  for (const interaction of (node.interactions || []) as any) {
+    const { event } = interaction;
+
+    if (findEventMatcher({ event, runtime, variables })) {
+      return true;
+    }
+  }
+
+  return false;
 };
