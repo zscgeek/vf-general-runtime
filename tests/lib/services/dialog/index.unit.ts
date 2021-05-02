@@ -3,6 +3,7 @@ import { IntentRequest } from '@voiceflow/general-types';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
+import DataAPI from '@/lib/clients/dataAPI';
 import DialogManager, { utils as defaultUtils } from '@/lib/services/dialog';
 import * as utils from '@/lib/services/dialog/utils';
 
@@ -45,10 +46,14 @@ describe('dialog manager unit tests', () => {
 
     it('exits early if intent not in scope', async () => {
       const services = {
-        dataAPI: { getVersion: sinon.stub().resolves() },
+        dataAPI: { getVersion: sinon.stub().resolves({ prototype: { model: true } }) },
       };
       const dm = new DialogManager({ utils: { ...defaultUtils, isIntentInScope: sinon.stub().resolves(false) }, ...services } as any, {} as any);
-      const context = { request: { type: 'intent', payload: { entities: [], intent: { name: 'intent_name' } } } };
+      const context = {
+        request: { type: 'intent', payload: { entities: [], intent: { name: 'intent_name' } } },
+        state: { storage: {} },
+        data: { api: services.dataAPI },
+      };
       const result = await dm.handle(context as any);
 
       expect(result).to.eql(context);

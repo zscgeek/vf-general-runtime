@@ -95,10 +95,6 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
       return context;
     }
 
-    if (!(await this.services.utils.isIntentInScope(context))) {
-      return context;
-    }
-
     const version = await context.data.api.getVersion(context.versionID);
 
     if (!version) {
@@ -156,6 +152,11 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
       }
     } else {
       logger.debug('@DM - In regular context');
+
+      if (!(await this.services.utils.isIntentInScope(context))) {
+        return context;
+      }
+
       // Since we are in the regular context, we just set the intentRequest object in the DM state store as-is.
       // The downstream code will decide if further DM processing is needed.
       dmStateStore.intentRequest = incomingRequest;
