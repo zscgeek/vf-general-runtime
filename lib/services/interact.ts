@@ -1,6 +1,5 @@
 import { Config, RequestType } from '@voiceflow/general-types';
 import { State, TurnBuilder } from '@voiceflow/runtime';
-import _ from 'lodash';
 
 import { RuntimeRequest } from '@/lib/services/runtime/types';
 import { Context } from '@/types';
@@ -48,7 +47,7 @@ class Interact extends AbstractManager {
 
     turn.addHandlers(asr, nlu, slots, dialog, runtime);
 
-    if (_.isUndefined(config.tts) || config.tts) {
+    if (config.tts) {
       turn.addHandlers(tts);
     }
 
