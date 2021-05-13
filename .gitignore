@@ -62,5 +62,6 @@ build
 
 #Sonar report
 sonar/
+nyc_coverage*
 
 /docs
