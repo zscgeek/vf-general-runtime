@@ -10,7 +10,7 @@ class StateManagement extends AbstractManager {
   async interact(data: {
     params: { versionID: string; userID: string };
     body: { state?: State; request?: RuntimeRequest; config?: Config };
-    query: { locale?: string };
+    query: { locale?: string; verbose?: boolean };
     headers: { authorization: string; project_id: string };
   }) {
     let state = await this.services.session.getFromDb<State>(data.headers.project_id, data.params.userID);
@@ -20,11 +20,11 @@ class StateManagement extends AbstractManager {
 
     data.body.state = state;
 
-    const { state: updatedState, trace } = await this.services.interact.handler(data);
+    const { state: updatedState, trace, request } = await this.services.interact.handler(data);
 
     await this.services.session.saveToDb(data.headers.project_id, data.params.userID, updatedState);
 
-    return trace;
+    return data.query.verbose ? { state: updatedState, trace, request } : trace;
   }
 
   async reset(data: { headers: { authorization: string; project_id: string }; params: { versionID: string; userID: string } }) {

@@ -16,7 +16,7 @@ info:
     1. **Create a project**. You need to first build a conversational project on *[Voiceflow Creator](https://creator.voiceflow.com)*.
     2. **Create API Key**. If you are an admin of a Voiceflow workspace, create and manage API Keys under *Workspace Settings / Developers*.
     3. **Get Version ID**. On your project, it is in the URL: `https://creator.voiceflow.com/project/{versionID}/canvas/...`
-    4. **Make a test call**. Use the examples below to make an API call. Make subsequent calls to the same endpoint, 
+    4. **Make a test call**. Use the examples below to make an API call. Make subsequent calls to the same endpoint,
       changing the `payload` to reflect what the user might say. See how the response trace changes based on where in the project the user is.<br/>
       *Make sure to replace the `{apiKey}` and `{versionID}` with what you've gathered on steps 2 and 3*.
     5. **Implement your application**. Get familiar with the API by reading the rest of this documentation, and power the next conversation with your Voiceflow project!
@@ -123,7 +123,7 @@ tags:
     description: |
       Take advantage of the Custom Action step to allow you Voiceflow project to repeatably perform any kind of integration action/side effect.
 
-      Examples can include triggering navigation your website or app, processing a credit card payment, 
+      Examples can include triggering navigation your website or app, processing a credit card payment,
       opening the windows on a car, handing off to a human on a phone call, and much much more.
 
       Let's take a look at an example Custom Action step where we want to use a third party integration like *stripe* for actually charging a credit card:
@@ -131,14 +131,14 @@ tags:
 
       In your request body call, you can specific which Custom Actions to **stop** on in the `config.stopTypes` field:
       ```
-      { 
-        "request": { "type": "text", "payload": "hello!" } // any request type here, 
+      {
+        "request": { "type": "text", "payload": "hello!" } // any request type here,
         "config": {
           "stopTypes": ["Pay Credit Card"]
         }
       }
       ```
-      This will inform the dialog manager to stop on any `Pay Credit Card` Custom Action, ensuring that the last trace is always the Custom Action. 
+      This will inform the dialog manager to stop on any `Pay Credit Card` Custom Action, ensuring that the last trace is always the Custom Action.
       By default, Custom Action steps will always go out the default port, but still leave a trace.
 
       Here's what the Custom Action `trace` for the "Pay Credit Card" block above might look like:
@@ -162,10 +162,10 @@ tags:
 
       `"request": { "type": "success" }`
 
-      Where the `type` of the request is the same as the name of the path you've labelled in Voiceflow. 
+      Where the `type` of the request is the same as the name of the path you've labelled in Voiceflow.
       If the next request is an invalid path, your project will simply behave as if there were no lines coming out of the Custom Action step.
 
-      In summary - all that is happening is we send out a request saying to stop on certain types of Custom Actions, 
+      In summary - all that is happening is we send out a request saying to stop on certain types of Custom Actions,
       we get a response stopping on it, and in the next request, we specify the path to go down.
 paths:
   '/state/{versionID}/user/{userID}/interact':
@@ -178,6 +178,7 @@ paths:
         Every time a request is sent you will get a unique response based on where the user is currently on in the Voiceflow project.
 
         Send out a request with a `type` and `payload`, and get back a response with a `trace` array to act on.
+        If you've enabled the verbose response parameter you will receive the [same kind of response as the stateless interact route](https://www.voiceflow.com/api/dialog-manager#operation/statelessInteract).
 
         ```
         // -> request body, send user intention or event
@@ -188,7 +189,31 @@ paths:
           }
         }
         // <- response body, an array of "traces"
+        [{
+          "type": "speak",
+          "payload": {
+            "type": "message",
+            "message": "would you like fries with that?"
+          }
+        }, {
+          "type": "visual",
+          "payload": {
+            "image": "https://voiceflow.com/pizza.png"
+          }
+        }]
+
+        // <- simplified verbose response body
         {
+          "state": {
+            "stack": [{
+              "programID": "home flow",
+              "nodeID": "yes no choice node"
+            }],
+            "storage": {},
+            "variables": {
+              "pizza_type": "pepperoni"
+            }
+          },
           "trace": [{
             "type": "speak",
             "payload": {
@@ -225,6 +250,14 @@ paths:
           schema:
             type: string
             example: user@gmail.com
+        - name: verbose
+          in: query
+          description: enable verbose responses
+          optional: false
+          default: false
+          schema:
+            type: boolean
+            example: false
         - in: header
           name: Authorization
           description: voiceflow API key
@@ -289,10 +322,19 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  trace:
-                    $ref: '#/components/schemas/Trace'
+                oneOf:
+                  - type: object
+                    description: Verbose response, only returned if you enabled the `verbose` parameter
+                    properties:
+                      trace:
+                        $ref: '#/components/schemas/Trace'
+                      state:
+                        $ref: '#/components/schemas/State'
+                      request:
+                        $ref: '#/components/schemas/Request'
+                    required:
+                      - trace
+                  - $ref: '#/components/schemas/Trace'
               examples:
                 Dialog Example:
                   value:
@@ -539,7 +581,7 @@ paths:
         Notice that the `type: text` request got processed by the NLP handler to become an `type: intent` request.
         The `state` is updated, and a `trace` is generated in the API response.
 
-        To move the conversation forward, you can create a request object and pass it in the response body to `/interact/{versionID}` along with the state and optionally a `config` object. 
+        To move the conversation forward, you can create a request object and pass it in the response body to `/interact/{versionID}` along with the state and optionally a `config` object.
         This will return an updated `state`, an updated `request` (not shown in examples), and the trace array containing the traces to display.
 
         if `state` is undefined/empty, it will automatically use the **default state** (starting from the first block).
