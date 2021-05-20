@@ -2,6 +2,7 @@
   "name": "@voiceflow/general-runtime",
   "description": "voiceflow general runtime",
   "version": "0.1.0",
+  "private": true,
   "author": "Voiceflow",
   "bugs": {
     "url": "https://github.com/voiceflow/general-runtime/issues"
