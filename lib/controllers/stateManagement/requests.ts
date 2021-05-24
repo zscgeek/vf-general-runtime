@@ -1,9 +1,9 @@
 /* eslint-disable import/prefer-default-export */
-import { ArrayField, ObjectField, RecordField, StringField } from '@/lib/controllers/schemaTypes';
+import { ArrayField, ObjectField, StringField } from '@/lib/controllers/schemaTypes';
 
 const StackFrame = {
   type: 'object',
-  additionalProperties: false,
+  additionalProperties: true,
   required: ['programID', 'storage', 'variables'],
   properties: {
     nodeID: StringField('nodeID'),
@@ -19,7 +19,7 @@ export const UpdateSchema = {
   additionalProperties: false,
   required: ['stack', 'storage', 'variables'],
   properties: {
-    stack: ArrayField('stack', RecordField('stackFrame', StackFrame)),
+    stack: ArrayField('stack', StackFrame),
     storage: ObjectField('storage'),
     variables: ObjectField('variables'),
   },
