@@ -4,7 +4,7 @@ import { ArrayField, ObjectField, StringField } from '@/lib/controllers/schemaTy
 const StackFrame = {
   type: 'object',
   additionalProperties: true,
-  required: ['programID', 'storage', 'variables'],
+  required: ['programID'],
   properties: {
     nodeID: StringField('nodeID'),
     programID: StringField('programID'),
