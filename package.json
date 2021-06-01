@@ -143,6 +143,7 @@
     "lint:quiet": "yarn lint --quiet",
     "lint:report": "yarn lint --format json -o sonar/report.json",
     "local": "rm -f .env.local && vfcli mesh connect general-runtime",
+    "prepare": "yarn build",
     "start": "NODE_ENV=production node --max-old-space-size=8192 build/start.js",
     "start:meshed": "NODE_TLS_REJECT_UNAUTHORIZED=0  NODE_ENV=local ts-node-dev --files --respawn --exit-child --transpile-only -r tsconfig-paths/register -- start.ts",
     "test": "yarn test:run",
