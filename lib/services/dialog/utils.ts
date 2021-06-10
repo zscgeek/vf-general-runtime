@@ -1,8 +1,10 @@
 /* eslint-disable no-restricted-syntax */
-import { IntentInput, PrototypeModel } from '@voiceflow/api-sdk';
+import { BaseNode, IntentInput, PrototypeModel } from '@voiceflow/api-sdk';
 import { SLOT_REGEXP } from '@voiceflow/common';
-import { IntentRequest } from '@voiceflow/general-types';
+import { AnyRequestButton, IntentRequest, RequestType } from '@voiceflow/general-types';
+import { NodeInteraction } from '@voiceflow/general-types/build/nodes/interaction';
 import * as crypto from 'crypto';
+import _ from 'lodash';
 
 import CommandHandler from '@/lib/services/runtime/handlers/command';
 import { findEventMatcher } from '@/lib/services/runtime/handlers/event';
@@ -70,6 +72,9 @@ export const getIntentEntityList = (intentName: string, model: PrototypeModel) =
   return intentEntityIDs?.map((id) => model.slots.find((entity) => entity.key === id));
 };
 
+export const isInteractionsInNode = (node: BaseNode & { interactions?: NodeInteraction[] }): node is BaseNode & { interactions: NodeInteraction[] } =>
+  Array.isArray(node.interactions);
+
 export const isIntentInScope = async ({ data: { api }, versionID, state, request }: Context) => {
   const client = new Client({
     api,
@@ -92,14 +97,65 @@ export const isIntentInScope = async ({ data: { api }, versionID, state, request
   // if no event handler can handle, intent req is out of scope => no dialog management required
   if (!eventHandlers.find((h) => h.canHandle(node as any, runtime, variables, program!))) return false;
 
-  // if interaction node - check if req intent matches one of the node intents
-  for (const interaction of (node.interactions || []) as any) {
-    const { event } = interaction;
+  if (isInteractionsInNode(node)) {
+    // if interaction node - check if req intent matches one of the node intents
+    for (const interaction of node.interactions) {
+      const { event } = interaction;
 
-    if (findEventMatcher({ event, runtime, variables })) {
-      return true;
+      if (findEventMatcher({ event, runtime, variables })) {
+        return true;
+      }
     }
   }
 
   return false;
+};
+
+interface Utterance {
+  text: string;
+  slots?: string[];
+}
+
+export const sampleUtterance = (utterances: Utterance[], model: PrototypeModel, index = 0) => {
+  let slotMap: Record<string, string> = {};
+
+  const utterance =
+    // ensure every slot in the utterance can be filled with a dummy value
+    utterances.find(({ slots = [] }) => {
+      let i = index;
+      slotMap = {};
+
+      return slots.every((utteranceSlot) => {
+        // find an random sample for each slot in the intent
+        const slot = model.slots.find(({ key }) => key === utteranceSlot);
+        const sample = slot?.inputs[i % slot.inputs.length]?.split(',')[0];
+        if (!sample) return false;
+
+        i++;
+        slotMap[slot!.name] = sample;
+
+        return true;
+      });
+    })?.text;
+
+  return utterance ? replaceSlots(utterance, slotMap).trim() : '';
+};
+
+// generate multiple buttons with slot variations from provided utterances
+export const generateButtonsForUtterances = (utterances: Utterance[], model: PrototypeModel, variations = 3): AnyRequestButton[] => {
+  const buttons: AnyRequestButton[] = [];
+
+  for (let i = 0; i < variations; i++) {
+    const utterance = utterances[i % utterances.length];
+
+    if (utterance) {
+      const name = sampleUtterance([utterance], model, i);
+
+      if (name) {
+        buttons.push({ name, request: { type: RequestType.TEXT, payload: name } });
+      }
+    }
+  }
+
+  return _.uniqBy(buttons, (button) => button.name);
 };

@@ -1,21 +1,28 @@
-import { Node } from '@voiceflow/api-sdk';
+import { BaseNode } from '@voiceflow/api-sdk';
 import { replaceVariables, sanitizeVariables } from '@voiceflow/common';
-import { EventType, IntentEvent, TraceType } from '@voiceflow/general-types';
-import { Node as ChoiceNode, TraceFrame as ChoiceTrace } from '@voiceflow/general-types/build/nodes/interaction';
+import { NodeWithButtons, TraceType } from '@voiceflow/general-types';
+import { Node as ChoiceNode } from '@voiceflow/general-types/build/nodes/interaction';
 import { SpeakType, TraceFrame } from '@voiceflow/general-types/build/nodes/speak';
 import _ from 'lodash';
 
-import { Runtime, Store } from '@/runtime';
+import { HandlerFactory, Runtime, Store } from '@/runtime';
 
 import { NoMatchCounterStorage, StorageData, StorageType } from '../types';
+import { addButtonsIfExists } from '../utils';
 
-type NoMatchNode = Partial<ChoiceNode> & Node<any, { noMatches?: string[]; randomize?: boolean }>;
+export interface NoMatchNode extends BaseNode, NodeWithButtons, Partial<Pick<ChoiceNode, 'noMatches'>> {
+  randomize?: boolean;
+}
 
 export const EMPTY_AUDIO_STRING = '<audio src=""/>';
 
+const utilsObj = {
+  addButtonsIfExists,
+};
+
 const removeEmptyNoMatches = (noMatchArray?: string[]) => noMatchArray?.filter((noMatch) => noMatch != null && noMatch !== EMPTY_AUDIO_STRING);
 
-export const NoMatchHandler = () => ({
+export const NoMatchHandler: HandlerFactory<NoMatchNode, typeof utilsObj> = (utils) => ({
   canHandle: (node: NoMatchNode, runtime: Runtime) => {
     const nonEmptyNoMatches = removeEmptyNoMatches(node.noMatches);
 
@@ -52,23 +59,10 @@ export const NoMatchHandler = () => ({
       payload: { message: output, type: SpeakType.MESSAGE },
     });
 
-    if (Array.isArray(node.interactions)) {
-      runtime.trace.addTrace<ChoiceTrace>({
-        type: TraceType.CHOICE,
-        payload: {
-          choices: node.interactions.reduce<{ name: string; intent?: string }[]>((acc, interaction) => {
-            if (interaction.event?.type === EventType.INTENT) {
-              const { intent } = interaction.event as IntentEvent;
-              acc.push({ intent, name: intent });
-            }
-            return acc;
-          }, []),
-        },
-      });
-    }
+    utils.addButtonsIfExists(node, runtime, variables);
 
     return node.id;
   },
 });
 
-export default () => NoMatchHandler();
+export default () => NoMatchHandler(utilsObj);

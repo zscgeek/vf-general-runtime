@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 
 import { TurnType } from '@/lib/services/runtime/types';
-import { addChipsIfExists, addRepromptIfExists, getReadableConfidence } from '@/lib/services/runtime/utils';
+import { addButtonsIfExists, addRepromptIfExists, getReadableConfidence } from '@/lib/services/runtime/utils';
 
 describe('runtime utils service unit tests', () => {
   describe('addRepromptIfExists', () => {
@@ -33,10 +33,16 @@ describe('runtime utils service unit tests', () => {
     });
   });
 
-  describe('addChipsIfExists', () => {
-    it('no chips', () => {
-      expect(addChipsIfExists({} as any, null as any, null as any)).to.eql(false);
-      expect(addChipsIfExists({ chips: [] } as any, null as any, null as any)).to.eql(false);
+  describe('addButtonsIfExists', () => {
+    it('no buttons and chips', () => {
+      const addTrace = sinon.stub();
+
+      addButtonsIfExists({} as any, { trace: { addTrace } } as any, null as any);
+      addButtonsIfExists({ chips: [] } as any, { trace: { addTrace } } as any, null as any);
+      addButtonsIfExists({ buttons: [] } as any, { trace: { addTrace } } as any, null as any);
+      addButtonsIfExists({ chips: [], buttons: [] } as any, { trace: { addTrace } } as any, null as any);
+
+      expect(addTrace.callCount).to.eql(0);
     });
 
     it('with chips', () => {
@@ -44,18 +50,50 @@ describe('runtime utils service unit tests', () => {
       const runtime = { trace: { addTrace: sinon.stub() } };
       const variables = { getState: sinon.stub().returns({}) };
 
-      expect(addChipsIfExists(node as any, runtime as any, variables as any)).to.eql(true);
+      addButtonsIfExists(node as any, runtime as any, variables as any);
+
       expect(runtime.trace.addTrace.args).to.eql([
         [
           {
             type: TraceType.CHOICE,
             payload: {
-              choices: [{ name: 'l1' }, { name: 'l2' }],
+              buttons: [
+                { name: 'l1', request: { type: 'text', payload: 'l1' } },
+                { name: 'l2', request: { type: 'text', payload: 'l2' } },
+              ],
             },
           },
         ],
       ]);
       expect(variables.getState.callCount).to.eql(2);
+    });
+
+    it('with buttons', () => {
+      const node = {
+        buttons: [
+          { name: 'button {var1}', request: { type: 'intent', payload: { intent: { name: 'intent' }, query: 'button {var1}' } } },
+          { name: 'button {var2} ', request: { type: 'text', payload: '{var2}' } },
+        ],
+      };
+      const runtime = { trace: { addTrace: sinon.stub() } };
+      const variables = { getState: sinon.stub().returns({ var1: 'value1', var2: 'value2' }) };
+
+      addButtonsIfExists(node as any, runtime as any, variables as any);
+
+      expect(runtime.trace.addTrace.args).to.eql([
+        [
+          {
+            type: TraceType.CHOICE,
+            payload: {
+              buttons: [
+                { name: 'button value1', request: { type: 'intent', payload: { intent: { name: 'intent' }, query: 'button value1' } } },
+                { name: 'button value2 ', request: { type: 'text', payload: 'value2' } },
+              ],
+            },
+          },
+        ],
+      ]);
+      expect(variables.getState.callCount).to.eql(4);
     });
   });
 });
