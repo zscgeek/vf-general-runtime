@@ -205,14 +205,14 @@ tags:
         "request": {
           "type": "intent",
           "payload": {
-            "query": "can I get a pepperoni pizza?",
+            "query": "can I get a pepperoni pizza?", // (optional) original raw string of user input
             "intent": {
-              "name": "order_pizza_intent"
+              "name": "order_pizza_intent" // name of the intent, as specified on Voiceflow
             },
-            "entities": [
+            "entities": [ // array of matched entities, can be empty
               {
-                "name": "pizza_type",
-                "value": "pepperoni"
+                "name": "pizza_type", // name of entity
+                "value": "pepperoni" // value of entity
               }
             ]
           }
