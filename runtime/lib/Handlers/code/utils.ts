@@ -31,8 +31,10 @@ export const vmExecute = (
 
   vm.run(`${safe ? clearContext : ''} ${data.code}`);
 
+  const context = JSON.parse(JSON.stringify(_.get(vm, '_context')));
+
   return Object.keys(data.variables).reduce<Record<string, any>>((acc, key) => {
-    acc[key] = _.get(vm, '_context')[key];
+    acc[key] = context[key];
     return acc;
   }, {});
 };
