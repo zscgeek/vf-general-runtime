@@ -5,6 +5,7 @@
 
 import { GeneralTrace } from '@voiceflow/general-types';
 
+import { Event } from '@/lib/clients/ingest-client';
 import Client from '@/runtime';
 import { Config, Context, ContextHandler } from '@/types';
 
@@ -64,13 +65,15 @@ class RuntimeManager extends AbstractManager<{ utils: typeof utils }> implements
 
     await runtime.update();
 
-    return {
+    const result = {
       ...context,
       request,
       versionID,
       state: runtime.getFinalState(),
       trace: runtime.trace.get() as GeneralTrace[],
     };
+    await this.services.analyticsClient!.track(versionID, Event.INTERACT, result);
+    return result;
   }
 }
 

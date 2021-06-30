@@ -37,6 +37,7 @@ describe('runtime manager unit tests', () => {
 
       const services = {
         dataAPI: { getProgram: 'service-api' },
+        analyticsClient: { track: sinon.stub() },
       };
 
       const utils = {
@@ -85,6 +86,7 @@ describe('runtime manager unit tests', () => {
 
       const services = {
         dataAPI: { getProgram: 'service-api' },
+        analyticsClient: { track: sinon.stub() },
       };
 
       const utils = {
@@ -132,6 +134,7 @@ describe('runtime manager unit tests', () => {
 
       const services = {
         dataAPI: { getProgram: 'service-api' },
+        analyticsClient: { track: sinon.stub() },
       };
 
       const utils = {
@@ -180,6 +183,7 @@ describe('runtime manager unit tests', () => {
 
       const services = {
         dataAPI: { getProgram: 'service-api' },
+        analyticsClient: { track: sinon.stub() },
       };
 
       const utils = {

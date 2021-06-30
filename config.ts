@@ -9,10 +9,17 @@ import { getOptionalProcessEnv, getRequiredProcessEnv } from '@voiceflow/common'
 
 import { Config } from './types';
 
+const NODE_ENV = getRequiredProcessEnv('NODE_ENV');
+const CLOUD_ENV = getOptionalProcessEnv('CLOUD_ENV', 'public');
+
 const CONFIG: Config = {
   // Configs
-  NODE_ENV: getRequiredProcessEnv('NODE_ENV'),
+  NODE_ENV,
   PORT: getRequiredProcessEnv('PORT'),
+
+  CLOUD_ENV,
+
+  IS_PRIVATE_CLOUD: NODE_ENV === 'production' && CLOUD_ENV !== 'public',
 
   AWS_ENDPOINT: getOptionalProcessEnv('AWS_ENDPOINT'),
   DYNAMO_ENDPOINT: getOptionalProcessEnv('DYNAMO_ENDPOINT'),
@@ -72,6 +79,11 @@ const CONFIG: Config = {
   SESSIONS_SOURCE: getRequiredProcessEnv('SESSIONS_SOURCE'),
   MONGO_URI: getOptionalProcessEnv('MONGO_URI'),
   MONGO_DB: getOptionalProcessEnv('MONGO_DB'),
+
+  ANALYTICS_ENDPOINT: getOptionalProcessEnv('ANALYTICS_ENDPOINT') || null,
+  ANALYTICS_WRITE_KEY: getOptionalProcessEnv('ANALYTICS_WRITE_KEY') || null,
+
+  INGEST_WEBHOOK_ENDPOINT: getOptionalProcessEnv('INGEST_WEBHOOK_ENDPOINT') || null,
 };
 
 export default CONFIG;
