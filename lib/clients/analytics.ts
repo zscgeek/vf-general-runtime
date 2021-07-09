@@ -1,5 +1,5 @@
 import Rudderstack, { IdentifyRequest, TrackRequest } from '@rudderstack/rudder-sdk-node';
-import { GeneralTrace } from '@voiceflow/general-types';
+import { GeneralTrace, TraceType } from '@voiceflow/general-types';
 
 import log from '@/logger';
 import { Config, Context } from '@/types';
@@ -70,9 +70,15 @@ export class AnalyticsSystem extends AbstractClient {
 
   private async processTrace(fullTrace: GeneralTrace[], interactIngestBody: InteractBody): Promise<void> {
     // eslint-disable-next-line no-restricted-syntax
-    for (const trace of Object.values(fullTrace)) {
+    for (const trace of fullTrace) {
       interactIngestBody.request.requestType = 'response';
-      interactIngestBody.request.payload = trace;
+
+      // remove TTS base64 MP3 from speak trace
+      if (trace.type === TraceType.SPEAK) {
+        interactIngestBody.request.payload = { type: trace.type, payload: { ...trace.payload, src: undefined } };
+      } else {
+        interactIngestBody.request.payload = trace;
+      }
 
       if (this.aggregateAnalytics && this.rudderstackClient) {
         this.callAnalyticsSystemTrack(interactIngestBody.request.versionId!, interactIngestBody.eventId, interactIngestBody);

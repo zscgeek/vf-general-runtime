@@ -1,5 +1,6 @@
 import { Config, RequestType } from '@voiceflow/general-types';
 
+import { Event } from '@/lib/clients/ingest-client';
 import { RuntimeRequest } from '@/lib/services/runtime/types';
 import { State, TurnBuilder } from '@/runtime';
 import { Context } from '@/types';
@@ -53,7 +54,20 @@ class Interact extends AbstractManager {
 
     turn.addHandlers(speak, filter);
 
-    return turn.resolve({ state, request, versionID, data: { locale, config, reqHeaders: { authorization, origin, sessionid: sessionId } } });
+    // track analytics
+    turn.addHandlers({
+      handle: async (context: Context) => {
+        await this.services.analyticsClient!.track(context.versionID, Event.INTERACT, context);
+        return context;
+      },
+    });
+
+    return turn.resolve({
+      state,
+      request,
+      versionID,
+      data: { locale, config, reqHeaders: { authorization, origin, sessionid: sessionId } },
+    });
   }
 }
 
