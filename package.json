@@ -128,9 +128,6 @@
   "resolutions": {
     "@types/serve-static": "1.13.9"
   },
-  "files": [
-    "build"
-  ],
   "scripts": {
     "build": "yarn clean && ttsc --project ./tsconfig.build.json && cp app.config.js yarn.lock build/",
     "clean": "rimraf build",
