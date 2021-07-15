@@ -116,7 +116,7 @@ To make requests to these endpoints, an API key will need to be passed in the `A
 | GET `/interact/{VERSION_ID}/state` | <pre>{}</pre> | <pre>{<br>&nbsp;&nbsp;...state: State;<br>}</pre> |
 | POST `/interact/{VERSION_ID}` | <pre>{<br>&nbsp;&nbsp;state?: State;<br>&nbsp;&nbsp;request?: GeneralRequest;<br>&nbsp;&nbsp;config?: Config;<br>}</pre> | <pre>{<br>&nbsp;&nbsp;state: State;<br>&nbsp;&nbsp;request: GeneralRequest;<br>&nbsp;&nbsp;trace: GeneralTrace[];<br>}</pre> |
 
-# Setup
+# Setup (Local)
 
 run `yarn` in command line to install all dependencies.
 
@@ -128,19 +128,17 @@ Add the following file to the local repository:
 > PORT=4000
 > LOG_LEVEL="info"
 > MIDDLEWARE_VERBOSITY="none"
->
+> 
+> SESSIONS_SOURCE='local'
 > GENERAL_SERVICE_ENDPOINT='https://general-service.voiceflow.com'
->
-> INTEGRATIONS_HANDLER_ENDPOINT="none"
->
-> CREATOR_API_ENDPOINT='https://api.voiceflow.com'
-> CREATOR_API_AUTHORIZATION='[YOUR JWT TOKEN HERE]'
->
-> # uncomment PROJECT_SOURCE to use local file
-> # PROJECT_SOURCE='file.vfr'
+> 
+> # use local vfr file under /projects
+> PROJECT_SOURCE='[VFFILE.vfr]'
 > ```
 >
 > For more info on [Environment Variables](https://developer.voiceflow.com/general-runtime/modules/config.html)
+
+Use `yarn start:meshed` to run the development version, and `yarn build` followed by `yarn start` to run the production version (this checks against `.env.production` instead of `.env.local`)
 
 # API Documentation (Open API)
 
