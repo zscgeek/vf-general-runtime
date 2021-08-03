@@ -46,28 +46,29 @@ export const addRepromptIfExists = <N extends NodeWithReprompt>(node: N, runtime
 
 export const addButtonsIfExists = <N extends NodeWithButtons>(node: N, runtime: Runtime, variables: Store): void => {
   let buttons: AnyRequestButton[] = [];
-
   if (node.buttons?.length) {
-    buttons = node.buttons.map(({ name, request }) => {
-      return isTextRequest(request)
-        ? {
-            name: replaceVariables(name, variables.getState()),
-            request: {
-              ...request,
-              payload: replaceVariables(request.payload, variables.getState()),
-            },
-          }
-        : {
-            name: replaceVariables(name, variables.getState()),
-            request: {
-              ...request,
-              payload: {
-                ...request.payload,
-                query: replaceVariables(request.payload.query, variables.getState()),
+    buttons = node.buttons
+      .filter(({ name }) => name)
+      .map(({ name, request }) => {
+        return isTextRequest(request)
+          ? {
+              name: replaceVariables(name, variables.getState()),
+              request: {
+                ...request,
+                payload: replaceVariables(request.payload, variables.getState()),
               },
-            },
-          };
-    });
+            }
+          : {
+              name: replaceVariables(name, variables.getState()),
+              request: {
+                ...request,
+                payload: {
+                  ...request.payload,
+                  query: replaceVariables(request.payload.query, variables.getState()),
+                },
+              },
+            };
+      });
   }
 
   // needs this to do not break existing programs
