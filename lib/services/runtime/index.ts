@@ -3,8 +3,6 @@
  * @packageDocumentation
  */
 
-import { GeneralTrace } from '@voiceflow/general-types';
-
 import { Event } from '@/lib/clients/ingest-client';
 import { Variables } from '@/lib/services/runtime/types';
 import Client from '@/runtime';
@@ -44,7 +42,7 @@ class RuntimeManager extends AbstractManager<{ utils: typeof utils }> implements
     return client;
   }
 
-  public async handle({ versionID, state, request, ...context }: Context) {
+  public async handle({ versionID, state, request, ...context }: Context): Promise<Context> {
     if (!isRuntimeRequest(request)) throw new Error(`invalid runtime request type: ${JSON.stringify(request)}`);
 
     const runtime = this.createClient(context.data.api).createRuntime(versionID, state, request);
@@ -68,18 +66,21 @@ class RuntimeManager extends AbstractManager<{ utils: typeof utils }> implements
       runtime.turn.set(TurnType.STOP_ALL, true);
     }
 
-    runtime.variables.set(Variables.TIMESTAMP, Math.floor(Date.now() / 1000));
+    const timestamp = new Date();
+
+    runtime.variables.set(Variables.TIMESTAMP, Math.floor(timestamp.getTime() / 1000));
     await runtime.update();
 
-    const result = {
+    const metadata: Context = {
       ...context,
       request,
       versionID,
       state: runtime.getFinalState(),
-      trace: runtime.trace.get() as GeneralTrace[],
+      trace: runtime.trace.get(),
     };
-    await this.services.analyticsClient!.track(versionID, Event.INTERACT, result);
-    return result;
+
+    await this.services.analyticsClient!.track({ versionID, event: Event.TURN, metadata, timestamp });
+    return metadata;
   }
 }
 

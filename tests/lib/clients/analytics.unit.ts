@@ -26,10 +26,30 @@ describe('Analytics client unit tests', () => {
     it('throws on unknown events', () => {
       const client = AnalyticsClient({} as any);
 
-      expect(client.track('id', 'unknown event' as any, {} as any)).to.eventually.rejectedWith(RangeError);
+      expect(
+        client.track({
+          versionID: 'id',
+          event: 'unknown event' as any,
+          metadata: {} as any,
+          timestamp: new Date(),
+        })
+      ).to.eventually.rejectedWith(RangeError);
     });
 
-    it('works with interact events', () => {
+    it('throws on interact events', () => {
+      const client = AnalyticsClient({} as any);
+
+      expect(
+        client.track({
+          versionID: 'id',
+          event: Event.INTERACT,
+          metadata: {} as any,
+          timestamp: new Date(),
+        })
+      ).to.eventually.rejectedWith(RangeError);
+    });
+
+    it('works with turn events', () => {
       const config = {
         ANALYTICS_WRITE_KEY: 'write key',
         ANALYTICS_ENDPOINT: 'http://localhost/analytics',
@@ -55,33 +75,32 @@ describe('Analytics client unit tests', () => {
       const ingestClient = { doIngest: sinon.stub() };
 
       (client as any).ingestClient = ingestClient;
+      const timestamp = new Date();
 
-      client.track('id', Event.INTERACT, metadata as any);
+      client.track({ versionID: 'id', event: Event.TURN, metadata: metadata as any, timestamp });
 
-      expect(rudderstack.track.callCount).to.eql(1);
-      expect(rudderstack.track.getCall(0).args).to.deep.eq([
-        {
-          userId: 'id',
-          event: Event.INTERACT,
-          properties: {
-            metadata: {
-              eventId: Event.INTERACT,
-              request: {
-                metadata: {
-                  end: 'end',
-                  locale: 'locale',
+      expect(rudderstack.track.args).to.deep.eq([
+        [
+          {
+            userId: 'id',
+            event: Event.TURN,
+            properties: {
+              metadata: {
+                eventId: Event.TURN,
+                request: {
+                  metadata: {
+                    locale: metadata.data.locale,
+                    end: metadata.end,
+                  },
                   state: { variables: { user_id: 'user id' } },
+                  session_id: 'id.user id',
+                  version_id: 'id',
+                  timestamp: timestamp.toISOString(),
                 },
-                payload: {
-                  type: 'launch',
-                },
-                requestType: 'launch',
-                sessionId: 'id.user id',
-                versionId: 'id',
               },
             },
           },
-        },
+        ],
       ]);
     });
   });
