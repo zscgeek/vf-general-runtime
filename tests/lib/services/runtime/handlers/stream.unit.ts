@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 
 import { StreamHandler } from '@/lib/services/runtime/handlers/stream';
-import { FrameType, StorageType, StreamAction } from '@/lib/services/runtime/types';
+import { StorageType, StreamAction } from '@/lib/services/runtime/types';
 
 describe('stream handler unit tests', async () => {
   describe('canHandle', () => {
