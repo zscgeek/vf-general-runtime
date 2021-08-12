@@ -451,24 +451,23 @@ paths:
               examples:
                 Dialog Example:
                   value:
-                    trace:
-                      - type: speak
-                        payload:
-                          type: message
-                          message: one large pepperoni pizza is that correct?
-                      - type: speak
-                        payload:
-                          type: audio
-                          src: 'https://voiceflow.com/chime.mp3'
-                          message: "<audio src='https://voiceflow.com/chime.mp3'/>"
-                      - type: visual
-                        payload:
-                          image: 'https://voiceflow.com/splash.mp3'
-                      - type: choice
-                        payload:
-                          choices:
-                            - name: 'yes'
-                            - name: 'no'
+                    - type: speak
+                      payload:
+                        type: message
+                        message: one large pepperoni pizza is that correct?
+                    - type: speak
+                      payload:
+                        type: audio
+                        src: 'https://voiceflow.com/chime.mp3'
+                        message: "<audio src='https://voiceflow.com/chime.mp3'/>"
+                    - type: visual
+                      payload:
+                        image: 'https://voiceflow.com/splash.mp3'
+                    - type: choice
+                      payload:
+                        choices:
+                          - name: 'yes'
+                          - name: 'no'
                 Custom Trace:
                   value:
                     trace:
