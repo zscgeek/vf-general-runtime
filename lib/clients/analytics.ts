@@ -128,7 +128,8 @@ export class AnalyticsSystem extends AbstractClient {
     timestamp: Date;
   }): Promise<void> {
     log.trace(`analytics: Track Trace VersionID ${versionID}`);
-    const unixTime = timestamp.getTime();
+    // add milliseconds to put it behind response, and to maintain interact order
+    const unixTime = timestamp.getTime() + 1;
 
     // eslint-disable-next-line no-restricted-syntax
     for (const [index, trace] of fullTrace.entries()) {
