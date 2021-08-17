@@ -1,4 +1,4 @@
-import { Command, CommandType } from '@voiceflow/general-types';
+import { Node as BaseNode } from '@voiceflow/base-types';
 
 import { FrameType, GeneralRuntime } from '@/lib/services/runtime/types';
 import { Action, extractFrameCommand, Frame, Store } from '@/runtime';
@@ -6,9 +6,9 @@ import { Action, extractFrameCommand, Frame, Store } from '@/runtime';
 import { findEventMatcher, hasEventMatch } from './event';
 
 export const getCommand = (runtime: GeneralRuntime, extractFrame: typeof extractFrameCommand) => {
-  const frameMatch = (command: Command | null) => hasEventMatch(command?.event || null, runtime);
+  const frameMatch = (command: BaseNode.Utils.AnyCommand | null) => hasEventMatch(command?.event || null, runtime);
 
-  return extractFrame<Command>(runtime.stack, frameMatch) || null;
+  return extractFrame<BaseNode.Utils.AnyCommand>(runtime.stack, frameMatch) || null;
 };
 
 const utilsObj = {
@@ -37,7 +37,7 @@ export const CommandHandler = (utils: typeof utilsObj) => ({
     if (matcher) matcher.sideEffect();
 
     // interrupting command where it jumps to a node in the existing stack
-    if (command.type === CommandType.JUMP) {
+    if (command.type === BaseNode.Utils.CommandType.JUMP) {
       runtime.trace.addTrace<any>({
         type: 'path',
         payload: { path: 'jump' },
@@ -56,7 +56,7 @@ export const CommandHandler = (utils: typeof utilsObj) => ({
     }
 
     // push command, adds a new frame
-    if (command.type === CommandType.PUSH && command.diagramID) {
+    if (command.type === BaseNode.Utils.CommandType.PUSH && command.diagramID) {
       runtime.trace.addTrace<any>({
         type: 'path',
         payload: { path: 'push' },
