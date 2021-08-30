@@ -3,8 +3,7 @@
  * @packageDocumentation
  */
 
-import { Variables } from '@/lib/services/runtime/types';
-import Client from '@/runtime';
+import Client, { Action as RuntimeAction } from '@/runtime';
 import { Config, Context, ContextHandler } from '@/types';
 
 import { FullServiceMap } from '../index';
@@ -12,7 +11,7 @@ import CacheDataAPI from '../state/cacheDataAPI';
 import { AbstractManager, injectServices } from '../utils';
 import Handlers from './handlers';
 import init from './init';
-import { isIntentRequest, isRuntimeRequest, TurnType } from './types';
+import { isActionRequest, isIntentRequest, isRuntimeRequest, TurnType, Variables } from './types';
 import { getReadableConfidence } from './utils';
 
 export const utils = {
@@ -66,7 +65,13 @@ class RuntimeManager extends AbstractManager<{ utils: typeof utils }> implements
     }
 
     runtime.variables.set(Variables.TIMESTAMP, Math.floor(Date.now() / 1000));
-    await runtime.update();
+
+    // skip runtime for the action request, since it do not have any effects
+    if (!isActionRequest(request)) {
+      await runtime.update();
+    } else {
+      runtime.setAction(RuntimeAction.END); // to get final state
+    }
 
     return {
       ...context,
