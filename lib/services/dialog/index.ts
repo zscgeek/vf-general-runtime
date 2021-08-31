@@ -5,7 +5,9 @@
 
 import { PrototypeModel } from '@voiceflow/api-sdk';
 import { Node as BaseNode, Request, Trace } from '@voiceflow/base-types';
+import { Types as ChatTypes } from '@voiceflow/chat-types';
 import { Constants } from '@voiceflow/general-types';
+import { Types as VoiceTypes } from '@voiceflow/voice-types';
 import _ from 'lodash';
 
 import log from '@/logger';
@@ -14,6 +16,7 @@ import { Context, ContextHandler } from '@/types';
 import { handleNLCDialog } from '../nlu/nlc';
 import { getNoneIntentRequest, NONE_INTENT } from '../nlu/utils';
 import { isIntentRequest } from '../runtime/types';
+import { outputTrace } from '../runtime/utils';
 import { AbstractManager, injectServices } from '../utils';
 import { rectifyEntityValue } from './synonym';
 import {
@@ -21,6 +24,7 @@ import {
   fillStringEntities,
   generateButtonsForUtterances,
   getDMPrefixIntentName,
+  getEntitiesMap,
   getIntentEntityList,
   getUnfulfilledEntity,
   inputToString,
@@ -29,6 +33,7 @@ import {
 } from './utils';
 
 export const utils = {
+  outputTrace,
   isIntentInScope,
 };
 
@@ -179,15 +184,15 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
       // Assemble return string by populating the inline entity values
       const trace: Trace.AnyTrace[] = [];
 
-      const prompt = _.sample(unfulfilledEntity.dialog.prompt)!;
+      const prompt = _.sample(unfulfilledEntity.dialog.prompt)! as ChatTypes.Prompt | VoiceTypes.IntentPrompt<string>;
+      const variables = getEntitiesMap(dmStateStore!.intentRequest);
 
-      trace.push({
-        type: BaseNode.Utils.TraceType.SPEAK,
-        payload: {
-          message: fillStringEntities(inputToString(prompt, version.platformData.settings.defaultVoice), dmStateStore!.intentRequest),
-          type: BaseNode.Speak.TraceSpeakType.MESSAGE,
-        },
-      });
+      const output =
+        'content' in prompt
+          ? prompt.content
+          : fillStringEntities(inputToString(prompt, version.platformData.settings.defaultVoice), dmStateStore!.intentRequest);
+
+      trace.push(outputTrace({ output, variables }));
 
       if (version.prototype?.model) {
         trace.push({
