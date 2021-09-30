@@ -16,7 +16,7 @@ import init from './init';
 import { isActionRequest, isIntentRequest, isRuntimeRequest, TurnType, Variables } from './types';
 import { getReadableConfidence } from './utils';
 
-export const utils = {
+export const utils: { Client: typeof Client; Handlers: typeof Handlers } = {
   Client,
   Handlers,
 };
