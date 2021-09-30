@@ -2,7 +2,6 @@ import { Node } from '@voiceflow/base-types';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
-import { TurnType } from '@/lib/services/runtime/types';
 import {
   addButtonsIfExists,
   addRepromptIfExists,
@@ -21,15 +20,154 @@ describe('runtime utils service unit tests', () => {
       expect(runtime.turn.set.callCount).to.eql(0);
     });
 
-    it('has reprompt', () => {
-      const runtime = { turn: { set: sinon.stub() } };
-      const node = { reprompt: 'hello {var}' };
-      const varState = { var: 'there' };
-      const variables = { getState: sinon.stub().returns(varState) };
+    describe('has reprompt', () => {
+      it('text', () => {
+        const runtime = { trace: { addTrace: sinon.stub() } };
+        const node = { reprompt: 'hello {var}' };
+        const varState = { var: 'there' };
+        const variables = { getState: sinon.stub().returns(varState) };
 
-      addRepromptIfExists(node, runtime as any, variables as any);
+        addRepromptIfExists(node, runtime as any, variables as any);
 
-      expect(runtime.turn.set.args[0]).to.eql([TurnType.REPROMPT, 'hello there']);
+        expect(runtime.trace.addTrace.args).to.eql([
+          [
+            {
+              type: Node.Utils.TraceType.NO_REPLY_RESPONSE,
+              payload: {
+                message: 'hello there',
+                type: Node.Speak.TraceSpeakType.MESSAGE,
+              },
+            },
+          ],
+        ]);
+      });
+
+      it('not text', () => {
+        const runtime = { trace: { addTrace: sinon.stub() } };
+        const node = {
+          reprompt: [
+            {
+              children: [
+                {
+                  text: 'hello',
+                  italic: true,
+                },
+                {
+                  text: ' ',
+                },
+                {
+                  text: '{var}',
+                  fontWeight: '700',
+                },
+              ],
+            },
+            {
+              children: [
+                {
+                  fontWeight: '700',
+                  text: "I'm",
+                  strikeThrough: true,
+                },
+                {
+                  fontWeight: '700',
+                  text: ' ',
+                },
+                {
+                  fontWeight: '700',
+                  text: 'Leo',
+                  underline: true,
+                },
+              ],
+            },
+          ],
+        };
+        const varState = { var: 'there' };
+        const variables = { getState: sinon.stub().returns(varState) };
+
+        addRepromptIfExists(node, runtime as any, variables as any);
+
+        expect(runtime.trace.addTrace.args).to.eql([
+          [
+            {
+              type: Node.Utils.TraceType.NO_REPLY_RESPONSE,
+              payload: {
+                message: "hello thereI'm Leo",
+                slate: {
+                  0: {
+                    children: [
+                      {
+                        italic: true,
+                        text: 'hello',
+                      },
+                      {
+                        text: ' ',
+                      },
+                      {
+                        fontWeight: '700',
+                        text: '{var}',
+                      },
+                    ],
+                  },
+                  1: {
+                    children: [
+                      {
+                        fontWeight: '700',
+                        strikeThrough: true,
+                        text: "I'm",
+                      },
+                      {
+                        fontWeight: '700',
+                        text: ' ',
+                      },
+                      {
+                        fontWeight: '700',
+                        text: 'Leo',
+                        underline: true,
+                      },
+                    ],
+                  },
+                  content: [
+                    {
+                      children: [
+                        {
+                          italic: true,
+                          text: 'hello',
+                        },
+                        {
+                          text: ' ',
+                        },
+                        {
+                          fontWeight: '700',
+                          text: 'there',
+                        },
+                      ],
+                    },
+                    {
+                      children: [
+                        {
+                          fontWeight: '700',
+                          strikeThrough: true,
+                          text: "I'm",
+                        },
+                        {
+                          fontWeight: '700',
+                          text: ' ',
+                        },
+                        {
+                          fontWeight: '700',
+                          text: 'Leo',
+                          underline: true,
+                        },
+                      ],
+                    },
+                  ],
+                  id: 'reprompt',
+                },
+              },
+            },
+          ],
+        ]);
+      });
     });
   });
 

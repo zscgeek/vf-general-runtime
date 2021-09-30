@@ -1155,6 +1155,15 @@
     axios "^0.21.1"
     superstruct "^0.10.12"
 
+"@voiceflow/api-sdk@^1.42.0":
+  version "1.42.0"
+  resolved "https://registry.yarnpkg.com/@voiceflow/api-sdk/-/api-sdk-1.42.0.tgz#b02a764a551c67cc71b16841b6c7f7006877dc6f"
+  integrity sha512-QwTxwvmg3T+K/R64OpNe7KjV+2UhUEiqK23suRAw8I+JZJkEl6AkiLk2Jbby9o3lp7xgUOr2BXMS3ki3lDYsBg==
+  dependencies:
+    "@voiceflow/common" "6.8.1"
+    axios "^0.21.1"
+    superstruct "^0.10.12"
+
 "@voiceflow/backend-utils@3.3.0":
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/@voiceflow/backend-utils/-/backend-utils-3.3.0.tgz#e4af7d68462855286f9d06026c4191fafdd8b156"
@@ -1178,7 +1187,15 @@
     rate-limiter-flexible "^2.2.2"
     sinon "^10.0.0"
 
-"@voiceflow/base-types@1.6.5", "@voiceflow/base-types@^1.6.5":
+"@voiceflow/base-types@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@voiceflow/base-types/-/base-types-1.9.0.tgz#c099883ae069648a3c630e77ea36067a79182a6b"
+  integrity sha512-wOluOwdKtpbDayP6XPAiE+2aG0WDL2KmIfhPCqisyIQKhH9Fxi0DFg5nP3n8CJr7EeHarvcbdpgcKx/nNa0c2g==
+  dependencies:
+    "@voiceflow/api-sdk" "^1.42.0"
+    slate "^0.63.0"
+
+"@voiceflow/base-types@^1.6.5":
   version "1.6.5"
   resolved "https://registry.yarnpkg.com/@voiceflow/base-types/-/base-types-1.6.5.tgz#42feb90a69582ca7a5cdd4cc584f6c0719835371"
   integrity sha512-282WUzRJ84GjtESvCM6lYEAUpehKkGgVSJpHrbtstBXdH9HajArFEkKQ7MiJ1kLkoseTffiWXtY2wzizml1RSA==

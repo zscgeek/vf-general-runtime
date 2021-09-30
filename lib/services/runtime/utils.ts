@@ -11,7 +11,7 @@ import { Text as SlateText } from 'slate';
 
 import { Runtime, Store } from '@/runtime';
 
-import { Output, TurnType } from './types';
+import { Output } from './types';
 
 export const mapEntities = (
   mappings: SlotMapping[],
@@ -54,16 +54,33 @@ export const slateInjectVariables = (slateValue: Text.SlateTextValue, variables:
   return _cloneDeepWith(slateValue, customizer);
 };
 
+export const slateToPlaintext = (content: Text.SlateTextValue = []): string =>
+  content.reduce<string>((acc, node) => acc + (SlateText.isText(node) ? node.text : slateToPlaintext(node.children)), '');
+
 export const addRepromptIfExists = <N extends VoiceNode.Utils.NodeReprompt | ChatNode.Utils.NodeReprompt>(
   { reprompt }: N,
   runtime: Runtime,
   variables: Store
 ): void => {
   if (reprompt) {
-    runtime.turn.set(
-      TurnType.REPROMPT,
-      _isString(reprompt) ? replaceVariables(reprompt, variables.getState()) : slateInjectVariables(reprompt, variables.getState())
-    );
+    let payload;
+    const sanitizedVars = sanitizeVariables(variables.getState());
+
+    if (_isString(reprompt)) {
+      payload = {
+        message: replaceVariables(reprompt, sanitizedVars),
+        type: Node.Speak.TraceSpeakType.MESSAGE,
+      };
+    } else {
+      const content = slateInjectVariables(reprompt, sanitizedVars);
+      const message = slateToPlaintext(content);
+      payload = { slate: { ...reprompt, content, id: 'reprompt' }, message };
+    }
+
+    runtime.trace.addTrace<Trace.NoReplyResponseTrace>({
+      type: Node.Utils.TraceType.NO_REPLY_RESPONSE,
+      payload,
+    });
   }
 };
 
@@ -140,9 +157,6 @@ export const addButtonsIfExists = <N extends Request.NodeButton>(node: N, runtim
 };
 
 export const getReadableConfidence = (confidence?: number) => ((confidence ?? 1) * 100).toFixed(2);
-
-export const slateToPlaintext = (content: Text.SlateTextValue = []): string =>
-  content.reduce<string>((acc, node) => acc + (SlateText.isText(node) ? node.text : slateToPlaintext(node.children)), '');
 
 interface OutputParams<V> {
   output?: V;
