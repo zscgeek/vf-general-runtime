@@ -1,6 +1,7 @@
 import { Node } from '@voiceflow/base-types';
 
 import { HandlerFactory } from '@/runtime/lib/Handler';
+import { VARIABLES_OBJECT_NAME } from '@/runtime/lib/Handlers/ifV2';
 
 import CodeHandler from './code';
 
@@ -25,11 +26,13 @@ const SetV2Handler: HandlerFactory<Node.SetV2.Node, SetV2Options | void> = ({ sa
 
       code += `
             evaluated = eval(\`${set.expression}\`);
-            ${set.variable} = !!evaluated || !Number.isNaN(evaluated) ? evaluated : undefined;
+            ${VARIABLES_OBJECT_NAME}.${set.variable} = !!evaluated || !Number.isNaN(evaluated) ? evaluated : undefined;
         `;
     });
 
-    await codeHandler.handle({ code, id: 'PROGRAMMATICALLY-GENERATED-CODE-NODE', type: Node.NodeType.CODE }, runtime, variables, program);
+    await codeHandler.handle({ code, id: 'PROGRAMMATICALLY-GENERATED-CODE-NODE', type: Node.NodeType.CODE }, runtime, variables, program, {
+      wrapVariables: VARIABLES_OBJECT_NAME,
+    });
 
     return node.nextId || null;
   },

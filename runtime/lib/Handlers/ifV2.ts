@@ -12,6 +12,9 @@ export type IfV2Options = {
 
 type DebugError = { index: number; expression: string; msg: string };
 
+export const addVariableObjectPrefixRegex = /\(([^ ']+)/g;
+export const VARIABLES_OBJECT_NAME = 'variables';
+
 const IfV2Handler: HandlerFactory<Node.IfV2.Node, IfV2Options> = ({ _v1, safe }) => ({
   canHandle: (node) => {
     return node.type === Node.NodeType.IF_V2;
@@ -34,7 +37,19 @@ const IfV2Handler: HandlerFactory<Node.IfV2.Node, IfV2Options> = ({ _v1, safe })
 
     let code = '';
     for (let i = 0; i < node.payload.expressions.length; i++) {
-      const expression = node.payload.expressions[i];
+      let expression = node.payload.expressions[i];
+      const transformExpressionVariables = () => {
+        if (typeof expression === 'string') {
+          const isNotParenWrapped = expression[0] !== '(' && expression[expression.length - 1] !== ')';
+          if (isNotParenWrapped) {
+            expression = `(${expression})`;
+          }
+          expression = expression.replace(addVariableObjectPrefixRegex, `(${VARIABLES_OBJECT_NAME}.$1`);
+        }
+      };
+
+      transformExpressionVariables();
+
       code += `
             try {
               if(eval(\`${expression}\`)) {
@@ -58,7 +73,10 @@ const IfV2Handler: HandlerFactory<Node.IfV2.Node, IfV2Options> = ({ _v1, safe })
       { code: codeTemplate, id: 'PROGRAMMATICALLY-GENERATED-CODE-NODE', type: Node.NodeType.CODE },
       runtime,
       variables,
-      program
+      program,
+      {
+        wrapVariables: VARIABLES_OBJECT_NAME,
+      }
     );
 
     debugErrors.forEach((err) => runtime.trace.debug(`Error condition ${err.index} - "${err.expression}": ${err.msg}`, Node.NodeType.IF_V2));
