@@ -38,13 +38,21 @@ const IfV2Handler: HandlerFactory<Node.IfV2.Node, IfV2Options> = ({ _v1, safe })
     let code = '';
     for (let i = 0; i < node.payload.expressions.length; i++) {
       let expression = node.payload.expressions[i];
+
       const transformExpressionVariables = () => {
         if (typeof expression === 'string') {
           const isNotParenWrapped = expression[0] !== '(' && expression[expression.length - 1] !== ')';
           if (isNotParenWrapped) {
             expression = `(${expression})`;
           }
-          expression = expression.replace(addVariableObjectPrefixRegex, `(${VARIABLES_OBJECT_NAME}.$1`);
+
+          const variableNames = Object.keys(variables.getState?.() || {});
+          variableNames.forEach((name) => {
+            const leftSideRegex = new RegExp(`[(]${name} `, 'g');
+            const rightSideRegex = new RegExp(` ${name}[)]`, 'g');
+            expression = (expression as string).replace(leftSideRegex, `(${VARIABLES_OBJECT_NAME}.${name} `);
+            expression = (expression as string).replace(rightSideRegex, ` ${VARIABLES_OBJECT_NAME}.${name})`);
+          });
         }
       };
 
