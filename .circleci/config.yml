@@ -44,7 +44,7 @@ defaults:
           branch_pattern: master
 
 orbs:
-  vfcommon: voiceflow/common@0.0.246
+  vfcommon: voiceflow/common@0.0.248
   sonarcloud: sonarsource/sonarcloud@1.0.2
 
 jobs:
@@ -170,7 +170,6 @@ workflows:
           vf_service_commit: CIRCLE_SHA1
           vf_service_name: "general-runtime"
           vf_service_port: "8005"
-          enable: false
           context: dev-test
           filters:
             <<: *ignore_staging_filters
