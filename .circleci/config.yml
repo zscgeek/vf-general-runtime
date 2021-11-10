@@ -171,6 +171,7 @@ workflows:
           vf_service_name: "general-runtime"
           vf_service_port: "8005"
           context: dev-test
+          enable: false
           filters:
             <<: *ignore_staging_filters
       - vfcommon/release:
