@@ -154,6 +154,8 @@
     "lint:quiet": "yarn lint --quiet",
     "lint:report": "yarn lint:output",
     "local": "rm -f .env.local && vfcli mesh connect general-runtime",
+    "mesh:post": "exit 0",
+    "mesh:pre": "exit 0",
     "prepare": "yarn build",
     "redoc": "redoc-cli serve backend/docs/openapi.yaml --ssr --watch",
     "start": "cross-env NODE_ENV=production node --max-old-space-size=8192 build/start.js",
