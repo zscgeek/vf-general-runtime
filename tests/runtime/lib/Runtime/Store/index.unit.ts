@@ -72,8 +72,32 @@ describe('Runtime Store unit tests', () => {
     expect(store.getState()).to.eql({ var1: 'val1', var2: 'val2' });
   });
 
+  it('merge overlap', () => {
+    const state = { a: 1, b: 2 };
+    const payload = { b: 4, c: 3 };
+
+    const store = new Store(state);
+    store.merge(payload);
+    expect(store.getState()).to.eql({ a: 1, b: 4, c: 3 });
+  });
+
+  it('merge falsy', () => {
+    const state = { a: 1, b: 2, c: 3 };
+    const payload = { a: null, b: undefined, c: 0 };
+
+    const store = new Store(state);
+    store.merge(payload);
+    expect(store.getState()).to.eql({ a: null, b: undefined, c: 0 });
+  });
+
   it('set', () => {
     const store = new Store();
+    store.set('var', 'val');
+    expect(store.getState()).to.eql({ var: 'val' });
+  });
+
+  it('set overwrite', () => {
+    const store = new Store({ var: 'other' });
     store.set('var', 'val');
     expect(store.getState()).to.eql({ var: 'val' });
   });
