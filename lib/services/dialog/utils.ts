@@ -61,7 +61,7 @@ export const fillStringEntities = (input = '', intentRequest: Request.IntentRequ
 
 export const dmPrefix = (contents: string) =>
   crypto
-    .createHash('sha1')
+    .createHash('sha256')
     .update(contents)
     .digest('hex')
     .slice(-10);
