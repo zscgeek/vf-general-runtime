@@ -167,7 +167,8 @@ workflows:
           filters:
             branches:
               ignore: master
-      - vfcommon/dummy_job
+      - vfcommon/dummy_job:
+          context: dev-test
       - vfcommon/test_e2e:
           <<: *slack-fail-post-step
           github_username: GITHUB_USERNAME
