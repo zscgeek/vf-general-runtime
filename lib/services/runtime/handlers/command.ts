@@ -1,7 +1,7 @@
 import { Node as BaseNode, Trace } from '@voiceflow/base-types';
 
 import { FrameType, GeneralRuntime } from '@/lib/services/runtime/types';
-import { Action, extractFrameCommand, Frame, Store } from '@/runtime';
+import { extractFrameCommand, Frame, Store } from '@/runtime';
 
 import { findEventMatcher, hasEventMatch } from './event';
 
@@ -25,9 +25,6 @@ export const CommandHandler = (utils: typeof utilsObj) => ({
   canHandle: (runtime: GeneralRuntime): boolean => !!utils.getCommand(runtime),
   handle: (runtime: GeneralRuntime, variables: Store): string | null => {
     const res = utils.getCommand(runtime);
-
-    // request for this turn has been processed, set action to response
-    runtime.setAction(Action.RESPONSE);
 
     const { command, index } = res!;
     const { event } = command;

@@ -3,7 +3,7 @@ import { Node } from '@voiceflow/base-types';
 import { replaceVariables } from '@voiceflow/common';
 import { Constants } from '@voiceflow/general-types';
 
-import { Action, HandlerFactory } from '@/runtime';
+import { HandlerFactory } from '@/runtime';
 
 import { isIntentRequest, StorageData, StorageType, StreamAction, StreamPauseStorage, StreamPlayStorage } from '../../types';
 import CommandHandler from '../command';
@@ -19,8 +19,6 @@ export const StreamStateHandler: HandlerFactory<any, typeof utilsObj> = (utils) 
   handle: (_, runtime, variables) => {
     const streamPlay = runtime.storage.get<StreamPlayStorage>(StorageType.STREAM_PLAY)!;
 
-    // request for this turn has been processed, set action to response
-    runtime.setAction(Action.RESPONSE);
     const request = runtime.getRequest();
     const intentName = isIntentRequest(request) ? request.payload.intent.name : null;
 
