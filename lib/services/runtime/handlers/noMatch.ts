@@ -1,61 +1,71 @@
-import { BaseNode } from '@voiceflow/api-sdk';
-import { Node, Request, Text, Trace } from '@voiceflow/base-types';
+import { Node as BaseNode, Request, Text, Trace } from '@voiceflow/base-types';
 import { Node as ChatNode } from '@voiceflow/chat-types';
 import { Node as VoiceNode } from '@voiceflow/voice-types';
 import _ from 'lodash';
 
-import { HandlerFactory, Runtime, Store } from '@/runtime';
+import { Runtime, Store } from '@/runtime';
 
-import { NoMatchCounterStorage, StorageData, StorageType } from '../types';
-import { addButtonsIfExists, outputTrace, slateToPlaintext } from '../utils';
+import { NoMatchCounterStorage, StorageType } from '../types';
+import { addButtonsIfExists, outputTrace, removeEmptyPrompts } from '../utils';
+import { addNoReplyTimeoutIfExists } from './noReply';
 
-interface BaseNoMatchNode extends BaseNode, Request.NodeButton {}
-interface VoiceNoMatchNode extends BaseNoMatchNode, VoiceNode.Utils.NodeNoMatch {}
-interface ChatNoMatchNode extends BaseNoMatchNode, ChatNode.Utils.NodeNoMatch {}
-
-export type NoMatchNode = VoiceNoMatchNode | ChatNoMatchNode;
-
-export const EMPTY_AUDIO_STRING = '<audio src=""/>';
+type NoMatchNode = Request.NodeButton & (VoiceNode.Utils.NoMatchNode | ChatNode.Utils.NoMatchNode);
 
 const utilsObj = {
   outputTrace,
   addButtonsIfExists,
+  addNoReplyTimeoutIfExists,
 };
 
-const removeEmptyNoMatches = <T extends string[] | Text.SlateTextValue[]>(noMatchArray?: T): T | undefined =>
-  (noMatchArray as any[])?.filter(
-    (noMatch: T[number]) => noMatch != null && (_.isString(noMatch) ? noMatch !== EMPTY_AUDIO_STRING : !!slateToPlaintext(noMatch))
-  ) as T | undefined;
+const convertDeprecatedNoMatch = ({ noMatch, elseId, noMatches, randomize, ...node }: NoMatchNode) =>
+  ({
+    noMatch: {
+      prompts: noMatch?.prompts ?? noMatches,
+      randomize: noMatch?.randomize ?? randomize,
+      nodeID: noMatch?.nodeID ?? elseId,
+    },
+    ...node,
+  } as NoMatchNode);
 
-export const NoMatchHandler: HandlerFactory<NoMatchNode, typeof utilsObj> = (utils) => ({
-  canHandle: (node: NoMatchNode, runtime: Runtime) => {
-    const nonEmptyNoMatches = removeEmptyNoMatches(node.noMatches);
+const removeEmptyNoMatches = (node: NoMatchNode) => {
+  const prompts: Array<Text.SlateTextValue | string> = node.noMatch?.prompts ?? [];
 
-    return (
-      Array.isArray(nonEmptyNoMatches) && nonEmptyNoMatches.length > (runtime.storage.get<NoMatchCounterStorage>(StorageType.NO_MATCHES_COUNTER) ?? 0)
-    );
-  },
-  handle: (node: NoMatchNode, runtime: Runtime, variables: Store) => {
-    runtime.storage.produce<StorageData>((draft) => {
-      const counter = draft[StorageType.NO_MATCHES_COUNTER];
+  return removeEmptyPrompts(prompts);
+};
 
-      draft[StorageType.NO_MATCHES_COUNTER] = counter ? counter + 1 : 1;
-    });
+export const NoMatchHandler = (utils: typeof utilsObj) => ({
+  handle: (_node: NoMatchNode, runtime: Runtime, variables: Store) => {
+    const node = convertDeprecatedNoMatch(_node);
+
+    const nonEmptyNoMatches = removeEmptyNoMatches(node);
+
+    const noMatchCounter = runtime.storage.get<NoMatchCounterStorage>(StorageType.NO_MATCHES_COUNTER) ?? 0;
+
+    if (noMatchCounter >= nonEmptyNoMatches.length) {
+      // clean up no matches counter
+      runtime.storage.delete(StorageType.NO_MATCHES_COUNTER);
+
+      runtime.trace.addTrace<Trace.PathTrace>({
+        type: BaseNode.Utils.TraceType.PATH,
+        payload: { path: 'choice:else' },
+      });
+
+      return node.noMatch?.nodeID ?? null;
+    }
 
     runtime.trace.addTrace<Trace.PathTrace>({
-      type: Node.Utils.TraceType.PATH,
+      type: BaseNode.Utils.TraceType.PATH,
       payload: { path: 'reprompt' },
     });
 
-    const nonEmptyNoMatches = removeEmptyNoMatches(node.noMatches)!;
+    const output = node.noMatch?.randomize ? _.sample<string | Text.SlateTextValue>(nonEmptyNoMatches) : nonEmptyNoMatches?.[noMatchCounter];
 
-    const output = node.randomize
-      ? _.sample<string | Text.SlateTextValue>(nonEmptyNoMatches)
-      : nonEmptyNoMatches?.[runtime.storage.get<NoMatchCounterStorage>(StorageType.NO_MATCHES_COUNTER)! - 1];
+    runtime.storage.set(StorageType.NO_MATCHES_COUNTER, noMatchCounter + 1);
 
     runtime.trace.addTrace(utils.outputTrace({ output, variables: variables.getState() }));
 
     utils.addButtonsIfExists(node, runtime, variables);
+    utils.addNoReplyTimeoutIfExists(node, runtime);
 
     return node.id;
   },

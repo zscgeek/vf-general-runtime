@@ -5,27 +5,37 @@ import wordsToNumbers from 'words-to-numbers';
 
 import { Action, HandlerFactory } from '@/runtime';
 
-import { isIntentRequest } from '../types';
-import { addButtonsIfExists, addRepromptIfExists } from '../utils';
+import { isIntentRequest, StorageType } from '../types';
+import { addButtonsIfExists } from '../utils';
 import CommandHandler from './command';
+import NoReplyHandler, { addNoReplyTimeoutIfExists } from './noReply';
 import RepeatHandler from './repeat';
 
 const utilsObj = {
   repeatHandler: RepeatHandler(),
+  noReplyHandler: NoReplyHandler(),
   wordsToNumbers,
   commandHandler: CommandHandler(),
-  addRepromptIfExists,
   addButtonsIfExists,
+  addNoReplyTimeoutIfExists,
 };
 
 export const CaptureHandler: HandlerFactory<GeneralNode.Capture.Node | ChatNode.Capture.Node, typeof utilsObj> = (utils) => ({
   canHandle: (node) => !!node.variable,
   handle: (node, runtime, variables) => {
     if (runtime.getAction() === Action.RUNNING) {
-      utils.addRepromptIfExists(node, runtime, variables);
       utils.addButtonsIfExists(node, runtime, variables);
+      utils.addNoReplyTimeoutIfExists(node, runtime);
+
+      // clean up no-replies counters on new interaction
+      runtime.storage.delete(StorageType.NO_REPLIES_COUNTER);
+
       // quit cycleStack without ending session by stopping on itself
       return node.id;
+    }
+
+    if (utils.noReplyHandler.canHandle(runtime)) {
+      return utils.noReplyHandler.handle(node, runtime, variables);
     }
 
     // check if there is a command in the stack that fulfills request
