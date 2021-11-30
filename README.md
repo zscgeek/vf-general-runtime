@@ -36,7 +36,7 @@ Add the following file to the local repository:
 > PROJECT_SOURCE='[VFFILE.vfr]'
 > ```
 >
-> For more info on [Environment Variables](https://developer.voiceflow.com/general-runtime/modules/config.html)
+> For more info on [Environment Variables](https://github.com/voiceflow/general-runtime/blob/master/documentation/env.md)
 
 Use `yarn start:local` to run the development version.
 
@@ -44,9 +44,10 @@ For the production version, run `yarn build` followed by `yarn start` (this chec
 
 # Notable Code Locations
 
-[Documentation](https://developer.voiceflow.com/general-runtime/)<br/>
-[Context Handlers](https://developer.voiceflow.com/general-runtime/modules/lib_controllers_interact.html) - handlers for processing request<br/>
-[lib/services/runtime/handlers](https://github.com/voiceflow/general-runtime/tree/master/lib/services/runtime/handlers) - handlers for all the various blocks and defining their behavior
+[Context Handlers](https://github.com/voiceflow/general-runtime/blob/master/lib/services/interact.ts) ([documentation](https://github.com/voiceflow/general-runtime/blob/master/documentation/contextHandlers.md))- handlers for processing request<br/>
+[lib/services/runtime/handlers](https://github.com/voiceflow/general-runtime/tree/master/lib/services/runtime/handlers) - handlers for all the various nodes and defining their behavior<br/>
+[runtime/lib/Runtime/cycleStack](https://github.com/voiceflow/general-runtime/blob/master/runtime/lib/Runtime/cycleStack.ts) - iterator and execution of flows<br/>
+[runtime/lib/Runtime/cycleHandler](https://github.com/voiceflow/general-runtime/blob/master/runtime/lib/Runtime/cycleHandler.ts) - iterator and execution of individual nodes
 
 # API Documentation (Open API)
 
@@ -56,7 +57,7 @@ It is critical to make sure all OpenAPI docs are up to date:
 https://github.com/voiceflow/general-runtime/tree/master/backend/docs/openapi.yaml
 
 Whenever any of the paths change, or new ones get added, or if any of the behaviors documented change, be sure to update the Open API doc.
-Recommend to use an editor like [Swagger Editor](https://editor.swagger.io/) or [Stoplight](stoplight.io) to help construct the YAML file, and then fine tune things on local.
+Recommend to use an editor like [Swagger Editor](https://editor.swagger.io/) or [Stoplight](https://stoplight.io) to help construct the YAML file, and then fine tune things on local.
 
 ## Local Setup
 
