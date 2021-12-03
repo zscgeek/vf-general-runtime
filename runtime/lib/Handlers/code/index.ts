@@ -5,7 +5,7 @@ import safeJSONStringify from 'safe-json-stringify';
 
 import { HandlerFactory } from '@/runtime/lib/Handler';
 
-import { vmExecute } from './utils';
+import { ivmExecute, vmExecute } from './utils';
 
 export type CodeOptions = {
   endpoint?: string | null;
@@ -13,7 +13,7 @@ export type CodeOptions = {
   safe?: boolean;
 };
 
-const CodeHandler: HandlerFactory<Node.Code.Node, CodeOptions | void> = ({ endpoint, callbacks, safe } = {}) => ({
+const CodeHandler: HandlerFactory<Node.Code.Node, CodeOptions | void> = ({ endpoint, callbacks } = {}) => ({
   canHandle: (node) => !!node.code,
   handle: async (node, runtime, variables) => {
     try {
@@ -24,7 +24,14 @@ const CodeHandler: HandlerFactory<Node.Code.Node, CodeOptions | void> = ({ endpo
         variables: variablesState,
       };
 
-      const data = endpoint ? (await axios.post(endpoint, reqData)).data : vmExecute(reqData, safe, callbacks);
+      // if requireFromUrl is used, use either axios or vm2
+      // if requireFromUrl is not used, use isolated-vm
+      // eslint-disable-next-line no-nested-ternary
+      const data = node.code.includes('requireFromUrl')
+        ? endpoint
+          ? (await axios.post(endpoint, reqData)).data
+          : vmExecute(reqData, true, callbacks)
+        : ivmExecute(reqData, callbacks);
 
       // debugging changes find variable value differences
       const changes = _.union(Object.keys(variablesState), Object.keys(data)).reduce<string>((acc, variable) => {
