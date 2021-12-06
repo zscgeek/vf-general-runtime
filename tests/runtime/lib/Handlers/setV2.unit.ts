@@ -41,7 +41,7 @@ describe('setV2 handler unit tests', () => {
       expect(await handler.handle(node as any, runtime as any, variables as any, program as any)).to.eql(null);
 
       expect(CodeHandlerStub.calledOnce).to.eql(true);
-      expect(CodeHandlerStub.args).to.eql([[{ safe: undefined }]]);
+      expect(CodeHandlerStub.args).to.eql([[{ useIVM: true }]]);
 
       expect(codeHandler.handle.args).to.eql([
         [
@@ -59,7 +59,7 @@ describe('setV2 handler unit tests', () => {
     });
 
     it('with nextId', async () => {
-      const handler = SetV2Handler({ safe: false });
+      const handler = SetV2Handler();
 
       const node = {
         nextId: 'next-id',

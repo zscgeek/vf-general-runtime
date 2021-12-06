@@ -4,14 +4,13 @@ import { HandlerFactory } from '@/runtime/lib/Handler';
 
 import CodeHandler from './code';
 
-export type SetV2Options = {
-  safe?: boolean;
-};
+export type SetV2Options = Record<string, never>;
 
-const SetV2Handler: HandlerFactory<Node.SetV2.Node, SetV2Options | void> = ({ safe } = {}) => ({
+const SetV2Handler: HandlerFactory<Node.SetV2.Node, SetV2Options | void> = () => ({
   canHandle: (node) => node.type === Node.NodeType.SET_V2,
   handle: async (node, runtime, variables, program) => {
-    const codeHandler = CodeHandler({ safe });
+    // use isolated-vm
+    const codeHandler = CodeHandler({ useIVM: true });
 
     let code = `
         let evaluated;

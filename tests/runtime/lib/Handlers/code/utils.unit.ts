@@ -13,12 +13,12 @@ describe('codeHandler utils unit tests', () => {
       const data = {
         code: `
         const _ = requireFromUrl('https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.min.js');
-        res = _.sum([15, 18]);
+        res = _.add(15, 18);
         res2 = _.max([4, 12, 0, -3, 9]);
         `,
         variables: { res: 0, res2: 0 },
       };
-      expect(vmExecute(data)).to.eql({ res: 33, res2: 12 });
+      expect(vmExecute(data, true)).to.eql({ res: 33, res2: 12 });
     });
   });
   describe('ivmExecute', () => {
@@ -26,7 +26,7 @@ describe('codeHandler utils unit tests', () => {
       sinon.restore();
     });
 
-    it('works correctly', () => {
+    it('works correctly', async () => {
       const data = {
         code: `
         res = 15 + 18;
@@ -34,7 +34,7 @@ describe('codeHandler utils unit tests', () => {
         `,
         variables: { res: 0, res2: 0 },
       };
-      expect(ivmExecute(data)).to.eql({ res: 33, res2: 12 });
+      expect(await ivmExecute(data)).to.eql({ res: 33, res2: 12 });
     });
   });
 });

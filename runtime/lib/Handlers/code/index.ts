@@ -10,10 +10,11 @@ import { ivmExecute, vmExecute } from './utils';
 export type CodeOptions = {
   endpoint?: string | null;
   callbacks?: Record<string, (...args: any) => any>;
-  safe?: boolean;
+  useIVM?: boolean;
+  testingEnv?: boolean;
 };
 
-const CodeHandler: HandlerFactory<Node.Code.Node, CodeOptions | void> = ({ endpoint, callbacks } = {}) => ({
+const CodeHandler: HandlerFactory<Node.Code.Node, CodeOptions | void> = ({ endpoint, callbacks, useIVM = false, testingEnv = false } = {}) => ({
   canHandle: (node) => !!node.code,
   handle: async (node, runtime, variables) => {
     try {
@@ -24,14 +25,13 @@ const CodeHandler: HandlerFactory<Node.Code.Node, CodeOptions | void> = ({ endpo
         variables: variablesState,
       };
 
-      // if requireFromUrl is used, use either axios or vm2
-      // if requireFromUrl is not used, use isolated-vm
-      // eslint-disable-next-line no-nested-ternary
-      const data = node.code.includes('requireFromUrl')
-        ? endpoint
-          ? (await axios.post(endpoint, reqData)).data
-          : vmExecute(reqData, true, callbacks)
-        : ivmExecute(reqData, callbacks);
+      let data: Record<string, any>;
+      // useIVM used for IfV2 and SetV2
+      if (useIVM) {
+        data = await ivmExecute(reqData, callbacks);
+      } else {
+        data = endpoint ? (await axios.post(endpoint, reqData)).data : vmExecute(reqData, testingEnv, callbacks);
+      }
 
       // debugging changes find variable value differences
       const changes = _.union(Object.keys(variablesState), Object.keys(data)).reduce<string>((acc, variable) => {
