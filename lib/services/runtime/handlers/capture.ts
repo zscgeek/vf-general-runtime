@@ -1,4 +1,5 @@
 import { Node as BaseNode, Trace } from '@voiceflow/base-types';
+import { RequestType } from '@voiceflow/base-types/build/common/request';
 import { Node as ChatNode } from '@voiceflow/chat-types';
 import { Node as GeneralNode } from '@voiceflow/general-types';
 import wordsToNumbers from 'words-to-numbers';
@@ -26,6 +27,13 @@ export const CaptureHandler: HandlerFactory<GeneralNode.Capture.Node | ChatNode.
     if (runtime.getAction() === Action.RUNNING) {
       utils.addButtonsIfExists(node, runtime, variables);
       utils.addNoReplyTimeoutIfExists(node, runtime);
+
+      if (node.intent) {
+        runtime.trace.addTrace<Trace.GoToTrace>({
+          type: BaseNode.Utils.TraceType.GOTO,
+          payload: { request: { type: RequestType.INTENT, payload: { intent: { name: node.intent }, query: '', entities: [] } } },
+        });
+      }
 
       // clean up no-replies counters on new interaction
       runtime.storage.delete(StorageType.NO_REPLIES_COUNTER);
