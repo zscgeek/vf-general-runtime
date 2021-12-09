@@ -5,8 +5,7 @@ ARG NPM_TOKEN
 WORKDIR /target
 COPY ./ ./
 
-RUN apk add python make g++
-
+RUN apk add --no-cache python make g++
 
 RUN echo $NPM_TOKEN > .npmrc && \
   yarn install --ignore-scripts && \
