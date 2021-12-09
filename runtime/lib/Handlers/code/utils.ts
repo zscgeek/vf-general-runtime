@@ -13,7 +13,6 @@ const ISOLATED_VM_LIMITS = {
 export const ivmExecute = async (data: { code: string; variables: Record<string, any> }, callbacks?: Record<string, (...args: any) => any>) => {
   // Create isolate with 8mb max memory
   const isolate = new ivm.Isolate({ memoryLimit: ISOLATED_VM_LIMITS.maxMemoryMB });
-  let ret = {};
   try {
     // Create a context inside this isolate to run the code in and inject variables/funcs
     const context = await isolate.createContext();
@@ -21,35 +20,31 @@ export const ivmExecute = async (data: { code: string; variables: Record<string,
     // Get a Reference{} to the global object within the context.
     const jail = context.global;
 
-    // set Promise to not do anthing in code
+    // set Promise to not do anthing in code because it has complex functionality inside the vm
     await jail.set('Promise', null);
 
     // add callbacks if exists
     if (callbacks) {
-      Promise.all(
+      await Promise.all(
         Object.keys(callbacks).map(async (callbackName) => {
           await jail.set(callbackName, (...args: any[]) => {
             callbacks[callbackName](...args);
           });
         })
-      ).catch((err) => {
-        throw new Error(err);
-      });
+      );
     }
 
     // add variables to context
-    Promise.all(
+    await Promise.all(
       Object.keys(data.variables).map(async (key) => {
         await jail.set(key, data.variables[key], { copy: true });
       })
-    ).catch((err) => {
-      throw new Error(err);
-    });
+    );
 
-    // run code with 2s timeout
+    // run code with timeout
     await context.eval(data.code, { timeout: ISOLATED_VM_LIMITS.maxExecutionTimeMs });
 
-    ret = await Object.keys(data.variables).reduce(async (accPromise, key) => {
+    return await Object.keys(data.variables).reduce(async (accPromise, key) => {
       const acc = await accPromise;
       // get new value of variable after code ran
       let val = await jail.get(key);
@@ -64,8 +59,6 @@ export const ivmExecute = async (data: { code: string; variables: Record<string,
     // delete isolate to regain memory
     isolate.dispose();
   }
-
-  return ret;
 };
 
 // eslint-disable-next-line import/prefer-default-export
