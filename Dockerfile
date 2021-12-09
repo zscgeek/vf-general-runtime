@@ -5,6 +5,9 @@ ARG NPM_TOKEN
 WORKDIR /target
 COPY ./ ./
 
+RUN apk add python make g++
+
+
 RUN echo $NPM_TOKEN > .npmrc && \
   yarn install --ignore-scripts && \
   yarn build && \
@@ -13,7 +16,7 @@ RUN echo $NPM_TOKEN > .npmrc && \
 
 FROM node:16-alpine
 
-RUN apk add --no-cache dumb-init
+RUN apk add --no-cache dumb-init python make g++
 
 ARG NPM_TOKEN
 

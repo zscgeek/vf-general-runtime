@@ -1,6 +1,6 @@
 FROM node:16-alpine
 
-RUN apk add --no-cache dumb-init ca-certificates
+RUN apk add --no-cache dumb-init ca-certificates python make g++
 
 ARG NPM_TOKEN
 
