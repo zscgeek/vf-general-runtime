@@ -5,9 +5,10 @@ import { VM } from 'vm2';
 
 import Store from '@/runtime/lib/Runtime/Store';
 
+// Reduced limits for IFV2/SETV2 use only
 const ISOLATED_VM_LIMITS = {
-  maxMemoryMB: 64,
-  maxExecutionTimeMs: 3 * 1000,
+  maxMemoryMB: 10,
+  maxExecutionTimeMs: 1 * 1000,
 };
 
 export const ivmExecute = async (data: { code: string; variables: Record<string, any> }, callbacks?: Record<string, (...args: any) => any>) => {
