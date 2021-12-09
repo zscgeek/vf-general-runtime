@@ -10,11 +10,11 @@ import { ivmExecute, vmExecute } from './utils';
 export type CodeOptions = {
   endpoint?: string | null;
   callbacks?: Record<string, (...args: any) => any>;
-  useIVM?: boolean;
+  useStrictVM?: boolean;
   testingEnv?: boolean;
 };
 
-const CodeHandler: HandlerFactory<Node.Code.Node, CodeOptions | void> = ({ endpoint, callbacks, useIVM = false, testingEnv = false } = {}) => ({
+const CodeHandler: HandlerFactory<Node.Code.Node, CodeOptions | void> = ({ endpoint, callbacks, useStrictVM = false, testingEnv = false } = {}) => ({
   canHandle: (node) => !!node.code,
   handle: async (node, runtime, variables) => {
     try {
@@ -26,8 +26,8 @@ const CodeHandler: HandlerFactory<Node.Code.Node, CodeOptions | void> = ({ endpo
       };
 
       let data: Record<string, any>;
-      // useIVM used for IfV2 and SetV2
-      if (useIVM) {
+      // useStrictVM used for IfV2 and SetV2 to use isolated-vm
+      if (useStrictVM) {
         data = await ivmExecute(reqData, callbacks);
       } else {
         data = endpoint ? (await axios.post(endpoint, reqData)).data : vmExecute(reqData, testingEnv, callbacks);

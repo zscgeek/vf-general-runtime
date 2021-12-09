@@ -152,13 +152,13 @@ describe('codeHandler unit tests', () => {
       });
     });
 
-    describe('useIVM is true', () => {
+    describe('useStrictVM is true', () => {
       afterEach(() => {
         sinon.restore();
       });
 
       it('works correctly', async () => {
-        const codeHandler = CodeHandler({ endpoint: null, useIVM: true });
+        const codeHandler = CodeHandler({ endpoint: null, useStrictVM: true });
         const ivmExecuteStub = sinon.stub(utils, 'ivmExecute').resolves({ var1: 1.1, var2: 2.2, newVar: 5 });
 
         const node = { code: 'var1(); var2(); var3();', success_id: 'success-id' };
@@ -185,7 +185,7 @@ describe('codeHandler unit tests', () => {
             res = c;
           },
         };
-        const codeHandler = CodeHandler({ endpoint: null, callbacks, useIVM: true });
+        const codeHandler = CodeHandler({ endpoint: null, callbacks, useStrictVM: true });
 
         const node = {
           code: 'const c  = a + b; setRes(c);',
