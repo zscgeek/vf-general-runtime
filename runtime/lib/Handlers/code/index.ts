@@ -5,15 +5,16 @@ import safeJSONStringify from 'safe-json-stringify';
 
 import { HandlerFactory } from '@/runtime/lib/Handler';
 
-import { vmExecute } from './utils';
+import { ivmExecute, vmExecute } from './utils';
 
 export type CodeOptions = {
   endpoint?: string | null;
   callbacks?: Record<string, (...args: any) => any>;
-  safe?: boolean;
+  useStrictVM?: boolean;
+  testingEnv?: boolean;
 };
 
-const CodeHandler: HandlerFactory<Node.Code.Node, CodeOptions | void> = ({ endpoint, callbacks, safe } = {}) => ({
+const CodeHandler: HandlerFactory<Node.Code.Node, CodeOptions | void> = ({ endpoint, callbacks, useStrictVM = false, testingEnv = false } = {}) => ({
   canHandle: (node) => !!node.code,
   handle: async (node, runtime, variables) => {
     try {
@@ -24,7 +25,13 @@ const CodeHandler: HandlerFactory<Node.Code.Node, CodeOptions | void> = ({ endpo
         variables: variablesState,
       };
 
-      const data = endpoint ? (await axios.post(endpoint, reqData)).data : vmExecute(reqData, safe, callbacks);
+      let data: Record<string, any>;
+      // useStrictVM used for IfV2 and SetV2 to use isolated-vm
+      if (useStrictVM) {
+        data = await ivmExecute(reqData, callbacks);
+      } else {
+        data = endpoint ? (await axios.post(endpoint, reqData)).data : vmExecute(reqData, testingEnv, callbacks);
+      }
 
       // debugging changes find variable value differences
       const changes = _.union(Object.keys(variablesState), Object.keys(data)).reduce<string>((acc, variable) => {

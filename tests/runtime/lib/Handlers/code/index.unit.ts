@@ -116,7 +116,7 @@ describe('codeHandler unit tests', () => {
         };
         const result = await codeHandler.handle(node as any, runtime as any, variables as any, null as any);
         expect(result).to.eql(node.success_id);
-        expect(vmExecuteStub.args).to.eql([[{ code: node.code, variables: { var1: 1, var2: 2, var3: 3 } }, undefined, undefined]]);
+        expect(vmExecuteStub.args).to.eql([[{ code: node.code, variables: { var1: 1, var2: 2, var3: 3 } }, false, undefined]]);
         expect(runtime.trace.debug.args).to.eql([
           [
             'evaluating code - changes:  \n`{var1}`: `1` => `1.1`  \n`{var2}`: `2` => `2.2`  \n`{var3}`: `3` => `undefined`  \n`{newVar}`: `undefined` => `5`  \n',
@@ -135,10 +135,60 @@ describe('codeHandler unit tests', () => {
             return a + b;
           },
         };
-        const codeHandler = CodeHandler({ endpoint: null, callbacks, safe: false });
+        const codeHandler = CodeHandler({ endpoint: null, callbacks, testingEnv: true });
 
         const node = {
           code: 'const c  = add(a, b); setRes(c);',
+          success_id: 'success-id',
+        };
+        const runtime = { trace: { debug: sinon.stub() } };
+        const variables = {
+          merge: sinon.stub(),
+          getState: sinon.stub().returns({ a: 1, b: 4 }),
+        };
+        const result = await codeHandler.handle(node as any, runtime as any, variables as any, null as any);
+        expect(result).to.eql(node.success_id);
+        expect(res).to.eql(5);
+      });
+    });
+
+    describe('useStrictVM is true', () => {
+      afterEach(() => {
+        sinon.restore();
+      });
+
+      it('works correctly', async () => {
+        const codeHandler = CodeHandler({ endpoint: null, useStrictVM: true });
+        const ivmExecuteStub = sinon.stub(utils, 'ivmExecute').resolves({ var1: 1.1, var2: 2.2, newVar: 5 });
+
+        const node = { code: 'var1(); var2(); var3();', success_id: 'success-id' };
+        const runtime = { trace: { debug: sinon.stub() } };
+        const variables = {
+          merge: sinon.stub(),
+          getState: sinon.stub().returns({ var1: 1, var2: 2, var3: 3 }),
+        };
+        const result = await codeHandler.handle(node as any, runtime as any, variables as any, null as any);
+        expect(result).to.eql(node.success_id);
+        expect(ivmExecuteStub.args).to.eql([[{ code: node.code, variables: { var1: 1, var2: 2, var3: 3 } }, undefined]]);
+        expect(runtime.trace.debug.args).to.eql([
+          [
+            'evaluating code - changes:  \n`{var1}`: `1` => `1.1`  \n`{var2}`: `2` => `2.2`  \n`{var3}`: `3` => `undefined`  \n`{newVar}`: `undefined` => `5`  \n',
+            Node.NodeType.CODE,
+          ],
+        ]);
+      });
+
+      it('exes callbacks', async () => {
+        let res = 0;
+        const callbacks = {
+          setRes: (c: number) => {
+            res = c;
+          },
+        };
+        const codeHandler = CodeHandler({ endpoint: null, callbacks, useStrictVM: true });
+
+        const node = {
+          code: 'const c  = a + b; setRes(c);',
           success_id: 'success-id',
         };
         const runtime = { trace: { debug: sinon.stub() } };

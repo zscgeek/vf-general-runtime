@@ -6,13 +6,12 @@ import { TurnType } from '../Constants/flags';
 import CodeHandler from './code';
 
 export type IfV2Options = {
-  safe?: boolean;
   _v1: Handler<Node._v1.Node>;
 };
 
 type DebugError = { index: number; expression: string; msg: string };
 
-const IfV2Handler: HandlerFactory<Node.IfV2.Node, IfV2Options> = ({ _v1, safe }) => ({
+const IfV2Handler: HandlerFactory<Node.IfV2.Node, IfV2Options> = ({ _v1 }) => ({
   canHandle: (node) => {
     return node.type === Node.NodeType.IF_V2;
   },
@@ -30,7 +29,8 @@ const IfV2Handler: HandlerFactory<Node.IfV2.Node, IfV2Options> = ({ _v1, safe })
       debugErrors.push(err);
     };
 
-    const codeHandler = CodeHandler({ callbacks: { setOutputPort, addDebugError }, safe });
+    // use isolated-vm
+    const codeHandler = CodeHandler({ callbacks: { setOutputPort, addDebugError }, useStrictVM: true });
 
     let code = '';
     for (let i = 0; i < node.payload.expressions.length; i++) {
