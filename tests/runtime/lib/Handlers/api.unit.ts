@@ -43,7 +43,7 @@ describe('API Handler unit tests', () => {
       const customAPIEndpoint = 'https://foo';
       const apiHandler = APIHandler({ customAPIEndpoint });
       const resultVariables = { data: { variables: { foo: 'bar' }, response: { status: 200 } } };
-      const makeAPICallStub = sinon.stub(APIUtils, 'makeAPICall').resolves(resultVariables.data as any);
+      const axiosPost = sinon.stub(axios, 'post').resolves(resultVariables);
 
       const node = {
         selected_integration: Node.Utils.IntegrationType.CUSTOM_API,
@@ -55,14 +55,15 @@ describe('API Handler unit tests', () => {
 
       expect(await apiHandler.handle(node as any, runtime as any, variables as any, null as any)).to.eql(null);
       expect(runtime.trace.debug.args).to.eql([['API call successfully triggered', Node.NodeType.API]]);
-      expect(makeAPICallStub.args).to.eql([[AGENT_ACTION_DATA, runtime]]);
+      expect(axiosPost.args).to.eql([[`${customAPIEndpoint}/custom/make_api_call`, AGENT_ACTION_DATA]]);
       expect(variables.merge.args).to.eql([[resultVariables.data.variables]]);
     });
 
     it('calls local', async () => {
       const apiHandler = APIHandler();
       const resultVariables = { data: { variables: { foo: 'bar' }, response: { status: 200 } } };
-      const makeAPICallStub = sinon.stub(APIUtils, 'makeAPICall').resolves(resultVariables.data as any);
+      const axiosPost = sinon.stub(axios, 'post').resolves(resultVariables);
+      const local = sinon.stub(APIUtils, 'makeAPICall').resolves(resultVariables.data as any);
 
       const node = {
         selected_integration: Node.Utils.IntegrationType.CUSTOM_API,
@@ -74,14 +75,15 @@ describe('API Handler unit tests', () => {
 
       expect(await apiHandler.handle(node as any, runtime as any, variables as any, null as any)).to.eql(null);
       expect(runtime.trace.debug.args).to.eql([['API call successfully triggered', Node.NodeType.API]]);
-      expect(makeAPICallStub.args).to.eql([[AGENT_ACTION_DATA, runtime]]);
+      expect(local.args).to.eql([[AGENT_ACTION_DATA]]);
+      expect(axiosPost.callCount).to.eql(0);
       expect(variables.merge.args).to.eql([[resultVariables.data.variables]]);
     });
 
     it('error status without fail_id', async () => {
       const apiHandler = APIHandler(DEFAULT_OPTIONS);
       const resultVariables = { data: { variables: {}, response: { status: 401 } } };
-      sinon.stub(APIUtils, 'makeAPICall').resolves(resultVariables.data as any);
+      sinon.stub(axios, 'post').resolves(resultVariables);
 
       const node = { selected_integration: 'Custom API', selected_action: 'Make a GET Request', action_data: ACTION_DATA };
       const runtime = { trace: { debug: sinon.stub() } };
@@ -94,7 +96,7 @@ describe('API Handler unit tests', () => {
     it('error status with fail_id', async () => {
       const apiHandler = APIHandler(DEFAULT_OPTIONS);
       const resultVariables = { data: { variables: {}, response: { status: 401 } } };
-      sinon.stub(APIUtils, 'makeAPICall').resolves(resultVariables.data as any);
+      sinon.stub(axios, 'post').resolves(resultVariables);
 
       const node = { fail_id: 'fail-id', selected_integration: 'Custom API', selected_action: 'Make a GET Request', action_data: ACTION_DATA };
       const runtime = { trace: { debug: sinon.stub() } };
@@ -108,7 +110,7 @@ describe('API Handler unit tests', () => {
       it('without fail_id', async () => {
         const apiHandler = APIHandler(DEFAULT_OPTIONS);
         const axiosErr = { response: { data: 'http call error' } };
-        const makeAPICallStub = sinon.stub(APIUtils, 'makeAPICall').throws(axiosErr);
+        const axiosPost = sinon.stub(axios, 'post').throws(axiosErr);
 
         const node = { selected_integration: 'Zapier', selected_action: 'Start a Zap', action_data: ACTION_DATA };
         const runtime = { trace: { debug: sinon.stub() } };
@@ -116,19 +118,19 @@ describe('API Handler unit tests', () => {
 
         expect(await apiHandler.handle(node as any, runtime as any, variables as any, null as any)).to.eql(null);
         expect(runtime.trace.debug.args).to.eql([[`API call failed - Error: \n"${axiosErr.response.data}"`, Node.NodeType.API]]);
-        expect(makeAPICallStub.args).to.eql([[AGENT_ACTION_DATA, runtime]]);
+        expect(axiosPost.args).to.eql([[`${DEFAULT_OPTIONS.customAPIEndpoint}/custom/make_api_call`, AGENT_ACTION_DATA]]);
       });
 
       it('with fail_id', async () => {
         const apiHandler = APIHandler(DEFAULT_OPTIONS);
-        const makeAPICallStub = sinon.stub(APIUtils, 'makeAPICall').throws('error5');
+        const axiosPost = sinon.stub(axios, 'post').throws('error5');
 
         const node = { fail_id: 'fail-id', selected_integration: 'Zapier', selected_action: 'Start a Zap', action_data: ACTION_DATA };
         const runtime = { trace: { debug: sinon.stub() } };
         const variables = { getState: sinon.stub().returns({}) };
 
         expect(await apiHandler.handle(node as any, runtime as any, variables as any, null as any)).to.eql(node.fail_id);
-        expect(makeAPICallStub.args).to.eql([[AGENT_ACTION_DATA, runtime]]);
+        expect(axiosPost.args).to.eql([[`${DEFAULT_OPTIONS.customAPIEndpoint}/custom/make_api_call`, AGENT_ACTION_DATA]]);
         expect(runtime.trace.debug.args).to.eql([['API call failed - Error: \n{"name":"error5"}', Node.NodeType.API]]);
       });
     });

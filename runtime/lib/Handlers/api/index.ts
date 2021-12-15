@@ -1,5 +1,6 @@
 import { Node } from '@voiceflow/base-types';
 import { deepVariableSubstitution } from '@voiceflow/common';
+import axios from 'axios';
 import _ from 'lodash';
 import safeJSONStringify from 'safe-json-stringify';
 
@@ -13,10 +14,11 @@ export type IntegrationsOptions = {
 
 export const USER_AGENT_KEY = 'User-Agent';
 export const USER_AGENT = 'Voiceflow/1.0.0 (+https://voiceflow.com)';
-const APIHandler: HandlerFactory<Node.Integration.Node, IntegrationsOptions | void> = () => ({
+const APIHandler: HandlerFactory<Node.Integration.Node, IntegrationsOptions | void> = ({ customAPIEndpoint } = {}) => ({
   canHandle: (node) => node.type === Node.NodeType.INTEGRATIONS && node.selected_integration === Node.Utils.IntegrationType.CUSTOM_API,
   handle: async (node, runtime, variables) => {
     let nextId: string | null = null;
+
     try {
       const actionBodyData = deepVariableSubstitution(_.cloneDeep(node.action_data), variables.getState()) as APINodeData;
 
@@ -26,7 +28,10 @@ const APIHandler: HandlerFactory<Node.Integration.Node, IntegrationsOptions | vo
         actionBodyData.headers = [...headers, { key: USER_AGENT_KEY, val: USER_AGENT }];
       }
 
-      const data = await makeAPICall(actionBodyData, runtime);
+      const data = customAPIEndpoint
+        ? (await axios.post(`${customAPIEndpoint}/custom/make_api_call`, actionBodyData)).data
+        : // make the call locally if no service
+          await makeAPICall(actionBodyData);
 
       // add mapped variables to variables store
       variables.merge(data.variables);
