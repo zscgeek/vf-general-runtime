@@ -37,7 +37,7 @@ describe('Runtime cycleStack unit tests', () => {
         get: sinon.stub().returns(null),
         top: sinon
           .stub()
-          .returns({ getProgramID: sinon.stub().returns('program-id'), initialize: sinon.stub(), variables: { var1: 'val1', var2: 'val2' } }),
+          .returns({ getProgramID: sinon.stub().returns('program-id'), hydrate: sinon.stub(), variables: { var1: 'val1', var2: 'val2' } }),
         getFrames: sinon.stub().returns({}),
       },
       hasEnded: sinon.stub().returns(true),
@@ -58,7 +58,7 @@ describe('Runtime cycleStack unit tests', () => {
       const saveCombinedVariablesStub = sinon.stub(utils, 'saveCombinedVariables');
 
       const programID = 'program-id';
-      const currentFrame = { getProgramID: sinon.stub().returns(programID), initialize: sinon.stub(), variables: { var1: 'val1', var2: 'val2' } };
+      const currentFrame = { getProgramID: sinon.stub().returns(programID), hydrate: sinon.stub(), variables: { var1: 'val1', var2: 'val2' } };
       const currentFrames = {};
       const program = {};
 
@@ -79,7 +79,7 @@ describe('Runtime cycleStack unit tests', () => {
       await cycleStack(runtime as any);
 
       expect(runtime.getProgram.args).to.eql([[programID]]);
-      expect(currentFrame.initialize.args).to.eql([[program]]);
+      expect(currentFrame.hydrate.args).to.eql([[program]]);
       expect(createCombinedVariablesStub.args).to.eql([[runtime.variables, currentFrame.variables]]);
       expect(runtime.callEvent.args).to.eql([
         [EventType.stateWillExecute, { program, variables: combinedVariables }],
@@ -107,7 +107,7 @@ describe('Runtime cycleStack unit tests', () => {
           get: sinon.stub().returns(null),
           top: sinon
             .stub()
-            .returns({ getProgramID: sinon.stub().returns('program-id'), initialize: sinon.stub(), variables: { var1: 'val1', var2: 'val2' } }),
+            .returns({ getProgramID: sinon.stub().returns('program-id'), hydrate: sinon.stub(), variables: { var1: 'val1', var2: 'val2' } }),
           getFrames: sinon
             .stub()
             .onFirstCall()
@@ -147,7 +147,7 @@ describe('Runtime cycleStack unit tests', () => {
             get: sinon.stub().returns(null),
             top: sinon
               .stub()
-              .returns({ getProgramID: sinon.stub().returns('program-id'), initialize: sinon.stub(), variables: { var1: 'val1', var2: 'val2' } }),
+              .returns({ getProgramID: sinon.stub().returns('program-id'), hydrate: sinon.stub(), variables: { var1: 'val1', var2: 'val2' } }),
             getFrames: sinon.stub().returns([]),
           },
           end: sinon.stub(),
@@ -183,7 +183,7 @@ describe('Runtime cycleStack unit tests', () => {
               .onSecondCall()
               .returns(0),
             get: sinon.stub().returns(null),
-            top: sinon.stub().returns({ getProgramID: sinon.stub().returns('program-id'), initialize: sinon.stub(), variables: topFrameVariables }),
+            top: sinon.stub().returns({ getProgramID: sinon.stub().returns('program-id'), hydrate: sinon.stub(), variables: topFrameVariables }),
             getFrames: sinon.stub().returns([]),
           },
           end: sinon.stub(),
