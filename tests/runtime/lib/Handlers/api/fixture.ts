@@ -16,13 +16,13 @@ export const baseData = {
   content: 'mock-content',
 };
 
-const timeout = 29000;
+const timeout = 20000;
 export const baseOptions = {
   headers: { header1: 'headerval1' },
   params: { param1: 'paramval1' },
   url: 'https://www.mockurl.com',
   method: Node.Api.APIMethod.POST,
   timeout,
-  maxBodyLength: 100000,
-  maxContentLength: 100000,
+  maxBodyLength: 1000000,
+  maxContentLength: 1000000,
 };
