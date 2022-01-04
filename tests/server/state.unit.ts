@@ -11,6 +11,234 @@ import fixtures from './fixture';
 const tests = [
   {
     method: 'post',
+    calledPath: '/state/user/:userID/interact',
+    expected: {
+      controllers: {
+        stateManagement: {
+          interact: 1,
+        },
+      },
+      middlewares: {
+        rateLimit: {
+          verify: 1,
+          versionConsume: 1,
+        },
+        project: {
+          attachID: 1,
+        },
+      },
+      validations: {
+        middlewares: {
+          project: {
+            attachID: {
+              HEADERS_VERSION_ID: 1,
+              HEADERS_AUTHORIZATION: 1,
+            },
+          },
+        },
+        controllers: {
+          stateManagement: {
+            interact: {
+              HEADERS_PROJECT_ID: 1,
+              HEADERS_VERSION_ID: 1,
+              QUERY_VERBOSE: 1,
+            },
+          },
+        },
+      },
+    },
+  },
+  {
+    method: 'get',
+    calledPath: '/state/user/:userID',
+    expected: {
+      controllers: {
+        stateManagement: {
+          get: 1,
+        },
+      },
+      middlewares: {
+        rateLimit: {
+          verify: 1,
+          versionConsume: 1,
+        },
+        project: {
+          attachID: 1,
+        },
+      },
+      validations: {
+        controllers: {
+          stateManagement: {
+            get: {
+              HEADERS_PROJECT_ID: 1,
+            },
+          },
+        },
+        middlewares: {
+          project: {
+            attachID: {
+              HEADERS_VERSION_ID: 1,
+              HEADERS_AUTHORIZATION: 1,
+            },
+          },
+        },
+      },
+    },
+  },
+  {
+    method: 'put',
+    calledPath: '/state/user/:userID',
+    expected: {
+      controllers: {
+        stateManagement: {
+          update: 1,
+        },
+      },
+      middlewares: {
+        rateLimit: {
+          verify: 1,
+          versionConsume: 1,
+        },
+        project: {
+          attachID: 1,
+        },
+      },
+      validations: {
+        controllers: {
+          stateManagement: {
+            update: {
+              BODY_UPDATE_SESSION: 1,
+              HEADERS_PROJECT_ID: 1,
+            },
+          },
+        },
+        middlewares: {
+          project: {
+            attachID: {
+              HEADERS_VERSION_ID: 1,
+              HEADERS_AUTHORIZATION: 1,
+            },
+          },
+        },
+      },
+    },
+  },
+  {
+    method: 'delete',
+    calledPath: '/state/user/:userID',
+    expected: {
+      controllers: {
+        stateManagement: {
+          delete: 1,
+        },
+      },
+      middlewares: {
+        rateLimit: {
+          verify: 1,
+          versionConsume: 1,
+        },
+        project: {
+          attachID: 1,
+        },
+      },
+      validations: {
+        middlewares: {
+          project: {
+            attachID: {
+              HEADERS_VERSION_ID: 1,
+              HEADERS_AUTHORIZATION: 1,
+            },
+          },
+        },
+        controllers: {
+          stateManagement: {
+            delete: {
+              HEADERS_PROJECT_ID: 1,
+            },
+          },
+        },
+      },
+    },
+  },
+  {
+    method: 'post',
+    calledPath: '/state/user/:userID',
+    expected: {
+      controllers: {
+        stateManagement: {
+          reset: 1,
+        },
+      },
+      middlewares: {
+        rateLimit: {
+          verify: 1,
+          versionConsume: 1,
+        },
+        project: {
+          attachID: 1,
+        },
+      },
+      validations: {
+        middlewares: {
+          project: {
+            attachID: {
+              HEADERS_VERSION_ID: 1,
+              HEADERS_AUTHORIZATION: 1,
+            },
+          },
+        },
+        controllers: {
+          stateManagement: {
+            reset: {
+              HEADERS_PROJECT_ID: 1,
+              HEADERS_VERSION_ID: 1,
+            },
+          },
+        },
+      },
+    },
+  },
+  {
+    method: 'patch',
+    calledPath: '/state/user/:userID/variables',
+    expected: {
+      controllers: {
+        stateManagement: {
+          updateVariables: 1,
+        },
+      },
+      middlewares: {
+        rateLimit: {
+          verify: 1,
+          versionConsume: 1,
+        },
+        project: {
+          attachID: 1,
+        },
+      },
+      validations: {
+        controllers: {
+          stateManagement: {
+            updateVariables: {
+              HEADERS_PROJECT_ID: 1,
+              BODY_UPDATE_VARIABLES: 1,
+            },
+          },
+        },
+        middlewares: {
+          project: {
+            attachID: {
+              HEADERS_VERSION_ID: 1,
+              HEADERS_AUTHORIZATION: 1,
+            },
+          },
+        },
+      },
+    },
+  },
+  // legacy routes
+  {
+    method: 'post',
     calledPath: '/state/:versionID/user/:userID/interact',
     expected: {
       controllers: {
@@ -21,9 +249,10 @@ const tests = [
       middlewares: {
         rateLimit: {
           verify: 1,
-          consume: 1,
+          versionConsume: 1,
         },
         project: {
+          unifyVersionID: 1,
           attachID: 1,
         },
       },
@@ -31,7 +260,6 @@ const tests = [
         middlewares: {
           project: {
             attachID: {
-              PARAMS_VERSION_ID: 1,
               HEADERS_VERSION_ID: 1,
               HEADERS_AUTHORIZATION: 1,
             },
@@ -41,6 +269,7 @@ const tests = [
           stateManagement: {
             interact: {
               HEADERS_PROJECT_ID: 1,
+              HEADERS_VERSION_ID: 1,
               QUERY_VERBOSE: 1,
             },
           },
@@ -60,9 +289,10 @@ const tests = [
       middlewares: {
         rateLimit: {
           verify: 1,
-          consume: 1,
+          versionConsume: 1,
         },
         project: {
+          unifyVersionID: 1,
           attachID: 1,
         },
       },
@@ -77,7 +307,6 @@ const tests = [
         middlewares: {
           project: {
             attachID: {
-              PARAMS_VERSION_ID: 1,
               HEADERS_VERSION_ID: 1,
               HEADERS_AUTHORIZATION: 1,
             },
@@ -98,9 +327,10 @@ const tests = [
       middlewares: {
         rateLimit: {
           verify: 1,
-          consume: 1,
+          versionConsume: 1,
         },
         project: {
+          unifyVersionID: 1,
           attachID: 1,
         },
       },
@@ -116,7 +346,6 @@ const tests = [
         middlewares: {
           project: {
             attachID: {
-              PARAMS_VERSION_ID: 1,
               HEADERS_VERSION_ID: 1,
               HEADERS_AUTHORIZATION: 1,
             },
@@ -137,9 +366,10 @@ const tests = [
       middlewares: {
         rateLimit: {
           verify: 1,
-          consume: 1,
+          versionConsume: 1,
         },
         project: {
+          unifyVersionID: 1,
           attachID: 1,
         },
       },
@@ -147,7 +377,6 @@ const tests = [
         middlewares: {
           project: {
             attachID: {
-              PARAMS_VERSION_ID: 1,
               HEADERS_VERSION_ID: 1,
               HEADERS_AUTHORIZATION: 1,
             },
@@ -175,9 +404,10 @@ const tests = [
       middlewares: {
         rateLimit: {
           verify: 1,
-          consume: 1,
+          versionConsume: 1,
         },
         project: {
+          unifyVersionID: 1,
           attachID: 1,
         },
       },
@@ -185,7 +415,6 @@ const tests = [
         middlewares: {
           project: {
             attachID: {
-              PARAMS_VERSION_ID: 1,
               HEADERS_VERSION_ID: 1,
               HEADERS_AUTHORIZATION: 1,
             },
@@ -195,6 +424,7 @@ const tests = [
           stateManagement: {
             reset: {
               HEADERS_PROJECT_ID: 1,
+              HEADERS_VERSION_ID: 1,
             },
           },
         },
@@ -213,9 +443,10 @@ const tests = [
       middlewares: {
         rateLimit: {
           verify: 1,
-          consume: 1,
+          versionConsume: 1,
         },
         project: {
+          unifyVersionID: 1,
           attachID: 1,
         },
       },
@@ -231,7 +462,6 @@ const tests = [
         middlewares: {
           project: {
             attachID: {
-              PARAMS_VERSION_ID: 1,
               HEADERS_VERSION_ID: 1,
               HEADERS_AUTHORIZATION: 1,
             },
