@@ -1,54 +1,23 @@
-import { expect } from 'chai';
-import _ from 'lodash';
-import sinon from 'sinon';
+import * as VFMetrics from '@voiceflow/metrics';
 
-import Config from '@/config';
-import MetricsClient, { Metrics } from '@/lib/clients/metrics';
+import MetricsClient from '@/lib/clients/metrics';
+
+const metricsAsserter = new VFMetrics.Testing.MetricsAsserter(MetricsClient);
 
 describe('metrics client unit tests', () => {
-  afterEach(() => {
-    sinon.restore();
+  it('generalRequest', async () => {
+    const fixture = await metricsAsserter.assertMetric({ expected: /^general_request_total 1 \d+$/m });
+
+    fixture.metrics.generalRequest();
+
+    await fixture.assert();
   });
 
-  it('new', () => {
-    const NODE_ENV = 'test';
-    const loggerStub = sinon.stub().returns({
-      increment: () => {
-        //
-      },
-    });
+  it('sdkRequest', async () => {
+    const fixture = await metricsAsserter.assertMetric({ expected: /^sdk_request_total 1 \d+$/m });
 
-    const metrics = new Metrics({ NODE_ENV, DATADOG_API_KEY: 'key' } as any, loggerStub as any);
+    fixture.metrics.sdkRequest();
 
-    expect(typeof _.get(metrics, 'client.increment')).to.eql('function');
-
-    expect(loggerStub.calledWithNew()).to.eql(true);
-    expect(loggerStub.args).to.eql([
-      [
-        {
-          apiKey: 'key',
-          prefix: `vf_general_runtime.${NODE_ENV}.`,
-          flushIntervalSeconds: 5,
-        },
-      ],
-    ]);
-  });
-
-  it('generalRequest', () => {
-    const metrics = MetricsClient({} as any);
-    const increment = sinon.stub();
-    _.set(metrics, 'client', { increment });
-
-    metrics.generalRequest();
-    expect(increment.args).to.eql([['general.request']]);
-  });
-
-  it('sdkRequest', () => {
-    const metrics = MetricsClient({} as any);
-    const increment = sinon.stub();
-    _.set(metrics, 'client', { increment });
-
-    metrics.sdkRequest();
-    expect(increment.args).to.eql([['sdk.request']]);
+    await fixture.assert();
   });
 });
