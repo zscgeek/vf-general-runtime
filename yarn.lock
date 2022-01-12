@@ -640,7 +640,7 @@
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-"@redocly/openapi-core@^1.0.0-beta.54":
+"@redocly/openapi-core@^1.0.0-beta.50":
   version "1.0.0-beta.79"
   resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.0.0-beta.79.tgz#7512b3507ab99dc78226f9069669c5302abb0969"
   integrity sha512-do79vGt3iiHsaVG9LKY8dH+d1E7TLHr+3T+CQ1lqagtWVjYOxqGaoxAT8tRD7R1W0z8BmS4e2poNON6c1sxP5g==
@@ -925,6 +925,11 @@
   version "14.17.9"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.9.tgz#b97c057e6138adb7b720df2bd0264b03c9f504fd"
   integrity sha512-CMjgRNsks27IDwI785YMY0KLt3co/c0cQ5foxHYv/shC2w8oOnVwz5Ubq1QG5KzrcW+AXk6gzdnxIkDnTvzu3g==
+
+"@types/node@^15.6.1":
+  version "15.14.9"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-15.14.9.tgz#bc43c990c3c9be7281868bbc7b8fdd6e2b57adfa"
+  integrity sha512-qjd88DrCxupx/kJD5yQgZdcYKZKSIGBVDIBE1/LTGcNm3d2Np/jxojkdePDdfnBHJc5W7vSMpbJ1aB7p/Py69A==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -5886,6 +5891,11 @@ media-typer@0.3.0:
   resolved "https://registry.yarnpkg.com/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"
   integrity sha1-hxDXrwqmJvj/+hzgAWhUUmMlV0g=
 
+memoize-one@^5.2.1:
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-5.2.1.tgz#8337aa3c4335581839ec01c3d594090cebe8f00e"
+  integrity sha512-zYiwtZUcYyXKo/np96AGZAckk+FWWsUdJ3cHGGmld7+AhvcWmQyGCYUh1hc4Q/pkOhb65dQR/pqCyK0cOaHz4Q==
+
 memory-pager@^1.0.2:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/memory-pager/-/memory-pager-1.5.0.tgz#d8751655d22d384682741c972f2c3d6dfa3e66b5"
@@ -7528,10 +7538,10 @@ redis-parser@^3.0.0:
   dependencies:
     redis-errors "^1.0.0"
 
-redoc-cli@0.13.2:
-  version "0.13.2"
-  resolved "https://registry.yarnpkg.com/redoc-cli/-/redoc-cli-0.13.2.tgz#2ef5e1003d4fb797d3b98c87b2590f58e15686f2"
-  integrity sha512-eRGRmAKPvm8ozCb8TxaBlHF0BjeFOXYUKDTx7RD3ABkPKsDamle776GwMrrf1ojgl5i+RSSJfP62k1gTP7Owaw==
+redoc-cli@^0.12.3:
+  version "0.12.3"
+  resolved "https://registry.yarnpkg.com/redoc-cli/-/redoc-cli-0.12.3.tgz#54e5ccc3aae05cb6bcb78ee45493c15e6c0a627c"
+  integrity sha512-qTBaEfwVqCvqLbuloZ9sMBQA49WfMOQrLVBGiVyT7pNMAjosQCpMyFESqQL8WqVxDzV2olPCZ1L2rG9cuDGOsA==
   dependencies:
     chokidar "^3.5.1"
     handlebars "^4.7.7"
@@ -7541,18 +7551,19 @@ redoc-cli@0.13.2:
     node-libs-browser "^2.2.1"
     react "^17.0.1"
     react-dom "^17.0.1"
-    redoc "2.0.0-rc.59"
+    redoc "2.0.0-rc.56"
     styled-components "^5.3.0"
     yargs "^17.0.1"
 
-redoc@2.0.0-rc.59:
-  version "2.0.0-rc.59"
-  resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.0.0-rc.59.tgz#4a5075574e153eb8b8b6f657230ce47918ffb1bf"
-  integrity sha512-1Wkj/HSCv5CdtwF7FSZc5L0EeBgI0N7YpAIsatMtfiMHEon0WhuArAkc5rMQ6mQXUPRrqq5Fs6QPc4GpNp6DuA==
+redoc@2.0.0-rc.56:
+  version "2.0.0-rc.56"
+  resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.0.0-rc.56.tgz#d0fc05149d4801aa6ddf430af223070f04dce596"
+  integrity sha512-ir2TtQ2d/1FqZWIoLmUZ3qvAAnO6jg8dt0SV75TanmfCXpEABcElXWH3mtUf6qKlvgDVt40diDCVuSvyPPxkAw==
   dependencies:
     "@babel/runtime" "^7.14.0"
-    "@redocly/openapi-core" "^1.0.0-beta.54"
+    "@redocly/openapi-core" "^1.0.0-beta.50"
     "@redocly/react-dropdown-aria" "^2.0.11"
+    "@types/node" "^15.6.1"
     classnames "^2.3.1"
     decko "^1.2.0"
     dompurify "^2.2.8"
@@ -7561,6 +7572,7 @@ redoc@2.0.0-rc.59:
     lunr "^2.3.9"
     mark.js "^8.11.1"
     marked "^0.7.0"
+    memoize-one "^5.2.1"
     mobx-react "^7.2.0"
     openapi-sampler "^1.0.1"
     path-browserify "^1.0.1"
