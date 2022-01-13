@@ -190,6 +190,11 @@ export const makeAPICall = async (nodeData: APINodeData, runtime: Runtime) => {
 
     const newVariables = Object.fromEntries((nodeData.mapping ?? []).filter((map) => map.var).map((map) => [map.var, getVariable(map.path, data)]));
 
+    // remove all undefined variables
+    Object.keys(newVariables).forEach((variable) => {
+      if (newVariables[variable] === undefined) delete newVariables[variable];
+    });
+
     return { variables: newVariables, response: { data, headers, status } };
   } catch (e) {
     throw e;
