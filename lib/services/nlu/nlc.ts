@@ -127,19 +127,19 @@ export const handleNLCEntityFilling = ({
   query,
   model,
   locale,
-  dmRequest,
+  efRequest,
 }: {
   query: string;
   model: Models.PrototypeModel;
   locale: Constants.Locale;
-  dmRequest: Request.IntentRequest;
+  efRequest: Request.IntentRequest;
 }): Request.IntentRequest => {
   const nlc = createNLC({ model, locale, openSlot: true });
 
-  const intentName = dmRequest.payload.intent.name;
-  const filledEntities = dmRequest.payload.entities;
+  const intentName = efRequest.payload.intent.name;
+  const filledEntities = efRequest.payload.entities;
 
-  // turn the dmRequest into IIntentFullfilment
+  // turn the efRequest into IIntentFullfilment
   const fulfillment: IIntentFullfilment = {
     intent: intentName,
     slots: filledEntities, // luckily payload.entities and ISlotFullfilment are compatible

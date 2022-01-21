@@ -13,7 +13,7 @@ import { Context } from '@/types';
 
 import { eventHandlers } from '../runtime/handlers/state/preliminary';
 
-export const VF_DM_PREFIX = 'dm_';
+export const VF_EF_PREFIX = 'dm_';
 
 export const inputToString = ({ text, voice }: Models.IntentInput, defaultVoice: string | null) => {
   const currentVoice = voice || defaultVoice;
@@ -64,7 +64,7 @@ export const fillStringEntities = (input = '', intentRequest: Request.IntentRequ
   return replaceSlots(input, entityMap);
 };
 
-export const dmPrefix = (contents: string) =>
+export const efPrefix = (contents: string) =>
   crypto
     .createHash('sha256')
     .update(contents)
@@ -72,8 +72,8 @@ export const dmPrefix = (contents: string) =>
     .slice(-10);
 
 /** @deprecated we compare entity subsets directly for now, if nothing is filled, it might as well be a fallback */
-export const getDMPrefixIntentName = (intentName: string) => {
-  return `${VF_DM_PREFIX}${dmPrefix(intentName)}_${intentName}`;
+export const getEFPrefixIntentName = (intentName: string) => {
+  return `${VF_EF_PREFIX}${efPrefix(intentName)}_${intentName}`;
 };
 
 export const getIntentEntityList = (intentName: string, model: Models.PrototypeModel) => {

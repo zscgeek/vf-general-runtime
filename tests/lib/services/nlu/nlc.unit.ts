@@ -90,18 +90,18 @@ describe('nlu nlc service unit tests', () => {
       const query = 'query';
       const model = 'model';
       const locale = 'locale';
-      const dmRequest = { payload: { intent: { name: 'intent_name' }, entities: ['e1', 'e2'] } };
+      const efRequest = { payload: { intent: { name: 'intent_name' }, entities: ['e1', 'e2'] } };
 
-      expect(handleNLCEntityFilling({ query, model, locale, dmRequest } as any)).to.eql(output);
+      expect(handleNLCEntityFilling({ query, model, locale, efRequest } as any)).to.eql(output);
       expect(createNLCStub.args).to.eql([[{ model, locale, openSlot: true }]]);
-      expect(nlcObj.getIntent.args).to.eql([[dmRequest.payload.intent.name]]);
-      expect(getRequiredStub.args).to.eql([[intent.slots, dmRequest.payload.entities]]);
+      expect(nlcObj.getIntent.args).to.eql([[efRequest.payload.intent.name]]);
+      expect(getRequiredStub.args).to.eql([[intent.slots, efRequest.payload.entities]]);
       expect(nlcObj.handleDialog.args).to.eql([
         [
           {
-            intent: dmRequest.payload.intent.name,
+            intent: efRequest.payload.intent.name,
             required,
-            slots: dmRequest.payload.entities,
+            slots: efRequest.payload.entities,
           },
           query,
         ],
@@ -123,18 +123,18 @@ describe('nlu nlc service unit tests', () => {
       const query = 'query';
       const model = 'model';
       const locale = 'locale';
-      const dmRequest = { payload: { intent: { name: 'intent_name' }, entities: ['e1', 'e2'] } };
+      const efRequest = { payload: { intent: { name: 'intent_name' }, entities: ['e1', 'e2'] } };
 
-      expect(handleNLCEntityFilling({ query, model, locale, dmRequest } as any)).to.eql(output);
+      expect(handleNLCEntityFilling({ query, model, locale, efRequest } as any)).to.eql(output);
       expect(createNLCStub.args).to.eql([[{ model, locale, openSlot: true }]]);
-      expect(nlcObj.getIntent.args).to.eql([[dmRequest.payload.intent.name]]);
-      expect(getRequiredStub.args).to.eql([[[], dmRequest.payload.entities]]);
+      expect(nlcObj.getIntent.args).to.eql([[efRequest.payload.intent.name]]);
+      expect(getRequiredStub.args).to.eql([[[], efRequest.payload.entities]]);
       expect(nlcObj.handleDialog.args).to.eql([
         [
           {
-            intent: dmRequest.payload.intent.name,
+            intent: efRequest.payload.intent.name,
             required,
-            slots: dmRequest.payload.entities,
+            slots: efRequest.payload.entities,
           },
           query,
         ],

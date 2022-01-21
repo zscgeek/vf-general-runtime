@@ -21,14 +21,14 @@ import { outputTrace } from '../runtime/utils';
 import { AbstractManager, injectServices } from '../utils';
 import { rectifyEntityValue } from './synonym';
 import {
-  dmPrefix,
+  efPrefix,
   fillStringEntities,
   getEntitiesMap,
   getIntentEntityList,
   getUnfulfilledEntity,
   inputToString,
   isIntentInScope,
-  VF_DM_PREFIX,
+  VF_EF_PREFIX,
 } from './utils';
 
 export const utils = {
@@ -48,30 +48,30 @@ class EntityFilling extends AbstractManager<{ utils: typeof utils }> implements 
   }
 
   handleDMContext = (
-    dmStateStore: EFStore,
-    dmPrefixedResult: Request.IntentRequest,
+    efStateStore: EFStore,
+    efPrefixedResult: Request.IntentRequest,
     incomingRequest: Request.IntentRequest,
     languageModel: Models.PrototypeModel
   ): boolean => {
-    const dmPrefixedResultName = dmPrefixedResult.payload.intent.name;
+    const efPrefixedResultName = efPrefixedResult.payload.intent.name;
     const incomingRequestName = incomingRequest.payload.intent.name;
-    const expectedIntentName = dmStateStore.intentRequest!.payload.intent.name;
+    const expectedIntentName = efStateStore.intentRequest!.payload.intent.name;
 
-    log.trace(`[app] [runtime] [dm] DM-Prefixed inference result ${log.vars({ resultName: dmPrefixedResultName })}`);
+    log.trace(`[app] [runtime] [ef] DM-Prefixed inference result ${log.vars({ resultName: efPrefixedResultName })}`);
 
-    if (dmPrefixedResultName.startsWith(VF_DM_PREFIX) || dmPrefixedResultName === expectedIntentName) {
+    if (efPrefixedResultName.startsWith(VF_EF_PREFIX) || efPrefixedResultName === expectedIntentName) {
       // Remove hash prefix entity from the DM-prefixed result
-      dmPrefixedResult.payload.entities = dmPrefixedResult.payload.entities.filter((entity) => !entity.name.startsWith(VF_DM_PREFIX));
+      efPrefixedResult.payload.entities = efPrefixedResult.payload.entities.filter((entity) => !entity.name.startsWith(VF_EF_PREFIX));
       const intentEntityList = getIntentEntityList(expectedIntentName, languageModel);
-      // Check if the dmPrefixedResult entities are a subset of the intent's entity list
-      const entitySubset = dmPrefixedResult.payload.entities.filter((dmEntity) => intentEntityList?.find((entity) => entity?.name === dmEntity.name));
+      // Check if the efPrefixedResult entities are a subset of the intent's entity list
+      const entitySubset = efPrefixedResult.payload.entities.filter((efEntity) => intentEntityList?.find((entity) => entity?.name === efEntity.name));
       if (entitySubset.length) {
         // CASE-B1: the prefixed intent only contains entities that are in the target intent's entity list
         // Action: Use the entities extracted from the prefixed intent to overwrite any existing filled entities
         entitySubset.forEach((entity) => {
-          const storedEntity = dmStateStore.intentRequest!.payload.entities.find((stored) => stored.name === entity.name);
+          const storedEntity = efStateStore.intentRequest!.payload.entities.find((stored) => stored.name === entity.name);
           if (!storedEntity) {
-            dmStateStore.intentRequest!.payload.entities.push(entity); // Append entity
+            efStateStore.intentRequest!.payload.entities.push(entity); // Append entity
           } else {
             storedEntity.value = entity.value; // Update entity value
           }
@@ -79,12 +79,12 @@ class EntityFilling extends AbstractManager<{ utils: typeof utils }> implements 
       } else {
         // CASE-B2_2: The prefixed intent has no entities extracted (except for the hash sentinel)
         // Action:  Migrate the user to the regular intent
-        dmStateStore.intentRequest = incomingRequest;
+        efStateStore.intentRequest = incomingRequest;
       }
-    } else if (dmPrefixedResultName === incomingRequestName) {
+    } else if (efPrefixedResultName === incomingRequestName) {
       // CASE-A1: The prefixed and regular calls match the same (non-DM) intent that is different from the original intent
       // Action: Migrate user to the new intent and extract all the available entities
-      dmStateStore.intentRequest = incomingRequest;
+      efStateStore.intentRequest = incomingRequest;
     } else {
       // (Unlikely) CASE-A2: The prefixed and regular calls do not match the same intent
       // Action: return true; Fallback intent
@@ -112,33 +112,33 @@ class EntityFilling extends AbstractManager<{ utils: typeof utils }> implements 
 
     const incomingRequest = context.request;
     const currentStore = context.state.storage[StorageType.ENTITY_FILLING];
-    const dmStateStore: EFStore = { ...currentStore, priorIntent: currentStore?.intentRequest };
+    const efStateStore: EFStore = { ...currentStore, priorIntent: currentStore?.intentRequest };
 
     // if there is an existing entity filling request
-    if (dmStateStore?.intentRequest) {
-      log.debug('[app] [runtime] [dm] in entity filling context');
+    if (efStateStore?.intentRequest) {
+      log.debug('[app] [runtime] [ef] in entity filling context');
 
       const { query } = incomingRequest.payload;
 
       try {
-        const prefix = dmPrefix(dmStateStore.intentRequest.payload.intent.name);
-        const dmPrefixedResult = this.config.GENERAL_SERVICE_ENDPOINT
+        const prefix = efPrefix(efStateStore.intentRequest.payload.intent.name);
+        const efPrefixedResult = this.config.GENERAL_SERVICE_ENDPOINT
           ? await this.services.nlu.predict({
               query: `${prefix} ${query}`,
               projectID: version.projectID,
             })
           : incomingRequest;
 
-        // Remove the dmPrefix from entity values that it has accidentally been attached to
-        dmPrefixedResult.payload.entities.forEach((entity) => {
+        // Remove the efPrefix from entity values that it has accidentally been attached to
+        efPrefixedResult.payload.entities.forEach((entity) => {
           entity.value = _.isString(entity.value) ? entity.value.replace(prefix, '').trim() : entity.value;
         });
 
-        const isFallback = this.handleDMContext(dmStateStore, dmPrefixedResult, incomingRequest, version.prototype.model);
+        const isFallback = this.handleDMContext(efStateStore, efPrefixedResult, incomingRequest, version.prototype.model);
 
         if (isFallback) {
           return {
-            ...EntityFilling.setEFStore(context, { ...dmStateStore, intentRequest: undefined }),
+            ...EntityFilling.setEFStore(context, { ...efStateStore, intentRequest: undefined }),
             request: getNoneIntentRequest(query),
           };
         }
@@ -147,20 +147,20 @@ class EntityFilling extends AbstractManager<{ utils: typeof utils }> implements 
           query,
           model: version.prototype.model,
           locale: version.prototype.data!.locales[0] as Constants.Locale,
-          dmRequest: dmStateStore.intentRequest,
+          efRequest: efStateStore.intentRequest,
         });
 
         if (resultNLC.payload.intent.name === NONE_INTENT) {
           return {
-            ...EntityFilling.setEFStore(context, { ...dmStateStore, intentRequest: undefined }),
+            ...EntityFilling.setEFStore(context, { ...efStateStore, intentRequest: undefined }),
             request: getNoneIntentRequest(query),
           };
         }
 
-        dmStateStore.intentRequest = resultNLC;
+        efStateStore.intentRequest = resultNLC;
       }
     } else {
-      log.debug('[app] [runtime] [dm] in regular context');
+      log.debug('[app] [runtime] [ef] in regular context');
 
       if (!(await this.services.utils.isIntentInScope(context))) {
         return context;
@@ -168,15 +168,15 @@ class EntityFilling extends AbstractManager<{ utils: typeof utils }> implements 
 
       // Since we are in the regular context, we just set the intentRequest object in the DM state store as-is.
       // The downstream code will decide if further DM processing is needed.
-      dmStateStore.intentRequest = incomingRequest;
+      efStateStore.intentRequest = incomingRequest;
     }
 
     // Set the DM state store without modifying the source context
-    context = EntityFilling.setEFStore(context, dmStateStore);
+    context = EntityFilling.setEFStore(context, efStateStore);
 
     // Are there any unfulfilled required entities?
     // We need to use the stored DM state here to ensure that previously fulfilled entities are also considered!
-    const unfulfilledEntity = getUnfulfilledEntity(dmStateStore!.intentRequest, version.prototype.model);
+    const unfulfilledEntity = getUnfulfilledEntity(efStateStore!.intentRequest, version.prototype.model);
 
     if (unfulfilledEntity) {
       // There are unfulfilled required entities -> return entity filling prompt
@@ -186,12 +186,12 @@ class EntityFilling extends AbstractManager<{ utils: typeof utils }> implements 
       const prompt = _.sample(unfulfilledEntity.dialog.prompt)! as ChatTypes.Prompt | VoiceTypes.IntentPrompt<string>;
 
       if (!hasElicit(incomingRequest) && prompt) {
-        const variables = getEntitiesMap(dmStateStore!.intentRequest);
+        const variables = getEntitiesMap(efStateStore!.intentRequest);
 
         const output =
           'content' in prompt
             ? prompt.content
-            : fillStringEntities(inputToString(prompt, version.platformData.settings.defaultVoice), dmStateStore!.intentRequest);
+            : fillStringEntities(inputToString(prompt, version.platformData.settings.defaultVoice), efStateStore!.intentRequest);
 
         trace.push(outputTrace({ output, variables }));
       }
@@ -199,7 +199,7 @@ class EntityFilling extends AbstractManager<{ utils: typeof utils }> implements 
         type: TraceType.ENTITY_FILLING,
         payload: {
           entityToFill: unfulfilledEntity.name,
-          intent: dmStateStore.intentRequest,
+          intent: efStateStore.intentRequest,
         },
       });
 
@@ -211,7 +211,7 @@ class EntityFilling extends AbstractManager<{ utils: typeof utils }> implements 
     }
 
     // No more unfulfilled required entities -> populate the request object with the final intent and extracted entities from the DM state store
-    context.request = rectifyEntityValue(dmStateStore!.intentRequest, version.prototype.model);
+    context.request = rectifyEntityValue(efStateStore!.intentRequest, version.prototype.model);
 
     // Clear the DM state store
     return EntityFilling.setEFStore(context, undefined);

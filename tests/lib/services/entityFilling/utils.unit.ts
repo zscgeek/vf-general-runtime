@@ -15,13 +15,13 @@ describe('entity filling utilities unit tests', () => {
     sinon.restore();
   });
 
-  describe('getDMPrefixIntentName', () => {
+  describe('getEFPrefixIntentName', () => {
     it('assembles the correct DM-context intent name', async () => {
       const intentName = 'dummy';
-      const hash = utils.dmPrefix(intentName);
-      const result = utils.getDMPrefixIntentName(intentName);
+      const hash = utils.efPrefix(intentName);
+      const result = utils.getEFPrefixIntentName(intentName);
 
-      expect(result).to.equal(`${utils.VF_DM_PREFIX}${hash}_${intentName}`);
+      expect(result).to.equal(`${utils.VF_EF_PREFIX}${hash}_${intentName}`);
     });
   });
 

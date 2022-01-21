@@ -66,12 +66,12 @@ describe('entity filling unit tests', () => {
 
     describe('CASE-B1: DM-prefixed and regular calls match the same intent', () => {
       it('Upserts the DM state store with the new extracted entities', async () => {
-        const dmState = {
+        const efState = {
           intentRequest: mockRegularSingleEntityResult,
         };
-        const result = await ef.handleDMContext(dmState, mockEFPrefixedMultipleEntityResult, mockRegularMultipleEntityResult, mockLM);
-        const sizeEntityValue = dmState.intentRequest.payload.entities.find((entity) => entity.name === 'size');
-        const toppingEntityValue = dmState.intentRequest.payload.entities.find((entity) => entity.name === 'topping');
+        const result = await ef.handleDMContext(efState, mockEFPrefixedMultipleEntityResult, mockRegularMultipleEntityResult, mockLM);
+        const sizeEntityValue = efState.intentRequest.payload.entities.find((entity) => entity.name === 'size');
+        const toppingEntityValue = efState.intentRequest.payload.entities.find((entity) => entity.name === 'topping');
 
         expect(result).to.be.false; // No fallback intent
         expect(sizeEntityValue?.value).to.be.equal('large');
@@ -81,12 +81,12 @@ describe('entity filling unit tests', () => {
 
     describe('CASE-B1: DM-prefixed call contains entities that are a strict subset of the entities of the target intent', () => {
       it('Upserts the DM state store with the new extracted entities', async () => {
-        const dmState = {
+        const efState = {
           intentRequest: mockRegularNoEntityResult,
         };
 
-        const result = await ef.handleDMContext(dmState, mockEFPrefixedUnrelatedSingleEntityResult, mockRegularUnrelatedResult, mockLM);
-        const sizeEntityValue = dmState.intentRequest.payload.entities.find((entity) => entity.name === 'size');
+        const result = await ef.handleDMContext(efState, mockEFPrefixedUnrelatedSingleEntityResult, mockRegularUnrelatedResult, mockLM);
+        const sizeEntityValue = efState.intentRequest.payload.entities.find((entity) => entity.name === 'size');
 
         expect(result).to.be.false; // No fallback intent
         expect(sizeEntityValue?.value).to.be.equal('small');
@@ -95,48 +95,48 @@ describe('entity filling unit tests', () => {
 
     describe('CASE-B2: no entities extracted from DM-prefixed call', () => {
       it('Migrates DM context to the regular intent', async () => {
-        const dmState = {
+        const efState = {
           intentRequest: mockUnfulfilledIntentRequest,
         };
-        const result = await ef.handleDMContext(dmState, mockEFPrefixedNoEntityResult, mockRegularNoEntityResult, mockLM);
+        const result = await ef.handleDMContext(efState, mockEFPrefixedNoEntityResult, mockRegularNoEntityResult, mockLM);
 
         expect(result).to.be.false; // No fallback intent
-        expect(dmState.intentRequest).to.deep.equal(mockRegularNoEntityResult);
+        expect(efState.intentRequest).to.deep.equal(mockRegularNoEntityResult);
       });
     });
 
     describe("CASE-B2: DM-prefixed call has entities that are not in the target intent's entity list", () => {
       it('Returns incoming intent', async () => {
-        const dmState = {
+        const efState = {
           intentRequest: mockRegularNoEntityResult,
         };
-        const result = await ef.handleDMContext(dmState, mockEFPrefixedNonSubsetEntityResult, mockRegularUnrelatedResult, mockLM);
+        const result = await ef.handleDMContext(efState, mockEFPrefixedNonSubsetEntityResult, mockRegularUnrelatedResult, mockLM);
 
         expect(result).to.be.false;
-        expect(dmState.intentRequest).to.eql(mockRegularUnrelatedResult);
+        expect(efState.intentRequest).to.eql(mockRegularUnrelatedResult);
       });
     });
 
     describe("CASE-A1: DM-prefixed and regular calls match the same intent that's different from the target intent", () => {
       it('Migrates DM context to the new regular call intent', async () => {
-        const dmState = {
+        const efState = {
           intentRequest: mockRegularNoEntityResult,
         };
 
-        const result = await ef.handleDMContext(dmState, mockEFPrefixUnrelatedResult, mockRegularUnrelatedResult, mockLM);
+        const result = await ef.handleDMContext(efState, mockEFPrefixUnrelatedResult, mockRegularUnrelatedResult, mockLM);
 
         expect(result).to.be.false; // no fallback intent
-        expect(dmState.intentRequest.payload.intent.name).to.be.equal('wings_order');
+        expect(efState.intentRequest.payload.intent.name).to.be.equal('wings_order');
       });
     });
 
     describe("CASE-A2: DM-prefixed and regular calls don't match the same intent", () => {
       it('Returns FallBack intent', async () => {
-        const dmState = {
+        const efState = {
           intentRequest: mockRegularUnrelatedResult,
         };
 
-        const result = await ef.handleDMContext(dmState, mockRegularNoEntityResult, mockRegularUnrelatedResult, mockLM);
+        const result = await ef.handleDMContext(efState, mockRegularNoEntityResult, mockRegularUnrelatedResult, mockLM);
 
         expect(result).to.be.true; // trigger fallback intent
       });
@@ -150,9 +150,9 @@ describe('entity filling unit tests', () => {
       it('correctly sets the DM state storage', async () => {
         const result = await ef.handle(mockRegularContext);
 
-        const dmStateStore = result.state.storage.dm;
-        expect(dmStateStore).to.not.be.undefined;
-        expect(dmStateStore.intentRequest).to.deep.equal(mockUnfulfilledIntentRequest);
+        const efStateStore = result.state.storage.dm;
+        expect(efStateStore).to.not.be.undefined;
+        expect(efStateStore.intentRequest).to.deep.equal(mockUnfulfilledIntentRequest);
       });
 
       it('returns the required entity prompt defined in the LM', async () => {
@@ -190,8 +190,8 @@ describe('entity filling unit tests', () => {
         const result = await ef.handle(mockRegularContext);
 
         const resultEntities = (result.request as Request.IntentRequest).payload.entities;
-        const hasDMPrefix = resultEntities.some((entity) => entity.name.startsWith(utils.VF_DM_PREFIX));
-        expect(hasDMPrefix).to.be.false;
+        const hasEFPrefix = resultEntities.some((entity) => entity.name.startsWith(utils.VF_EF_PREFIX));
+        expect(hasEFPrefix).to.be.false;
       });
 
       it('correctly populates the context request object', async () => {
