@@ -19,7 +19,6 @@ export const isRuntimeRequest = (request: any): request is RuntimeRequest => {
 };
 
 export enum StorageType {
-  DM = 'dm',
   USER = 'user',
   LOCALE = 'locale',
   REPEAT = 'repeat',
@@ -27,6 +26,7 @@ export enum StorageType {
   STREAM_PLAY = 'streamPlay',
   ACCESS_TOKEN = 'accessToken',
   STREAM_PAUSE = 'streamPause',
+  ENTITY_FILLING = 'dm',
   STREAM_FINISHED = 'streamFinished',
   NO_MATCHES_COUNTER = 'noMatchesCounter',
   NO_REPLIES_COUNTER = 'noRepliesCounter',

@@ -1,5 +1,4 @@
 import { Request } from '@voiceflow/base-types';
-import { RequestType } from '@voiceflow/base-types/build/common/request';
 import { EntityFillingTrace, TraceType } from '@voiceflow/base-types/build/common/trace';
 import sinon from 'sinon';
 
@@ -242,7 +241,7 @@ export const mockRegularUnrelatedResult: Request.IntentRequest = {
   },
 };
 
-export const mockDMPrefixUnrelatedResult: Request.IntentRequest = {
+export const mockEFPrefixUnrelatedResult: Request.IntentRequest = {
   type: Request.RequestType.INTENT,
   payload: {
     query: 'b5c1b7fae5e4c5b87a39e68d8e27028f I want to order some chicken wings',
@@ -258,7 +257,7 @@ export const mockDMPrefixUnrelatedResult: Request.IntentRequest = {
   },
 };
 
-export const mockDMPrefixedUnrelatedSingleEntityResult: Request.IntentRequest = {
+export const mockEFPrefixedUnrelatedSingleEntityResult: Request.IntentRequest = {
   type: Request.RequestType.INTENT,
   payload: {
     query: 'cd55d3ff73dce9bbb75edc60ab5c81be I want a small chicken wings',
@@ -289,7 +288,7 @@ export const mockRegularNoEntityResult: Request.IntentRequest = {
   },
 };
 
-export const mockDMPrefixedNoEntityResult: Request.IntentRequest = {
+export const mockEFPrefixedNoEntityResult: Request.IntentRequest = {
   type: Request.RequestType.INTENT,
   payload: {
     query: 'b5c1b7fae5e4c5b87a39e68d8e27028f I want a pizza',
@@ -325,7 +324,7 @@ export const mockRegularMultipleEntityResult: Request.IntentRequest = {
   },
 };
 
-export const mockDMPrefixedMultipleEntityResult: Request.IntentRequest = {
+export const mockEFPrefixedMultipleEntityResult: Request.IntentRequest = {
   type: Request.RequestType.INTENT,
   payload: {
     query: 'b5c1b7fae5e4c5b87a39e68d8e27028f I want a large pepperoni pizza',
@@ -365,7 +364,7 @@ export const mockRegularSingleEntityResult: Request.IntentRequest = {
   },
 };
 
-export const mockDMPrefixedSingleEntityResult: Request.IntentRequest = {
+export const mockEFPrefixedSingleEntityResult: Request.IntentRequest = {
   type: Request.RequestType.INTENT,
   payload: {
     query: 'b5c1b7fae5e4c5b87a39e68d8e27028f I want a small pizza',
@@ -385,7 +384,7 @@ export const mockDMPrefixedSingleEntityResult: Request.IntentRequest = {
   },
 };
 
-export const mockDMPrefixedNonSubsetEntityResult: Request.IntentRequest = {
+export const mockEFPrefixedNonSubsetEntityResult: Request.IntentRequest = {
   type: Request.RequestType.INTENT,
   payload: {
     query: 'A crazy blue query',
@@ -436,7 +435,7 @@ export const mockFulfilledIntentRequest: Request.IntentRequest = {
   },
 };
 
-export const mockDMContext: Context = {
+export const mockEFContext: Context = {
   state: {
     stack: [],
     turn: {},

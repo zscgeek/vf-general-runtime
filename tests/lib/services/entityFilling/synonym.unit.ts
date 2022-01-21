@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 
-import * as synonym from '@/lib/services/dialog/synonym';
+import * as synonym from '@/lib/services/entityFilling/synonym';
 
 import { mockEntityNonSynonymRequest, mockEntitySynonymRequest, mockLM } from './fixture';
 

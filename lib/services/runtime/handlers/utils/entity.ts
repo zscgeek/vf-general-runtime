@@ -1,6 +1,6 @@
 import { Node as BaseNode, Request, Trace } from '@voiceflow/base-types';
 
-import { DMStore } from '@/lib/services/dialog';
+import { EFStore } from '@/lib/services/entityFilling';
 import NoMatchHandler, { NoMatchNode } from '@/lib/services/runtime/handlers/noMatch';
 import { Runtime, Store } from '@/runtime';
 
@@ -27,7 +27,7 @@ const noMatchHandler = NoMatchHandler();
 export const EntityFillingNoMatchHandler = () => ({
   handle: (node: NoMatchNode, runtime: Runtime, variables: Store) => (intents: string[] = [], defaultRequest?: Request.IntentRequest) => {
     // see if the prior entity filling intent is within context
-    const priorIntent = runtime.storage.get<DMStore>(StorageType.DM)?.priorIntent;
+    const priorIntent = runtime.storage.get<EFStore>(StorageType.ENTITY_FILLING)?.priorIntent;
     const priorIntentMatch = intents.includes(priorIntent?.payload.intent.name!) && priorIntent?.payload.entities.length;
 
     const nextRequest = (priorIntentMatch && priorIntent) || defaultRequest;

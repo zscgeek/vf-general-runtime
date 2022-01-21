@@ -3,15 +3,15 @@ import { Request } from '@voiceflow/base-types';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
-import DialogManager, { utils as defaultUtils } from '@/lib/services/dialog';
-import * as utils from '@/lib/services/dialog/utils';
+import EntityFilling, { utils as defaultUtils } from '@/lib/services/entityFilling';
+import * as utils from '@/lib/services/entityFilling/utils';
 
 import {
-  mockDMPrefixedMultipleEntityResult,
-  mockDMPrefixedNoEntityResult,
-  mockDMPrefixedNonSubsetEntityResult,
-  mockDMPrefixedUnrelatedSingleEntityResult,
-  mockDMPrefixUnrelatedResult,
+  mockEFPrefixedMultipleEntityResult,
+  mockEFPrefixedNoEntityResult,
+  mockEFPrefixedNonSubsetEntityResult,
+  mockEFPrefixedUnrelatedSingleEntityResult,
+  mockEFPrefixUnrelatedResult,
   mockEntityFillingTrace,
   mockEntityFillingTraceWithElicit,
   mockFulfilledIntentRequest,
@@ -26,10 +26,10 @@ import {
 
 const createDM = () => {
   const services = {};
-  return new DialogManager({ utils: { ...defaultUtils, isIntentInScope: sinon.stub().resolves(true) }, ...services } as any, {} as any);
+  return new EntityFilling({ utils: { ...defaultUtils, isIntentInScope: sinon.stub().resolves(true) }, ...services } as any, {} as any);
 };
 
-describe('dialog manager unit tests', () => {
+describe('entity filling unit tests', () => {
   afterEach(() => {
     sinon.restore();
   });
@@ -39,8 +39,8 @@ describe('dialog manager unit tests', () => {
       const services = {
         dataAPI: { getVersion: sinon.stub().resolves() },
       };
-      const dm = new DialogManager({ utils: { ...defaultUtils }, ...services } as any, {} as any);
-      const result = dm.handle({ request: { type: 'intent', payload: { entities: [], intent: { name: 'intent_name' } } } } as any);
+      const ef = new EntityFilling({ utils: { ...defaultUtils }, ...services } as any, {} as any);
+      const result = ef.handle({ request: { type: 'intent', payload: { entities: [], intent: { name: 'intent_name' } } } } as any);
 
       await expect(result).to.eventually.be.rejected;
     });
@@ -49,27 +49,27 @@ describe('dialog manager unit tests', () => {
       const services = {
         dataAPI: { getVersion: sinon.stub().resolves({ prototype: { model: true } }) },
       };
-      const dm = new DialogManager({ utils: { ...defaultUtils, isIntentInScope: sinon.stub().resolves(false) }, ...services } as any, {} as any);
+      const ef = new EntityFilling({ utils: { ...defaultUtils, isIntentInScope: sinon.stub().resolves(false) }, ...services } as any, {} as any);
       const context = {
         request: { type: 'intent', payload: { entities: [], intent: { name: 'intent_name' } } },
         state: { storage: {} },
         data: { api: services.dataAPI },
       };
-      const result = await dm.handle(context as any);
+      const result = await ef.handle(context as any);
 
       expect(result).to.eql(context);
     });
   });
 
   describe('DM-context handler', () => {
-    const dm = createDM();
+    const ef = createDM();
 
     describe('CASE-B1: DM-prefixed and regular calls match the same intent', () => {
       it('Upserts the DM state store with the new extracted entities', async () => {
         const dmState = {
           intentRequest: mockRegularSingleEntityResult,
         };
-        const result = await dm.handleDMContext(dmState, mockDMPrefixedMultipleEntityResult, mockRegularMultipleEntityResult, mockLM);
+        const result = await ef.handleDMContext(dmState, mockEFPrefixedMultipleEntityResult, mockRegularMultipleEntityResult, mockLM);
         const sizeEntityValue = dmState.intentRequest.payload.entities.find((entity) => entity.name === 'size');
         const toppingEntityValue = dmState.intentRequest.payload.entities.find((entity) => entity.name === 'topping');
 
@@ -85,7 +85,7 @@ describe('dialog manager unit tests', () => {
           intentRequest: mockRegularNoEntityResult,
         };
 
-        const result = await dm.handleDMContext(dmState, mockDMPrefixedUnrelatedSingleEntityResult, mockRegularUnrelatedResult, mockLM);
+        const result = await ef.handleDMContext(dmState, mockEFPrefixedUnrelatedSingleEntityResult, mockRegularUnrelatedResult, mockLM);
         const sizeEntityValue = dmState.intentRequest.payload.entities.find((entity) => entity.name === 'size');
 
         expect(result).to.be.false; // No fallback intent
@@ -98,7 +98,7 @@ describe('dialog manager unit tests', () => {
         const dmState = {
           intentRequest: mockUnfulfilledIntentRequest,
         };
-        const result = await dm.handleDMContext(dmState, mockDMPrefixedNoEntityResult, mockRegularNoEntityResult, mockLM);
+        const result = await ef.handleDMContext(dmState, mockEFPrefixedNoEntityResult, mockRegularNoEntityResult, mockLM);
 
         expect(result).to.be.false; // No fallback intent
         expect(dmState.intentRequest).to.deep.equal(mockRegularNoEntityResult);
@@ -110,7 +110,7 @@ describe('dialog manager unit tests', () => {
         const dmState = {
           intentRequest: mockRegularNoEntityResult,
         };
-        const result = await dm.handleDMContext(dmState, mockDMPrefixedNonSubsetEntityResult, mockRegularUnrelatedResult, mockLM);
+        const result = await ef.handleDMContext(dmState, mockEFPrefixedNonSubsetEntityResult, mockRegularUnrelatedResult, mockLM);
 
         expect(result).to.be.false;
         expect(dmState.intentRequest).to.eql(mockRegularUnrelatedResult);
@@ -123,7 +123,7 @@ describe('dialog manager unit tests', () => {
           intentRequest: mockRegularNoEntityResult,
         };
 
-        const result = await dm.handleDMContext(dmState, mockDMPrefixUnrelatedResult, mockRegularUnrelatedResult, mockLM);
+        const result = await ef.handleDMContext(dmState, mockEFPrefixUnrelatedResult, mockRegularUnrelatedResult, mockLM);
 
         expect(result).to.be.false; // no fallback intent
         expect(dmState.intentRequest.payload.intent.name).to.be.equal('wings_order');
@@ -136,7 +136,7 @@ describe('dialog manager unit tests', () => {
           intentRequest: mockRegularUnrelatedResult,
         };
 
-        const result = await dm.handleDMContext(dmState, mockRegularNoEntityResult, mockRegularUnrelatedResult, mockLM);
+        const result = await ef.handleDMContext(dmState, mockRegularNoEntityResult, mockRegularUnrelatedResult, mockLM);
 
         expect(result).to.be.true; // trigger fallback intent
       });
@@ -144,11 +144,11 @@ describe('dialog manager unit tests', () => {
   });
 
   describe('Regular-context handler', () => {
-    const dm = createDM();
+    const ef = createDM();
 
     describe('with unfulfilled entities', async () => {
       it('correctly sets the DM state storage', async () => {
-        const result = await dm.handle(mockRegularContext);
+        const result = await ef.handle(mockRegularContext);
 
         const dmStateStore = result.state.storage.dm;
         expect(dmStateStore).to.not.be.undefined;
@@ -156,7 +156,7 @@ describe('dialog manager unit tests', () => {
       });
 
       it('returns the required entity prompt defined in the LM', async () => {
-        const result = await dm.handle(mockRegularContext);
+        const result = await ef.handle(mockRegularContext);
 
         const expectedTrace = [
           {
@@ -174,7 +174,7 @@ describe('dialog manager unit tests', () => {
 
       it('returns empty entity prompt with elicit', async () => {
         const request = { ...mockUnfulfilledIntentRequest, ELICIT: true };
-        const result = await dm.handle({
+        const result = await ef.handle({
           ...mockRegularContext,
           request,
         });
@@ -187,7 +187,7 @@ describe('dialog manager unit tests', () => {
 
     describe('with fulfilled entities', () => {
       it('removes the DM prefix entities from final entity list', async () => {
-        const result = await dm.handle(mockRegularContext);
+        const result = await ef.handle(mockRegularContext);
 
         const resultEntities = (result.request as Request.IntentRequest).payload.entities;
         const hasDMPrefix = resultEntities.some((entity) => entity.name.startsWith(utils.VF_DM_PREFIX));
@@ -198,7 +198,7 @@ describe('dialog manager unit tests', () => {
         const fulfilledContext = { ...mockRegularContext };
         fulfilledContext.request = mockFulfilledIntentRequest;
 
-        const result = await dm.handle(fulfilledContext);
+        const result = await ef.handle(fulfilledContext);
 
         expect(result.request).to.deep.equal(mockFulfilledIntentRequest);
       });

@@ -32,7 +32,7 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
     query: { locale?: string };
     headers: { authorization?: string; origin?: string; sessionid?: string; versionID: string };
   }): Promise<ResponseContext> {
-    const { analytics, runtime, metrics, nlu, tts, dialog, asr, speak, slots, state: stateManager, filter } = this.services;
+    const { analytics, runtime, metrics, nlu, tts, entityFilling, asr, speak, slots, state: stateManager, filter } = this.services;
 
     const {
       // `request` prop is deprecated, replaced with `action`
@@ -56,7 +56,7 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
 
     const turn = new this.services.utils.TurnBuilder<Context>(stateManager);
 
-    turn.addHandlers(asr, nlu, slots, dialog, runtime);
+    turn.addHandlers(asr, nlu, slots, entityFilling, runtime);
     turn.addHandlers(analytics);
 
     if (config.tts) {

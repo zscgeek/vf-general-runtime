@@ -6,7 +6,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 
 import * as nlc from '@/lib/services/nlu/nlc';
-import { createNLC, handleNLCCommand, handleNLCDialog, nlcToIntent, registerBuiltInIntents, registerSlots } from '@/lib/services/nlu/nlc';
+import { createNLC, handleNLCCommand, handleNLCEntityFilling, nlcToIntent, registerBuiltInIntents, registerSlots } from '@/lib/services/nlu/nlc';
 import * as utils from '@/lib/services/nlu/utils';
 
 import { customTypeSlots, regexMatcherSlots } from './fixture';
@@ -74,7 +74,7 @@ describe('nlu nlc service unit tests', () => {
     });
   });
 
-  describe('handleNLCDialog', () => {
+  describe('handleNLCEntityFilling', () => {
     it('works', () => {
       const dialogRes = { foo: 'bar' };
       const intent = { slots: ['s1', 's2'] };
@@ -92,7 +92,7 @@ describe('nlu nlc service unit tests', () => {
       const locale = 'locale';
       const dmRequest = { payload: { intent: { name: 'intent_name' }, entities: ['e1', 'e2'] } };
 
-      expect(handleNLCDialog({ query, model, locale, dmRequest } as any)).to.eql(output);
+      expect(handleNLCEntityFilling({ query, model, locale, dmRequest } as any)).to.eql(output);
       expect(createNLCStub.args).to.eql([[{ model, locale, openSlot: true }]]);
       expect(nlcObj.getIntent.args).to.eql([[dmRequest.payload.intent.name]]);
       expect(getRequiredStub.args).to.eql([[intent.slots, dmRequest.payload.entities]]);
@@ -125,7 +125,7 @@ describe('nlu nlc service unit tests', () => {
       const locale = 'locale';
       const dmRequest = { payload: { intent: { name: 'intent_name' }, entities: ['e1', 'e2'] } };
 
-      expect(handleNLCDialog({ query, model, locale, dmRequest } as any)).to.eql(output);
+      expect(handleNLCEntityFilling({ query, model, locale, dmRequest } as any)).to.eql(output);
       expect(createNLCStub.args).to.eql([[{ model, locale, openSlot: true }]]);
       expect(nlcObj.getIntent.args).to.eql([[dmRequest.payload.intent.name]]);
       expect(getRequiredStub.args).to.eql([[[], dmRequest.payload.entities]]);

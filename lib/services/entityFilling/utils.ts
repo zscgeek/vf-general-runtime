@@ -108,7 +108,7 @@ export const isIntentInScope = async ({ data: { api }, versionID, state, request
 
   if (runtime.getAction() === Action.RUNNING || !node) return false;
 
-  // if no event handler can handle, intent req is out of scope => no dialog management required
+  // if no event handler can handle, intent req is out of scope => no entity filling required
   if (!eventHandlers.find((h) => h.canHandle(node as any, runtime, variables, program!))) return false;
 
   if (isIntentInNode(node) && runtime.getRequest().payload?.intent?.name === node.intent.name) {

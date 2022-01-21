@@ -1,5 +1,5 @@
 /**
- * [[include:dialog.md]]
+ * [[include:entityFilling.md]]
  * @packageDocumentation
  */
 
@@ -14,7 +14,7 @@ import { hasElicit } from '@/lib/services/runtime/handlers/utils/entity';
 import log from '@/logger';
 import { Context, ContextHandler } from '@/types';
 
-import { handleNLCDialog } from '../nlu/nlc';
+import { handleNLCEntityFilling } from '../nlu/nlc';
 import { getNoneIntentRequest, NONE_INTENT } from '../nlu/utils';
 import { isIntentRequest, StorageType } from '../runtime/types';
 import { outputTrace } from '../runtime/utils';
@@ -36,19 +36,19 @@ export const utils = {
   isIntentInScope,
 };
 
-export type DMStore = {
+export type EFStore = {
   intentRequest?: Request.IntentRequest;
   priorIntent?: Request.IntentRequest;
 };
 
 @injectServices({ utils })
-class DialogManagement extends AbstractManager<{ utils: typeof utils }> implements ContextHandler {
-  static setDMStore(context: Context, store: DMStore | undefined) {
-    return { ...context, state: { ...context.state, storage: { ...context.state.storage, [StorageType.DM]: store } } };
+class EntityFilling extends AbstractManager<{ utils: typeof utils }> implements ContextHandler {
+  static setEFStore(context: Context, store: EFStore | undefined) {
+    return { ...context, state: { ...context.state, storage: { ...context.state.storage, [StorageType.ENTITY_FILLING]: store } } };
   }
 
   handleDMContext = (
-    dmStateStore: DMStore,
+    dmStateStore: EFStore,
     dmPrefixedResult: Request.IntentRequest,
     incomingRequest: Request.IntentRequest,
     languageModel: Models.PrototypeModel
@@ -111,8 +111,8 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
     }
 
     const incomingRequest = context.request;
-    const currentStore = context.state.storage[StorageType.DM];
-    const dmStateStore: DMStore = { ...currentStore, priorIntent: currentStore?.intentRequest };
+    const currentStore = context.state.storage[StorageType.ENTITY_FILLING];
+    const dmStateStore: EFStore = { ...currentStore, priorIntent: currentStore?.intentRequest };
 
     // if there is an existing entity filling request
     if (dmStateStore?.intentRequest) {
@@ -138,12 +138,12 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
 
         if (isFallback) {
           return {
-            ...DialogManagement.setDMStore(context, { ...dmStateStore, intentRequest: undefined }),
+            ...EntityFilling.setEFStore(context, { ...dmStateStore, intentRequest: undefined }),
             request: getNoneIntentRequest(query),
           };
         }
       } catch (err) {
-        const resultNLC = handleNLCDialog({
+        const resultNLC = handleNLCEntityFilling({
           query,
           model: version.prototype.model,
           locale: version.prototype.data!.locales[0] as Constants.Locale,
@@ -152,7 +152,7 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
 
         if (resultNLC.payload.intent.name === NONE_INTENT) {
           return {
-            ...DialogManagement.setDMStore(context, { ...dmStateStore, intentRequest: undefined }),
+            ...EntityFilling.setEFStore(context, { ...dmStateStore, intentRequest: undefined }),
             request: getNoneIntentRequest(query),
           };
         }
@@ -172,14 +172,14 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
     }
 
     // Set the DM state store without modifying the source context
-    context = DialogManagement.setDMStore(context, dmStateStore);
+    context = EntityFilling.setEFStore(context, dmStateStore);
 
     // Are there any unfulfilled required entities?
     // We need to use the stored DM state here to ensure that previously fulfilled entities are also considered!
     const unfulfilledEntity = getUnfulfilledEntity(dmStateStore!.intentRequest, version.prototype.model);
 
     if (unfulfilledEntity) {
-      // There are unfulfilled required entities -> return dialog management prompt
+      // There are unfulfilled required entities -> return entity filling prompt
       // Assemble return string by populating the inline entity values
       const trace: Trace.AnyTrace[] = [];
 
@@ -214,8 +214,8 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
     context.request = rectifyEntityValue(dmStateStore!.intentRequest, version.prototype.model);
 
     // Clear the DM state store
-    return DialogManagement.setDMStore(context, undefined);
+    return EntityFilling.setEFStore(context, undefined);
   };
 }
 
-export default DialogManagement;
+export default EntityFilling;

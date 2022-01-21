@@ -3,7 +3,7 @@ import { Config } from '@/types';
 import { ClientMap } from '../clients';
 import Analytics from './analytics';
 import ASR from './asr';
-import Dialog from './dialog';
+import EntityFilling from './entityFilling';
 import Filter from './filter';
 import Interact from './interact';
 import NLU from './nlu';
@@ -22,13 +22,13 @@ export interface ServiceMap {
   asr: ASR;
   speak: Speak;
   nlu: NLU;
-  dialog: Dialog;
   tts: TTS;
   slots: Slots;
   filter: Filter;
   session: Session;
   interact: Interact;
   analytics: Analytics;
+  entityFilling: EntityFilling;
   stateManagement: StateManagement;
 }
 
@@ -48,7 +48,7 @@ const buildServices = (config: Config, clients: ClientMap): FullServiceMap => {
   services.speak = new Speak(services, config);
   services.nlu = new NLU(services, config);
   services.tts = new TTS(services, config);
-  services.dialog = new Dialog(services, config);
+  services.entityFilling = new EntityFilling(services, config);
   services.slots = new Slots(services, config);
   services.filter = new Filter(services, config);
   services.analytics = new Analytics(services, config);

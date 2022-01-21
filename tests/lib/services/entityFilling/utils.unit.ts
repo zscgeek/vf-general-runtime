@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 
-import * as utils from '@/lib/services/dialog/utils';
+import * as utils from '@/lib/services/entityFilling/utils';
 import * as CommandHandler from '@/lib/services/runtime/handlers/command';
 import * as eventUtils from '@/lib/services/runtime/handlers/event';
 import * as RuntimeModule from '@/runtime';
@@ -10,7 +10,7 @@ import * as Client from '@/runtime/lib/Client';
 
 import { mockFulfilledIntentRequest, mockLM, mockUnfulfilledIntentRequest } from './fixture';
 
-describe('dialog manager utilities unit tests', () => {
+describe('entity filling utilities unit tests', () => {
   afterEach(() => {
     sinon.restore();
   });

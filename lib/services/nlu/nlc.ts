@@ -123,7 +123,7 @@ export const handleNLCCommand = ({
   return nlcToIntent(nlc.handleCommand(query), query, openSlot ? undefined : 1);
 };
 
-export const handleNLCDialog = ({
+export const handleNLCEntityFilling = ({
   query,
   model,
   locale,

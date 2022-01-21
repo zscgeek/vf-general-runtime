@@ -15,7 +15,7 @@ const buildServices = (context: any) => ({
   speak: { handle: sinon.stub().resolves(output(context, 'speak')) },
   runtime: { handle: sinon.stub().resolves(output(context, 'runtime')) },
   analytics: { handle: sinon.stub().resolves(output(context, 'analytics')) },
-  dialog: { handle: sinon.stub().resolves(output(context, 'dialog')) },
+  entityFilling: { handle: sinon.stub().resolves(output(context, 'entityFilling')) },
   filter: { handle: sinon.stub().resolves(output(context, 'filter', { trace: 'trace' })) },
   metrics: { generalRequest: sinon.stub() },
   utils: { TurnBuilder },
@@ -63,8 +63,8 @@ describe('interact service unit tests', () => {
       expect(services.asr.handle.args).to.eql([[output(context, 'state')]]);
       expect(services.nlu.handle.args).to.eql([[output(context, 'asr')]]);
       expect(services.slots.handle.args).to.eql([[output(context, 'nlu')]]);
-      expect(services.dialog.handle.args).to.eql([[output(context, 'slots')]]);
-      expect(services.runtime.handle.args).to.eql([[output(context, 'dialog')]]);
+      expect(services.entityFilling.handle.args).to.eql([[output(context, 'slots')]]);
+      expect(services.runtime.handle.args).to.eql([[output(context, 'entityFilling')]]);
       expect(services.analytics.handle.args).to.eql([[output(context, 'runtime')]]);
       expect(services.tts.handle.args).to.eql([[output(context, 'analytics')]]);
       expect(services.speak.handle.args).to.eql([[output(context, 'tts')]]);
@@ -160,7 +160,7 @@ describe('interact service unit tests', () => {
     expect(await interactController.handler(data as any)).to.eql('resolved-state');
     expect(services.utils.TurnBuilder.args).to.eql([[services.state]]);
     expect(turnBuilder.addHandlers.args).to.eql([
-      [services.asr, services.nlu, services.slots, services.dialog, services.runtime],
+      [services.asr, services.nlu, services.slots, services.entityFilling, services.runtime],
       [services.analytics],
       [services.speak, services.filter],
     ]);
