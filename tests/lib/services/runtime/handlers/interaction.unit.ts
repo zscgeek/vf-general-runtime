@@ -29,7 +29,7 @@ describe('Interaction handler', () => {
         const node = { id: 'node-id' };
         const runtime = {
           getAction: sinon.stub().returns(Action.RUNNING),
-          storage: { delete: sinon.stub() },
+          storage: { delete: sinon.stub(), get: sinon.stub(), set: sinon.stub() },
           getRequest: sinon.stub().returns({}),
         };
         const variables = { var1: 'val1' };
@@ -54,7 +54,7 @@ describe('Interaction handler', () => {
         const runtime = {
           getAction: sinon.stub().returns(Action.RUNNING),
           getRequest: sinon.stub().returns({}),
-          storage: { delete: sinon.stub() },
+          storage: { delete: sinon.stub(), get: sinon.stub(), set: sinon.stub() },
           trace: { addTrace: sinon.stub() },
         };
         const variables = { var1: 'val1' };
@@ -84,7 +84,7 @@ describe('Interaction handler', () => {
             getRequest: sinon.stub().returns({}),
             setAction: sinon.stub(),
             trace: { addTrace: sinon.stub() },
-            storage: { delete: sinon.stub() },
+            storage: { delete: sinon.stub(), get: sinon.stub(), set: sinon.stub() },
           };
           const variables = { var1: 'val1' };
           const handler = InteractionHandler(utils as any);
@@ -111,7 +111,7 @@ describe('Interaction handler', () => {
               getRequest: sinon.stub().returns({}),
               setAction: sinon.stub(),
               trace: { addTrace: sinon.stub() },
-              storage: { delete: sinon.stub() },
+              storage: { delete: sinon.stub(), get: sinon.stub(), set: sinon.stub() },
             };
             const variables = { var1: 'val1' };
             const handler = InteractionHandler(utils as any);
@@ -138,7 +138,7 @@ describe('Interaction handler', () => {
               setAction: sinon.stub(),
               getRequest: sinon.stub().returns({}),
               trace: { addTrace: sinon.stub() },
-              storage: { delete: sinon.stub() },
+              storage: { delete: sinon.stub(), get: sinon.stub(), set: sinon.stub() },
             };
             const variables = { var1: 'val1' };
             const handler = InteractionHandler(utils as any);
@@ -166,7 +166,7 @@ describe('Interaction handler', () => {
             getAction: sinon.stub().returns(Action.REQUEST),
             setAction: sinon.stub(),
             getRequest: sinon.stub().returns({}),
-            storage: { delete: sinon.stub() },
+            storage: { delete: sinon.stub(), get: sinon.stub(), set: sinon.stub() },
           };
           const variables = { var1: 'val1' };
           const handler = InteractionHandler(utils as any);
@@ -190,7 +190,7 @@ describe('Interaction handler', () => {
             getAction: sinon.stub().returns(Action.REQUEST),
             setAction: sinon.stub(),
             getRequest: sinon.stub().returns({}),
-            storage: { delete: sinon.stub() },
+            storage: { delete: sinon.stub(), get: sinon.stub(), set: sinon.stub() },
           };
           const variables = { var1: 'val1' };
           const handler = InteractionHandler(utils as any);
@@ -216,7 +216,7 @@ describe('Interaction handler', () => {
             getAction: sinon.stub().returns(Action.REQUEST),
             setAction: sinon.stub(),
             getRequest: sinon.stub().returns({}),
-            storage: { delete: sinon.stub() },
+            storage: { delete: sinon.stub(), get: sinon.stub(), set: sinon.stub() },
           };
           const variables = { var1: 'val1' };
           const handler = InteractionHandler(utils as any);
@@ -243,7 +243,7 @@ describe('Interaction handler', () => {
             getAction: sinon.stub().returns(Action.REQUEST),
             setAction: sinon.stub(),
             getRequest: sinon.stub().returns({}),
-            storage: { delete: sinon.stub() },
+            storage: { delete: sinon.stub(), get: sinon.stub(), set: sinon.stub() },
           };
           const variables = { var1: 'val1' };
           expect(handler.handle(node as any, runtime as any, variables as any, null as any)).to.eql(output);
@@ -264,7 +264,7 @@ describe('Interaction handler', () => {
               setAction: sinon.stub(),
               trace: { addTrace: sinon.stub() },
               getRequest: sinon.stub().returns({}),
-              storage: { delete: sinon.stub() },
+              storage: { delete: sinon.stub(), get: sinon.stub(), set: sinon.stub() },
             };
             const variables = { var1: 'val1' };
             const handler = InteractionHandler(utils as any);
@@ -283,13 +283,16 @@ describe('Interaction handler', () => {
               noReplyHandler: { canHandle: sinon.stub().returns(false) },
             };
 
-            const node = { id: 'node-id', interactions: [{ event: { foo: 'bar', goTo: { request: 'request' } } }] };
+            const node = {
+              id: 'node-id',
+              interactions: [{ event: { type: Node.Utils.EventType.INTENT, foo: 'bar', goTo: { request: 'request' } } }],
+            };
             const runtime = {
               getAction: sinon.stub().returns(Action.REQUEST),
               setAction: sinon.stub(),
               trace: { addTrace: sinon.stub() },
               getRequest: sinon.stub().returns({}),
-              storage: { delete: sinon.stub() },
+              storage: { delete: sinon.stub(), get: sinon.stub(), set: sinon.stub() },
             };
             const variables = { var1: 'val1' };
             const handler = InteractionHandler(utils as any);
@@ -325,7 +328,7 @@ describe('Interaction handler', () => {
               setAction: sinon.stub(),
               trace: { addTrace: sinon.stub() },
               getRequest: sinon.stub().returns({}),
-              storage: { delete: sinon.stub() },
+              storage: { delete: sinon.stub(), get: sinon.stub(), set: sinon.stub() },
             };
             const variables = { var1: 'val1' };
             const handler = InteractionHandler(utils as any);
@@ -350,7 +353,7 @@ describe('Interaction handler', () => {
               setAction: sinon.stub(),
               trace: { addTrace: sinon.stub() },
               getRequest: sinon.stub().returns({}),
-              storage: { delete: sinon.stub() },
+              storage: { delete: sinon.stub(), get: sinon.stub(), set: sinon.stub() },
             };
             const variables = { var1: 'val1' };
             const handler = InteractionHandler(utils as any);
