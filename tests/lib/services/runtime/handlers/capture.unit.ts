@@ -1,5 +1,5 @@
 /* eslint-disable max-nested-callbacks */
-import { Request } from '@voiceflow/base-types';
+import { BaseRequest } from '@voiceflow/base-types';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
@@ -200,7 +200,7 @@ describe('Capture handler', () => {
             const handler = CaptureHandler(utils as any);
 
             const node = { id: 'node-id' };
-            const request = { type: Request.RequestType.INTENT, payload: { intent: { name: 'intent_name' }, entities: [] } };
+            const request = { type: BaseRequest.RequestType.INTENT, payload: { intent: { name: 'intent_name' }, entities: [] } };
             const runtime = {
               getAction: sinon.stub().returns(Action.REQUEST),
               getRequest: sinon.stub().returns(request),
@@ -233,7 +233,7 @@ describe('Capture handler', () => {
               const handler = CaptureHandler(utils as any);
 
               const node = { id: 'node-id', variable: 'var' };
-              const request = { type: Request.RequestType.INTENT, payload: { intent: { name: 'intent_name' }, entities: [], query: 'q' } };
+              const request = { type: BaseRequest.RequestType.INTENT, payload: { intent: { name: 'intent_name' }, entities: [], query: 'q' } };
               const runtime = {
                 getAction: sinon.stub().returns(Action.REQUEST),
                 getRequest: sinon.stub().returns(request),
@@ -267,7 +267,7 @@ describe('Capture handler', () => {
               const handler = CaptureHandler(utils as any);
 
               const node = { id: 'node-id', variable: 'var' };
-              const request = { type: Request.RequestType.INTENT, payload: { intent: { name: 'intent_name' }, entities: [], query: 'q' } };
+              const request = { type: BaseRequest.RequestType.INTENT, payload: { intent: { name: 'intent_name' }, entities: [], query: 'q' } };
               const runtime = {
                 getAction: sinon.stub().returns(Action.REQUEST),
                 getRequest: sinon.stub().returns(request),
@@ -304,7 +304,7 @@ describe('Capture handler', () => {
               const handler = CaptureHandler(utils as any);
 
               const node = { id: 'node-id', variable: 'var' };
-              const request = { type: Request.RequestType.INTENT, payload: { intent: { name: 'intent_name' }, entities: [], query: 'q' } };
+              const request = { type: BaseRequest.RequestType.INTENT, payload: { intent: { name: 'intent_name' }, entities: [], query: 'q' } };
               const runtime = {
                 getAction: sinon.stub().returns(Action.REQUEST),
                 getRequest: sinon.stub().returns(request),
