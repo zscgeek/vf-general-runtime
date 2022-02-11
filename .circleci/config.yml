@@ -113,6 +113,7 @@ workflows:
         equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
     jobs:
       - vfcommon/install_and_build:
+          avoid_post_install_scripts: false
           <<: *slack-fail-post-step
           context: dev-test
 
