@@ -41,7 +41,7 @@ export class ProgramModel {
   }
 
   public getCommands<T extends BaseModels.BaseCommand = BaseModels.BaseCommand>(): T[] {
-    return this.commands as T[];
+    return (this.commands as T[]) || [];
   }
 
   public getStartNodeID(): string {
