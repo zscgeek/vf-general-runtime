@@ -18,6 +18,7 @@ export interface TurnBody<T> {
     session_id?: string;
     timestamp?: string;
     metadata?: T;
+    platform?: string;
   };
 }
 
