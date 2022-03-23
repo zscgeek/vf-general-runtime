@@ -1,47 +1,68 @@
 import { BaseNode } from '@voiceflow/base-types';
+import axios from 'axios';
 import { expect } from 'chai';
 import FormData from 'form-data';
 import querystring from 'querystring';
 import sinon from 'sinon';
 
-import { formatRequestConfig, getVariable, ReduceKeyValue, stringToNumIfNumeric } from '@/runtime/lib/Handlers/api/utils';
+import * as APIUtils from '@/runtime/lib/Handlers/api/utils';
 
 import { baseData, baseOptions } from './fixture';
 
 describe('Handlers api utils unit tests', () => {
-  describe('stringToNumIfNumeric', () => {
-    it('returns single digit number', () => {
-      expect(stringToNumIfNumeric('1')).to.eql(1);
+  describe('makeAPICall', () => {
+    let validateIPStub: sinon.SinonStub;
+    let axiosAdaptorStub: sinon.SinonStub;
+    beforeEach(() => {
+      validateIPStub = sinon.stub(APIUtils, 'validateIP');
+      axiosAdaptorStub = sinon.stub();
+      axios.defaults.adapter = axiosAdaptorStub;
     });
 
-    it('returns 15 digit number', () => {
-      expect(stringToNumIfNumeric('123456789123456')).to.eql(123456789123456);
+    afterEach(() => {
+      validateIPStub.restore();
+      axios.defaults.adapter = undefined;
     });
 
-    it('returns 16 character string number', () => {
-      expect(stringToNumIfNumeric('1234567891234567')).to.eql('1234567891234567');
-    });
+    it('works', async () => {
+      validateIPStub.returns(null);
+      axiosAdaptorStub.resolves({
+        data: {
+          a: {
+            b: [
+              {
+                c: '00001234',
+              },
+            ],
+            d: 422,
+          },
+        },
+      });
 
-    it('returns same string', () => {
-      expect(stringToNumIfNumeric('123abc')).to.eql('123abc');
-    });
+      const runtime = {
+        outgoingApiLimiter: {
+          addHostnameUseAndShouldThrottle: sinon.stub().resolves(false),
+        },
+      } as any;
 
-    it('returns undefined', () => {
-      expect(stringToNumIfNumeric(undefined as any)).to.eql(undefined);
-    });
+      const nodeData = {
+        url: 'http://0.0.0.0',
+        mapping: [
+          {
+            var: 'var1',
+            path: 'a.b[0].c',
+          },
+          {
+            var: 'var2',
+            path: 'a.d',
+          },
+        ],
+      } as any;
 
-    it('returns same object', () => {
-      expect(stringToNumIfNumeric({ foo: 'bar' } as any)).to.eql({ foo: 'bar' });
-    });
-  });
+      const { variables } = await APIUtils.makeAPICall(nodeData, runtime);
 
-  describe('getVariable', () => {
-    it('returns undefined if path is empty string', () => {
-      expect(getVariable('', {})).to.eql(undefined);
-    });
-
-    it('returns undefined if path is a number', () => {
-      expect(getVariable(5 as any, {})).to.eql(undefined);
+      expect(variables.var1).to.equal('00001234');
+      expect(variables.var2).to.equal(422);
     });
   });
 
@@ -55,7 +76,7 @@ describe('Handlers api utils unit tests', () => {
         { key: '', val: 'value5' },
       ];
 
-      expect(ReduceKeyValue(arr)).to.eql({
+      expect(APIUtils.ReduceKeyValue(arr)).to.eql({
         key1: 'value4',
         key2: 'value2',
         key3: 'value3',
@@ -75,7 +96,7 @@ describe('Handlers api utils unit tests', () => {
           bodyInputType: BaseNode.Api.APIBodyType.RAW_INPUT,
         };
 
-        const { validateStatus, ...rest } = await formatRequestConfig(data as any);
+        const { validateStatus, ...rest } = APIUtils.formatRequestConfig(data as any);
         expect(rest).to.eql({
           ...baseOptions,
           method: data.method,
@@ -90,7 +111,7 @@ describe('Handlers api utils unit tests', () => {
           bodyInputType: BaseNode.Api.APIBodyType.FORM_DATA,
         };
 
-        const { validateStatus, ...rest } = await formatRequestConfig(data as any);
+        const { validateStatus, ...rest } = APIUtils.formatRequestConfig(data as any);
         expect(rest).to.eql({
           ...baseOptions,
           method: data.method,
@@ -107,7 +128,7 @@ describe('Handlers api utils unit tests', () => {
           bodyInputType: BaseNode.Api.APIBodyType.RAW_INPUT,
         };
 
-        const { validateStatus, ...rest } = await formatRequestConfig(data as any);
+        const { validateStatus, ...rest } = APIUtils.formatRequestConfig(data as any);
         expect(rest).to.eql({
           ...baseOptions,
           data: 'parsedJSON',
@@ -122,7 +143,7 @@ describe('Handlers api utils unit tests', () => {
           bodyInputType: BaseNode.Api.APIBodyType.RAW_INPUT,
         };
 
-        const { validateStatus, ...rest } = await formatRequestConfig(data as any);
+        const { validateStatus, ...rest } = APIUtils.formatRequestConfig(data as any);
         expect(rest).to.eql({
           ...baseOptions,
           data,
@@ -144,7 +165,7 @@ describe('Handlers api utils unit tests', () => {
           bodyInputType: BaseNode.Api.APIBodyType.FORM_DATA,
         };
 
-        const { validateStatus, data: formDataObj, ...rest } = await formatRequestConfig(data as any);
+        const { validateStatus, data: formDataObj, ...rest } = APIUtils.formatRequestConfig(data as any);
         expect(rest).to.eql({
           ...baseOptions,
           headers: {
@@ -168,7 +189,7 @@ describe('Handlers api utils unit tests', () => {
           body: 'body-value',
         };
 
-        const { validateStatus, ...rest } = await formatRequestConfig(data as any);
+        const { validateStatus, ...rest } = APIUtils.formatRequestConfig(data as any);
         expect(rest).to.eql({
           ...baseOptions,
           data: 'body-value',
@@ -188,7 +209,7 @@ describe('Handlers api utils unit tests', () => {
           ],
         };
 
-        const { validateStatus, ...rest } = await formatRequestConfig(data as any);
+        const { validateStatus, ...rest } = APIUtils.formatRequestConfig(data as any);
         expect(rest).to.eql({
           ...baseOptions,
           data: 'querystring stringify',
@@ -208,7 +229,7 @@ describe('Handlers api utils unit tests', () => {
           body: 'body-value',
         };
 
-        const { validateStatus, ...rest } = await formatRequestConfig(data as any);
+        const { validateStatus, ...rest } = APIUtils.formatRequestConfig(data as any);
         expect(rest).to.eql({
           ...baseOptions,
           data: 'querystring stringify',
@@ -232,7 +253,7 @@ describe('Handlers api utils unit tests', () => {
           ],
         };
 
-        const { validateStatus, ...rest } = await formatRequestConfig(data as any);
+        const { validateStatus, ...rest } = APIUtils.formatRequestConfig(data as any);
         expect(rest).to.eql({
           ...baseOptions,
           data: { body1: 'bodyval' },
@@ -250,7 +271,7 @@ describe('Handlers api utils unit tests', () => {
         ],
       };
 
-      const { validateStatus, ...rest } = await formatRequestConfig(data as any);
+      const { validateStatus, ...rest } = APIUtils.formatRequestConfig(data as any);
       expect(rest).to.eql({
         ...baseOptions,
         data: { body1: 'bodyval' },
@@ -264,7 +285,7 @@ describe('Handlers api utils unit tests', () => {
         body: {},
       };
 
-      const { validateStatus, ...rest } = await formatRequestConfig(data as any);
+      const { validateStatus, ...rest } = APIUtils.formatRequestConfig(data as any);
       expect(rest).to.eql({
         ...baseOptions,
       });

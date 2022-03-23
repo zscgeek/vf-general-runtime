@@ -20,43 +20,6 @@ const BLACKLISTED_URLS: RegExp[] = [];
 // Delay amount in ms for when max api call limit is reached
 const THROTTLE_DELAY = 2000;
 
-export const stringToNumIfNumeric = (str: string): string | number => {
-  /* eslint-disable-next-line */
-  if (_.isString(str) && !isNaN(str as any) && str.length < 16) {
-    return Number(str);
-  }
-
-  return str;
-};
-
-export const getVariable = (path: string, data: any) => {
-  if (!path || typeof path !== 'string') {
-    return undefined;
-  }
-
-  const props = path.split('.');
-  let curData: any = { response: data };
-
-  props.forEach((prop) => {
-    const propsAndInds = prop.split('[');
-    propsAndInds.forEach((propOrInd) => {
-      if (propOrInd.indexOf(']') >= 0) {
-        const indexStr = propOrInd.slice(0, -1);
-        let index;
-        if (indexStr.toLowerCase() === '{random}') {
-          index = Math.floor(Math.random() * curData.length);
-        } else {
-          index = parseInt(indexStr, 10);
-        }
-        curData = curData ? curData[index] : undefined;
-      } else {
-        curData = curData ? curData[propOrInd] : undefined;
-      }
-    });
-  });
-  return stringToNumIfNumeric(curData);
-};
-
 export const ReduceKeyValue = (values: { key: string; val: string }[]) =>
   values.reduce<Record<string, string>>((acc, { key, val }) => {
     if (key) {
@@ -65,7 +28,7 @@ export const ReduceKeyValue = (values: { key: string; val: string }[]) =>
     return acc;
   }, {});
 
-const validateHostname = (urlString: string): string => {
+export const validateHostname = (urlString: string): string => {
   let url: URL;
   try {
     url = new URL(urlString);
@@ -86,7 +49,7 @@ const validateHostname = (urlString: string): string => {
   return hostname;
 };
 
-const validateIP = async (hostname: string) => {
+export const validateIP = async (hostname: string) => {
   // DNS.resolve returns an array of ips
   const ips = validator.isIP(hostname)
     ? [hostname]
@@ -107,7 +70,7 @@ export interface ResponseConfig {
 }
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
-export const formatRequestConfig = (data: APINodeData, config: ResponseConfig) => {
+export const formatRequestConfig = (data: APINodeData, config?: ResponseConfig) => {
   const { method, bodyInputType, headers, body, params, url, content } = data;
 
   const options: AxiosRequestConfig = {
@@ -173,7 +136,7 @@ export const formatRequestConfig = (data: APINodeData, config: ResponseConfig) =
   return options;
 };
 
-export const makeAPICall = async (nodeData: APINodeData, runtime: Runtime, config: ResponseConfig) => {
+export const makeAPICall = async (nodeData: APINodeData, runtime: Runtime, config?: ResponseConfig) => {
   const hostname = validateHostname(nodeData.url);
   await validateIP(hostname);
 
@@ -195,12 +158,9 @@ export const makeAPICall = async (nodeData: APINodeData, runtime: Runtime, confi
     data.VF_HEADERS = headers;
   }
 
-  const newVariables = Object.fromEntries((nodeData.mapping ?? []).filter((map) => map.var).map((map) => [map.var, getVariable(map.path, data)]));
+  const variables = Object.fromEntries(
+    (nodeData.mapping ?? []).filter((map) => map.var && _.has(data, map.path)).map((map) => [map.var, _.get(data, map.path)])
+  );
 
-  // remove all undefined variables
-  Object.keys(newVariables).forEach((variable) => {
-    if (newVariables[variable] === undefined) delete newVariables[variable];
-  });
-
-  return { variables: newVariables, response: { data, headers, status } };
+  return { variables, response: { data, headers, status } };
 };
