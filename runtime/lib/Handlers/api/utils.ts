@@ -136,6 +136,25 @@ export const formatRequestConfig = (data: APINodeData, config?: ResponseConfig) 
   return options;
 };
 
+export const getVariableAtJSONPath = (data: any, pathStr: string) => {
+  const path: string[] = _.toPath(pathStr);
+
+  return path.reduce((acc, prop) => {
+    if (acc == null) return acc;
+
+    if (prop.toLocaleLowerCase() === '{random}') {
+      if (!Array.isArray(acc)) return undefined;
+      prop = String(Math.floor(Math.random() * acc.length));
+    }
+
+    return _.get(acc, prop);
+  }, data);
+};
+
+export const resolveVariableMapping = <T>(mapping: BaseNode.Api.APIMapping[], resp: T) => {
+  return Object.fromEntries(mapping.filter((map) => map.var && _.has(resp, map.path)).map((map) => [map.var, getVariableAtJSONPath(resp, map.path)]));
+};
+
 export const makeAPICall = async (nodeData: APINodeData, runtime: Runtime, config?: ResponseConfig) => {
   const hostname = validateHostname(nodeData.url);
   await validateIP(hostname);
@@ -158,9 +177,7 @@ export const makeAPICall = async (nodeData: APINodeData, runtime: Runtime, confi
     data.VF_HEADERS = headers;
   }
 
-  const variables = Object.fromEntries(
-    (nodeData.mapping ?? []).filter((map) => map.var && _.has(data, map.path)).map((map) => [map.var, _.get(data, map.path)])
-  );
+  const variables = resolveVariableMapping(nodeData.mapping ?? [], { response: data });
 
   return { variables, response: { data, headers, status } };
 };
