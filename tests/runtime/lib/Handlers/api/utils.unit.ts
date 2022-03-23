@@ -10,6 +10,39 @@ import * as APIUtils from '@/runtime/lib/Handlers/api/utils';
 import { baseData, baseOptions } from './fixture';
 
 describe('Handlers api utils unit tests', () => {
+  describe('getVariableAtJSONPath', () => {
+    it('retrieves value at json path', () => {
+      const data = {
+        a: {
+          b: 422,
+        },
+      };
+      expect(APIUtils.getVariableAtJSONPath(data, 'a.b')).to.equal(422);
+    });
+
+    it('retrieves value at json path with array accessor', () => {
+      const data = {
+        a: {
+          b: [
+            {
+              c: '00001234',
+            },
+          ],
+        },
+      };
+      expect(APIUtils.getVariableAtJSONPath(data, 'a.b[0].c')).to.equal('00001234');
+    });
+
+    it('retrieves value at json path with random array', () => {
+      const data = {
+        a: {
+          b: ['hello'],
+        },
+      };
+      expect(APIUtils.getVariableAtJSONPath(data, 'a.b[{random}]')).to.equal('hello');
+    });
+  });
+
   describe('makeAPICall', () => {
     let validateIPStub: sinon.SinonStub;
     let axiosAdaptorStub: sinon.SinonStub;
@@ -50,11 +83,11 @@ describe('Handlers api utils unit tests', () => {
         mapping: [
           {
             var: 'var1',
-            path: 'a.b[0].c',
+            path: 'response.a.b[0].c',
           },
           {
             var: 'var2',
-            path: 'a.d',
+            path: 'response.a.d',
           },
         ],
       } as any;
