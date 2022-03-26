@@ -12,7 +12,7 @@ parameters:
     default: "deployment/general-runtime"
   k8s-namespace:
     type: string
-    default: "voiceflow-v1" # This is usually voiceflow-v1
+    default: "voiceflow" # This is usually voiceflow
   ssh-fingerprint:
     type: string
     default: "61:71:13:8f:00:5f:da:63:a8:0c:6d:f3:b4:b1:17:b3"
@@ -59,7 +59,7 @@ defaults:
           branch_pattern: master
 
 orbs:
-  vfcommon: voiceflow/common@0.0.333
+  vfcommon: voiceflow/common@0.0.338
   sonarcloud: sonarsource/sonarcloud@1.0.2
 
 jobs:
