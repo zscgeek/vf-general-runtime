@@ -72,12 +72,16 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
 
       subscription.on('message', (message) => {
         const data = JSON.parse(message.data.toString());
+        console.log('MESSAGE RESPONSE', data);
         if (Array.isArray(data.intents)) {
-          resolve(data.intents);
+          resolve(data.intents[0]);
           clearTimeout(subscriptionTimeout);
         }
         message.ack();
+        subscription.close();
       });
+
+      console.log('SENDING OUT QUERY', query);
 
       topic.publishMessage({
         json: {

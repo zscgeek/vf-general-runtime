@@ -78,7 +78,7 @@ const CONFIG: Config = {
 
   PUBSUB_PROJECT_ID: getOptionalProcessEnv('PUBSUB_PROJECT_ID') || 'denys-staging-1111',
   PUBSUB_TOPIC_ID: getOptionalProcessEnv('PUBSUB_TOPIC_ID') || 'vf3258_nlu_test_1_req',
-  PUBSUB_SUBSCRIPTION: getOptionalProcessEnv('PUBSUB_TOPIC_ID') || 'vf3258_nlu_test_1_resp_sub',
+  PUBSUB_SUBSCRIPTION: getOptionalProcessEnv('PUBSUB_SUBSCRIPTION_ID') || 'vf3258_nlu_test_1_resp_sub',
 
   // SESSIONS SOURCE
   SESSIONS_SOURCE: getRequiredProcessEnv('SESSIONS_SOURCE'),
