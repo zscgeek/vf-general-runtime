@@ -76,6 +76,10 @@ const CONFIG: Config = {
   RATE_LIMITER_POINTS_PRIVATE: Number(getOptionalProcessEnv('RATE_LIMITER_POINTS_PRIVATE', '500')),
   RATE_LIMITER_DURATION_PRIVATE: Number(getOptionalProcessEnv('RATE_LIMITER_DURATION_PRIVATE', '60')),
 
+  PUBSUB_PROJECT_ID: getOptionalProcessEnv('PUBSUB_PROJECT_ID') || 'denys-staging-1111',
+  PUBSUB_TOPIC_ID: getOptionalProcessEnv('PUBSUB_TOPIC_ID') || 'vf3258_nlu_test_1_req',
+  PUBSUB_SUBSCRIPTION: getOptionalProcessEnv('PUBSUB_TOPIC_ID') || 'vf3258_nlu_test_1_resp_sub',
+
   // SESSIONS SOURCE
   SESSIONS_SOURCE: getRequiredProcessEnv('SESSIONS_SOURCE'),
   MONGO_URI: getOptionalProcessEnv('MONGO_URI'),

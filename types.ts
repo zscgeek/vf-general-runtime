@@ -59,6 +59,11 @@ export interface Config extends RateLimitConfig {
   MONGO_URI: string | null;
   MONGO_DB: string | null;
 
+  // PUBSUB
+  PUBSUB_PROJECT_ID: string;
+  PUBSUB_TOPIC_ID: string;
+  PUBSUB_SUBSCRIPTION: string;
+
   ANALYTICS_ENDPOINT: string | null;
   ANALYTICS_WRITE_KEY: string | null;
   INGEST_WEBHOOK_ENDPOINT: string | null;

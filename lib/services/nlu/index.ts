@@ -20,44 +20,86 @@ export const utils = {};
  * random
  */
 class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHandler {
-  async predict({
-    query,
-    model,
-    locale,
-    projectID,
-  }: {
-    query: string;
-    model?: BaseModels.PrototypeModel;
-    locale?: VoiceflowConstants.Locale;
-    projectID: string;
-  }) {
-    // 1. first try restricted regex (no open slots) - exact string match
-    if (model && locale) {
-      const intent = handleNLCCommand({ query, model, locale, openSlot: false });
-      if (intent.payload.intent.name !== NONE_INTENT) {
-        return intent;
-      }
-    }
+  // async predict({
+  //   query,
+  //   model,
+  //   locale,
+  //   projectID,
+  // }: {
+  //   query: string;
+  //   model?: BaseModels.PrototypeModel;
+  //   locale?: VoiceflowConstants.Locale;
+  //   projectID: string;
+  // }): Promise<BaseRequest.IntentRequest> {
+  //   // 1. first try restricted regex (no open slots) - exact string match
+  //   if (model && locale) {
+  //     const intent = handleNLCCommand({ query, model, locale, openSlot: false });
+  //     if (intent.payload.intent.name !== NONE_INTENT) {
+  //       return intent;
+  //     }
+  //   }
 
-    // 2. next try to resolve with luis NLP on general-service
-    const { data } = await this.services.axios
-      .post<BaseRequest.IntentRequest | null>(`${this.config.GENERAL_SERVICE_ENDPOINT}/runtime/${projectID}/predict`, {
+  //   // 2. next try to resolve with luis NLP on general-service
+  //   const { data } = await this.services.axios
+  //     .post<BaseRequest.IntentRequest | null>(`${this.config.GENERAL_SERVICE_ENDPOINT}/runtime/${projectID}/predict`, {
+  //       query,
+  //     })
+  //     .catch(() => ({ data: null }));
+
+  //   if (data) {
+  //     return data;
+  //   }
+
+  //   // 3. finally try open regex slot matching
+  //   if (!model) {
+  //     throw new Error('Model not found!');
+  //   }
+  //   if (!locale) {
+  //     throw new Error('Locale not found!');
+  //   }
+  //   return handleNLCCommand({ query, model, locale, openSlot: true });
+  // }
+
+  async predict({ query }: { query: string } & Record<string, any>): Promise<BaseRequest.IntentRequest> {
+    const topic = await this.services.pubsub.topic(this.config.PUBSUB_TOPIC_ID);
+
+    const subscription = topic.subscription(this.config.PUBSUB_SUBSCRIPTION);
+
+    const name = await new Promise<string>((resolve, reject) => {
+      const subscriptionTimeout = setTimeout(() => {
+        reject();
+      }, 10000);
+
+      subscription.on('message', (message) => {
+        const data = JSON.parse(message.data.toString());
+        if (Array.isArray(data.intents)) {
+          resolve(data.intents);
+          clearTimeout(subscriptionTimeout);
+        }
+        message.ack();
+      });
+
+      topic.publishMessage({
+        json: {
+          modelName: 'pubsubtest2',
+          modelCompany: 'vf',
+          modelWorkspace: 'denystest',
+          modelCloud: 'pc',
+          modelLanguage: 'en',
+          utterance: query,
+          reqGUID: 'abc123',
+        },
+      });
+    });
+
+    return {
+      type: BaseRequest.RequestType.INTENT,
+      payload: {
+        intent: { name },
         query,
-      })
-      .catch(() => ({ data: null }));
-
-    if (data) {
-      return data;
-    }
-
-    // 3. finally try open regex slot matching
-    if (!model) {
-      throw new Error('Model not found!');
-    }
-    if (!locale) {
-      throw new Error('Locale not found!');
-    }
-    return handleNLCCommand({ query, model, locale, openSlot: true });
+        entities: [],
+      },
+    };
   }
 
   handle = async (context: Context) => {

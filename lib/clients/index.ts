@@ -7,6 +7,7 @@ import Analytics, { AnalyticsSystem } from './analytics';
 import DataAPI from './dataAPI';
 import Metrics, { MetricsType } from './metrics';
 import MongoDB from './mongodb';
+import PubSub from './pubsub';
 import { RedisClient } from './redis';
 import Static, { StaticType } from './static';
 
@@ -16,6 +17,7 @@ export interface ClientMap extends StaticType {
   redis: ReturnType<typeof RedisClient>;
   rateLimitClient: ReturnType<typeof RateLimitClient>;
   mongo: MongoDB | null;
+  pubsub: ReturnType<typeof PubSub>;
   analyticsClient: AnalyticsSystem | null;
 }
 
@@ -30,6 +32,7 @@ const buildClients = (config: Config): ClientMap => {
     dataAPI: new DataAPI(config),
     metrics: Metrics(config),
     redis,
+    pubsub: PubSub(config),
     rateLimitClient: RateLimitClient('general-runtime', redis, config),
     mongo: MongoSession.enabled(config) ? new MongoDB(config) : null,
     analyticsClient: Analytics(config),

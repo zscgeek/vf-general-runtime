@@ -12,6 +12,7 @@
     }
   },
   "dependencies": {
+    "@google-cloud/pubsub": "^2.19.0",
     "@opentelemetry/api-metrics": "0.26.0",
     "@types/mathjs": "^6.0.4",
     "@types/workerpool": "^5.0.1",
