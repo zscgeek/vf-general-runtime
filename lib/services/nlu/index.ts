@@ -65,23 +65,34 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
 
     const subscription = topic.subscription(this.config.PUBSUB_SUBSCRIPTION);
 
-    const name = await new Promise<string>((resolve, reject) => {
+    return new Promise<BaseRequest.IntentRequest>((resolve, reject) => {
       const subscriptionTimeout = setTimeout(() => {
         reject();
       }, 10000);
 
       subscription.on('message', (message) => {
-        const data = JSON.parse(message.data.toString());
-        console.log('MESSAGE RESPONSE', data);
-        if (Array.isArray(data.intents)) {
-          resolve(data.intents[0]);
-          clearTimeout(subscriptionTimeout);
-        }
+        const data: {
+          prediction: { query: string; topScoringIntent: string; intents: Record<string, number>; slots: Record<string, string> };
+        } = JSON.parse(message.data.toString());
+
+        const { topScoringIntent, slots, intents } = data.prediction;
+
+        resolve({
+          type: BaseRequest.RequestType.INTENT,
+          payload: {
+            intent: { name: topScoringIntent },
+            query: data.prediction.query,
+            entities: Object.entries(slots).map(([key, value]) => ({
+              name: key,
+              value,
+            })),
+            confidence: intents[topScoringIntent] || undefined,
+          },
+        });
+        clearTimeout(subscriptionTimeout);
         message.ack();
         subscription.close();
       });
-
-      console.log('SENDING OUT QUERY', query);
 
       topic.publishMessage({
         json: {
@@ -95,15 +106,6 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
         },
       });
     });
-
-    return {
-      type: BaseRequest.RequestType.INTENT,
-      payload: {
-        intent: { name },
-        query,
-        entities: [],
-      },
-    };
   }
 
   handle = async (context: Context) => {
