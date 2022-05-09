@@ -26,10 +26,10 @@ export const hasElicit = (
 const noMatchHandler = NoMatchHandler();
 
 export const EntityFillingNoMatchHandler = () => ({
-  handle: (node: NoMatchNode, runtime: Runtime, variables: Store) => (intents: string[] = [], defaultRequest?: BaseRequest.IntentRequest) => {
+  handle: (node: NoMatchNode, runtime: Runtime, variables: Store) => (intents?: string[], defaultRequest?: BaseRequest.IntentRequest) => {
     // see if the prior entity filling intent is within context
     const priorIntent = runtime.storage.get<DMStore>(StorageType.DM)?.priorIntent;
-    const priorIntentMatch = intents.includes(priorIntent?.payload.intent.name!) && priorIntent?.payload.entities.length;
+    const priorIntentMatch = !!priorIntent && (intents ?? []).includes(priorIntent.payload.intent.name) && priorIntent?.payload.entities.length;
 
     const nextRequest = (priorIntentMatch && priorIntent) || defaultRequest;
 

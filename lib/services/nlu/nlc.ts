@@ -3,7 +3,6 @@ import { getUtterancesWithSlotNames } from '@voiceflow/common';
 import NLC, { IIntentFullfilment, IIntentSlot } from '@voiceflow/natural-language-commander';
 import { getRequired } from '@voiceflow/natural-language-commander/dist/lib/standardSlots';
 import { VoiceflowConstants } from '@voiceflow/voiceflow-types';
-import _ from 'lodash';
 
 import log from '@/logger';
 
@@ -18,7 +17,8 @@ export const registerSlots = (nlc: NLC, { slots }: BaseModels.PrototypeModel, op
           nlc.addSlotType({ type: slot.name, matcher: /[\S\s]*/ });
         }
       } else {
-        const matcher = _.flatten(slot.inputs.map((input) => input.split(',')))
+        const matcher = slot.inputs
+          .flatMap((input) => input.split(','))
           .map((value) => value.trim())
           .filter(Boolean);
 
@@ -102,6 +102,7 @@ export const createNLC = ({
   return nlc;
 };
 
+// eslint-disable-next-line default-param-last
 export const nlcToIntent = (intent: IIntentFullfilment | null, query = '', confidence?: number): BaseRequest.IntentRequest =>
   (intent && {
     type: BaseRequest.RequestType.INTENT,

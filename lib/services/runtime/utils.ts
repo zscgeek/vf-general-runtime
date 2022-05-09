@@ -2,7 +2,6 @@ import { BaseModels, BaseNode, BaseRequest, BaseText, BaseTrace } from '@voicefl
 import { replaceVariables, sanitizeVariables, transformStringVariableToNumber, Utils } from '@voiceflow/common';
 import cuid from 'cuid';
 import _cloneDeepWith from 'lodash/cloneDeepWith';
-import _isString from 'lodash/isString';
 import _uniqBy from 'lodash/uniqBy';
 import * as Slate from 'slate';
 
@@ -48,7 +47,7 @@ export const mapEntities = (
 
 export const slateInjectVariables = (slateValue: BaseText.SlateTextValue, variables: Record<string, unknown>): BaseText.SlateTextValue => {
   // return undefined to recursively clone object https://stackoverflow.com/a/52956848
-  const customizer = (value: any) => (_isString(value) ? replaceVariables(value, variables, undefined, { trim: false }) : undefined);
+  const customizer = (value: any) => (typeof value === 'string' ? replaceVariables(value, variables, undefined, { trim: false }) : undefined);
 
   return _cloneDeepWith(slateValue, customizer);
 };
@@ -65,6 +64,7 @@ const processActions = (actions: BaseRequest.Action.BaseAction<unknown>[] | unde
     return action;
   });
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export const addButtonsIfExists = <N extends BaseRequest.NodeButton>(node: N, runtime: Runtime, variables: Store): void => {
   let buttons: BaseRequest.AnyRequestButton[] = [];
 
@@ -153,7 +153,7 @@ export const slateToPlaintext = (content: Readonly<BaseText.SlateTextValue> = []
     .trim();
 
 export const removeEmptyPrompts = (prompts: Array<BaseText.SlateTextValue | string>): Array<BaseText.SlateTextValue | string> =>
-  prompts.filter((prompt) => prompt != null && (_isString(prompt) ? prompt !== EMPTY_AUDIO_STRING : !!slateToPlaintext(prompt)));
+  prompts.filter((prompt) => prompt != null && (typeof prompt === 'string' ? prompt !== EMPTY_AUDIO_STRING : !!slateToPlaintext(prompt)));
 
 interface OutputParams<V> {
   output?: V;
