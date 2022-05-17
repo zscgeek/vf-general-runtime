@@ -29,39 +29,20 @@ class Project extends AbstractMiddleware {
     HEADERS_VERSION_ID: VALIDATIONS.HEADERS.VERSION_ID,
     HEADERS_AUTHORIZATION: VALIDATIONS.HEADERS.AUTHORIZATION,
   })
-  async attachID(req: Request<Record<string, unknown>, unknown, { versionID?: string }>, _res: Response, next: NextFunction): Promise<void> {
+  async attachProjectID(req: Request<Record<string, unknown>, unknown, { versionID?: string }>, _res: Response, next: NextFunction): Promise<void> {
+    const { versionID } = req.headers;
+
+    if (!versionID) {
+      throw new VError('Could not resolve the version ID', 400);
+    }
+
     const api = await this.services.dataAPI.get(req.headers.authorization).catch((error) => {
       throw new VError(`invalid API key: ${error}`, VError.HTTP_STATUS.UNAUTHORIZED);
     });
 
     try {
-      // Facilitate supporting routes that require a versionID but do not have to supply one.
-      // We can use the provided API key to look up the project and grab the latest version.
-      if (!req.headers.versionID && BaseModels.ApiKey.isDialogManagerAPIKey(req.headers.authorization)) {
-        if (!(api instanceof CreatorDataApi)) {
-          throw new VError('Version lookup only supported via Creator Data API', VError.HTTP_STATUS.UNAUTHORIZED);
-        }
-
-        const project = await api.getProjectUsingAuthorization(req.headers.authorization).catch(() => null);
-        if (!project) {
-          throw new VError('Cannot infer project version, provide a specific version in the versionID header', 404);
-        }
-
-        req.headers.prototype = 'api';
-        req.headers.projectID = project._id.toString();
-        req.headers.versionID = project.devVersion!.toString();
-
-        return next();
-      }
-
-      if (!req.headers.versionID) {
-        throw new VError('Missing versionID header', 400);
-      }
-
-      const { projectID } = await api.getVersion(req.headers.versionID);
-
+      const { projectID } = await api.getVersion(versionID);
       req.headers.projectID = projectID;
-
       return next();
     } catch (err) {
       if (err instanceof VError) throw err;
