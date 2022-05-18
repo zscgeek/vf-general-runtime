@@ -7,7 +7,7 @@ import { BaseModels, BaseRequest } from '@voiceflow/base-types';
 import { VoiceflowConstants } from '@voiceflow/voiceflow-types';
 
 import { isTextRequest } from '@/lib/services/runtime/types';
-import { Context, ContextHandler } from '@/types';
+import { Context, ContextHandler, PredictionStage } from '@/types';
 
 import { AbstractManager, injectServices } from '../utils';
 import { handleNLCCommand } from './nlc';
@@ -25,13 +25,13 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
     model,
     locale,
     projectID,
-    versionID,
+    isProduction,
   }: {
     query: string;
     model?: BaseModels.PrototypeModel;
     locale?: VoiceflowConstants.Locale;
     projectID: string;
-    versionID: string;
+    isProduction: boolean;
   }) {
     // 1. first try restricted regex (no open slots) - exact string match
     if (model && locale) {
@@ -45,7 +45,7 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
     const { data } = await this.services.axios
       .post<BaseRequest.IntentRequest | null>(`${this.config.GENERAL_SERVICE_ENDPOINT}/runtime/${projectID}/predict`, {
         query,
-        versionID,
+        isProduction,
       })
       .catch(() => ({ data: null }));
 
@@ -87,7 +87,7 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
       model: version.prototype?.model,
       locale: version.prototype?.data.locales[0] as VoiceflowConstants.Locale,
       projectID: version.projectID,
-      versionID: context.versionID,
+      isProduction: context.data.stage === PredictionStage.PROD,
     });
 
     return { ...context, request };

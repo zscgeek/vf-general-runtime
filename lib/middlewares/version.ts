@@ -5,7 +5,7 @@ import { NextFunction, Response } from 'express';
 
 import { validate } from '@/lib/utils';
 import { CreatorDataApi } from '@/runtime';
-import { Request } from '@/types';
+import { PredictionStage, Request } from '@/types';
 
 import { AbstractMiddleware } from './utils';
 
@@ -33,43 +33,41 @@ class Version extends AbstractMiddleware {
       headers: { versionID, authorization: apiKey },
     } = req;
 
-    const isValidAPIKey = BaseModels.ApiKey.isDialogManagerAPIKey(apiKey);
+    if (!BaseModels.ApiKey.isDialogManagerAPIKey(apiKey)) {
+      throw new VError('Invalid API key', 400);
+    }
 
     try {
-      // Case 1 - Missing version ID, resolve if API key provided
+      // Retrieve project information to resolve version and its associated stage
+      const { devVersion, liveVersion } = await this.getProjectFromAPIKey(apiKey);
+
+      // Case 1 - Missing version ID, default to `devVersion`
       if (!versionID) {
-        if (!isValidAPIKey) {
-          throw new VError('Missing version ID header', 400);
-        }
-
-        const project = await this.getProjectFromAPIKey(apiKey);
-
         req.headers.prototype = 'api';
-        req.headers.versionID = project!.devVersion!.toString();
+        req.headers.versionID = devVersion;
+        req.headers.stage = PredictionStage.STAGING;
 
         return next();
       }
 
       // Case 2 - Non-alias version ID, proceed normally
-      if (!['Production', 'Staging'].includes(versionID)) {
+      if (!Object.values<string>(PredictionStage).includes(versionID)) {
+        req.headers.stage = this.getStage(versionID, liveVersion);
         return next();
       }
 
       // Case 3 - Alias version ID, resolve into actual version ID
-      if (!isValidAPIKey) {
-        throw new VError('Could not resolve alias, please check your API key', 400);
-      }
-
-      const project = await this.getProjectFromAPIKey(apiKey);
-
-      const { devVersion, liveVersion } = project;
-      req.headers.versionID = versionID === 'Production' ? liveVersion : devVersion;
-
+      req.headers.versionID = versionID === PredictionStage.PROD ? liveVersion : devVersion;
+      req.headers.stage = this.getStage(versionID, liveVersion);
       return next();
     } catch (err) {
       if (err instanceof VError) throw err;
       else throw new VError('no permissions for this version', VError.HTTP_STATUS.UNAUTHORIZED);
     }
+  }
+
+  getStage(versionID: string, liveVersion?: string) {
+    return liveVersion === versionID ? PredictionStage.PROD : PredictionStage.STAGING;
   }
 
   async getProjectFromAPIKey(apiKey: string) {

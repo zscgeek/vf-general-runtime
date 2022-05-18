@@ -97,10 +97,16 @@ export interface Class<T, A extends any[]> {
 }
 export type AnyClass = Class<any, any[]>;
 
+export enum PredictionStage {
+  PROD = 'Production',
+  STAGING = 'Staging',
+}
+
 export interface ContextData {
   api: CacheDataAPI;
   locale?: string;
   config?: BaseRequest.RequestConfig;
+  stage?: PredictionStage;
   reqHeaders?: {
     origin?: string;
     platform?: string;
