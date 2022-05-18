@@ -25,7 +25,7 @@ class Version extends AbstractMiddleware {
     HEADERS_AUTHORIZATION: VALIDATIONS.HEADERS.AUTHORIZATION,
   })
   async resolveVersionID(
-    req: Request<Record<string, unknown>, unknown, { versionID?: string; authorization?: string }>,
+    req: Request<Record<string, unknown>, unknown, { versionID?: string; authorization: string }>,
     _res: Response,
     next: NextFunction
   ) {
