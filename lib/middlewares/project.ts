@@ -1,10 +1,8 @@
 import { Validator } from '@voiceflow/backend-utils';
-import { BaseModels } from '@voiceflow/base-types';
 import VError from '@voiceflow/verror';
 import { NextFunction, Response } from 'express';
 
 import { validate } from '@/lib/utils';
-import { CreatorDataApi } from '@/runtime';
 import { Request } from '@/types';
 
 import { AbstractMiddleware } from './utils';
