@@ -1,13 +1,29 @@
+import { Validator } from '@voiceflow/backend-utils';
 import { BaseModels } from '@voiceflow/base-types';
 import VError from '@voiceflow/verror';
 import { NextFunction, Response } from 'express';
 
-import { CreatorDataApi, Program } from '@/runtime';
+import { validate } from '@/lib/utils';
+import { CreatorDataApi } from '@/runtime';
 import { Request } from '@/types';
 
 import { AbstractMiddleware } from './utils';
 
+const { header } = Validator;
+const VALIDATIONS = {
+  HEADERS: {
+    VERSION_ID: header('versionID').optional().isString(),
+    AUTHORIZATION: header('authorization').exists().isString(),
+  },
+};
+
 class Version extends AbstractMiddleware {
+  static VALIDATIONS = VALIDATIONS;
+
+  @validate({
+    HEADERS_VERSION_ID: VALIDATIONS.HEADERS.VERSION_ID,
+    HEADERS_AUTHORIZATION: VALIDATIONS.HEADERS.AUTHORIZATION,
+  })
   async resolveVersionID(
     req: Request<Record<string, unknown>, unknown, { versionID?: string; authorization?: string }>,
     _res: Response,
