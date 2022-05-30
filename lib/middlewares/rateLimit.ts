@@ -5,16 +5,13 @@ import { Config, Request } from '@/types';
 
 import { FullServiceMap } from '../services';
 
-const LOCAL_DEVELOPEMENT = 'https://creator-local.development.voiceflow.com:3002';
+// const LOCAL_DEVELOPEMENT = 'https://creator-local.development.voiceflow.com:3002';
 
 class RateLimit extends RateLimitMiddleware<FullServiceMap, Config> {
   async verify(req: Request, _res: Response, next: NextFunction): Promise<void> {
-    if (
-      !this.config.PROJECT_SOURCE &&
-      !this.config.DISABLE_ORIGIN_CHECK &&
-      ![this.config.CREATOR_APP_ORIGIN, LOCAL_DEVELOPEMENT].includes(req.headers.origin || 'no-origin') &&
-      !req.headers.authorization
-    ) {
+    if (!this.config.PROJECT_SOURCE && !this.config.DISABLE_ORIGIN_CHECK && !req.headers.authorization) {
+      // TODO not rly sure if this should be removed
+      // ![this.config.CREATOR_APP_ORIGIN, LOCAL_DEVELOPEMENT].includes(req.headers.origin || 'no-origin') &&
       RateLimitMiddleware.throwAuthError();
     }
 

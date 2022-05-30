@@ -74,7 +74,7 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
     }
 
     // cache per interaction (save version call during request/response cycle)
-    const dataApi = await this.services.dataAPI.get(context.data?.reqHeaders?.authorization);
+    const dataApi = await this.services.dataAPI.get();
     const api = new CacheDataAPI(dataApi);
     const version = await api.getVersion(context.versionID!);
 
