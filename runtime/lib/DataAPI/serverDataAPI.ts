@@ -85,6 +85,16 @@ class ServerDataAPI<
 
     return data;
   };
+
+  public getProjectUsingAuthorization = async (apiKey: string): Promise<PJ> => {
+    // Extract the model _id from the key: VF.<type>.<id>.<hash>
+    // Legacy workspace keys do not have a type, so we need to pad the split by one.
+    const split = apiKey.split('.');
+    const [, , _id] = split.length === 4 ? split : ['', ...split];
+
+    const project = await this.client.get(`/api-keys/${_id}/project`);
+    return project.data as PJ;
+  };
 }
 
 export default ServerDataAPI;
