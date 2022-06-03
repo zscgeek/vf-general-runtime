@@ -1,7 +1,7 @@
 import { Validator } from '@voiceflow/backend-utils';
 
 import { State } from '@/runtime';
-import { PredictionStage, Request } from '@/types';
+import { Request } from '@/types';
 
 import { customAJV, validate } from '../../utils';
 import { AbstractController } from '../utils';
@@ -30,14 +30,7 @@ class StateManagementController extends AbstractController {
     HEADERS_VERSION_ID: VALIDATIONS.HEADERS.VERSION_ID,
     QUERY_VERBOSE: VALIDATIONS.QUERY.VERBOSE,
   })
-  async interact(
-    req: Request<
-      { userID: string },
-      any,
-      { projectID: string; authorization: string; versionID: string; stage: PredictionStage },
-      { verbose?: boolean }
-    >
-  ) {
+  async interact(req: Request<{ userID: string }, any, { projectID: string; authorization: string; versionID: string }, { verbose?: boolean }>) {
     return this.services.stateManagement.interact(req);
   }
 

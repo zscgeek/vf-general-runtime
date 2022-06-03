@@ -97,12 +97,12 @@ export interface Class<T, A extends any[]> {
 }
 export type AnyClass = Class<any, any[]>;
 
-export enum PredictionStage {
+export enum VersionAlias {
   /*
       LUIS only has staging and production slots. For our purposes, we implement
       a VF "development" version (`devVersion`) by hitting a LUIS model on its staging slot,
       that is, VF development === LUIS staging.
-      
+
       On a future VF NLU, we might have our own convention like development, staging,
       *and* production.
    */
@@ -110,11 +110,12 @@ export enum PredictionStage {
   PRODUCTION = 'production',
 }
 
+export const isVersionAlias = (value: unknown): value is VersionAlias => value === VersionAlias.DEVELOPMENT || value === VersionAlias.PRODUCTION;
+
 export interface ContextData {
   api: CacheDataAPI;
   locale?: string;
   config?: BaseRequest.RequestConfig;
-  stage?: PredictionStage;
   reqHeaders?: {
     origin?: string;
     platform?: string;

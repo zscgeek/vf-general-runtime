@@ -12,7 +12,7 @@ import _ from 'lodash';
 
 import { hasElicit, setElicit } from '@/lib/services/runtime/handlers/utils/entity';
 import log from '@/logger';
-import { Context, ContextHandler, PredictionStage } from '@/types';
+import { Context, ContextHandler } from '@/types';
 
 import { handleNLCDialog } from '../nlu/nlc';
 import { getNoneIntentRequest, NONE_INTENT } from '../nlu/utils';
@@ -131,8 +131,7 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
         const dmPrefixedResult = this.config.GENERAL_SERVICE_ENDPOINT
           ? await this.services.nlu.predict({
               query: `${prefix} ${query}`,
-              projectID: version.projectID,
-              isProduction: context.data.stage === PredictionStage.PRODUCTION,
+              versionID: version._id,
             })
           : incomingRequest;
 
