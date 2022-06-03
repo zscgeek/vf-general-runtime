@@ -102,15 +102,22 @@ export const createNLC = ({
   return nlc;
 };
 
-// eslint-disable-next-line default-param-last
-export const nlcToIntent = (intent: IIntentFullfilment | null, query = '', confidence?: number): BaseRequest.IntentRequest =>
+export const nlcToIntent = (
+  intent: IIntentFullfilment | null,
+  // eslint-disable-next-line default-param-last
+  query = '',
+  confidence?: number
+): BaseRequest.IntentRequest =>
   (intent && {
     type: BaseRequest.RequestType.INTENT,
     payload: {
       query,
       intent: { name: intent.intent },
       // only add entity if value is defined
-      entities: intent.slots.reduce<{ name: string; value: string }[]>((acc, { name, value }) => (value ? [...acc, { name, value }] : acc), []),
+      entities: intent.slots.reduce<{ name: string; value: string }[]>(
+        (acc, { name, value }) => (value ? [...acc, { name, value }] : acc),
+        []
+      ),
       confidence,
     },
   }) ||
