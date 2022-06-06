@@ -3,7 +3,7 @@
  * @packageDocumentation
  */
 
-import { BaseModels, BaseRequest } from '@voiceflow/base-types';
+import { BaseModels } from '@voiceflow/base-types';
 import { VoiceflowConstants } from '@voiceflow/voiceflow-types';
 
 import { isTextRequest } from '@/lib/services/runtime/types';
@@ -24,12 +24,14 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
     query,
     model,
     locale,
-    versionID,
+    tag,
+    nlp,
   }: {
     query: string;
     model?: BaseModels.PrototypeModel;
     locale?: VoiceflowConstants.Locale;
-    versionID: string;
+    tag: string;
+    nlp: BaseModels.Project.PrototypeNLP | undefined;
   }) {
     // 1. first try restricted regex (no open slots) - exact string match
     if (model && locale) {
@@ -39,15 +41,21 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
       }
     }
 
-    // 2. next try to resolve with luis NLP on general-service
-    const { data } = await this.services.axios
-      .post<BaseRequest.IntentRequest | null>(`${this.config.GENERAL_SERVICE_ENDPOINT}/runtime/${versionID}/predict`, {
-        query,
-      })
-      .catch(() => ({ data: null }));
+    // 2. next try to resolve with luis NLP
+    if (nlp && nlp.appID && nlp.resourceID) {
+      const { appID, resourceID } = nlp;
 
-    if (data) {
-      return data;
+      const { data } = await this.services.axios
+        .post(`${this.config.LUIS_SERVICE_ENDPOINT}/predict/${appID}`, {
+          query,
+          resourceID,
+          tag,
+        })
+        .catch(() => ({ data: null }));
+
+      if (data) {
+        return data;
+      }
     }
 
     // 3. finally try open regex slot matching
@@ -74,16 +82,21 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
     }
 
     const version = await context.data.api.getVersion(context.versionID);
-
     if (!version) {
       throw new Error('Version not found!');
+    }
+
+    const project = await context.data.api.getProject(version.projectID);
+    if (!project) {
+      throw new Error('Project not found!');
     }
 
     const request = await this.predict({
       query: context.request.payload,
       model: version.prototype?.model,
       locale: version.prototype?.data.locales[0] as VoiceflowConstants.Locale,
-      versionID: context.versionID,
+      tag: project.liveVersion === context.versionID ? 'Production' : 'Development',
+      nlp: project.prototype?.nlp,
     });
 
     return { ...context, request };
