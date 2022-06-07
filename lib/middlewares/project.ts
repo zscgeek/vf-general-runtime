@@ -3,7 +3,7 @@ import VError from '@voiceflow/verror';
 import { NextFunction, Response } from 'express';
 
 import { CreatorDataApi } from '@/runtime';
-import { isVersionAlias, Request, VersionAlias } from '@/types';
+import { isVersionTag, Request, VersionTag } from '@/types';
 
 import { validate } from '../utils';
 import { AbstractMiddleware } from './utils';
@@ -38,7 +38,7 @@ class Project extends AbstractMiddleware {
     HEADER_VERSION_ID: VALIDATIONS.HEADERS.VERSION_ID,
   })
   async resolveVersionAlias(req: Request<any, any, { versionID?: string }>, _res: Response, next: NextFunction) {
-    if (!isVersionAlias(req.headers.versionID)) {
+    if (!isVersionTag(req.headers.versionID)) {
       next();
       return;
     }
@@ -56,7 +56,7 @@ class Project extends AbstractMiddleware {
       throw new VError('Cannot infer project version, provide a specific versionID', VError.HTTP_STATUS.BAD_REQUEST);
     }
 
-    req.headers.versionID = req.headers.versionID === VersionAlias.PRODUCTION ? project.liveVersion : project.devVersion;
+    req.headers.versionID = req.headers.versionID === VersionTag.PRODUCTION ? project.liveVersion : project.devVersion;
 
     next();
   }

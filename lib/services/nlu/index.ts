@@ -7,7 +7,7 @@ import { BaseModels } from '@voiceflow/base-types';
 import { VoiceflowConstants } from '@voiceflow/voiceflow-types';
 
 import { isTextRequest } from '@/lib/services/runtime/types';
-import { Context, ContextHandler } from '@/types';
+import { Context, ContextHandler, VersionTag } from '@/types';
 
 import { AbstractManager, injectServices } from '../utils';
 import { handleNLCCommand } from './nlc';
@@ -81,12 +81,14 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
       };
     }
 
-    const version = await context.data.api.getVersion(context.versionID);
+    const version = await context.data.api.getVersion(context.versionID).catch(() => null);
+
     if (!version) {
       throw new Error('Version not found!');
     }
 
-    const project = await context.data.api.getProject(version.projectID);
+    const project = await context.data.api.getProject(version.projectID).catch(() => null);
+
     if (!project) {
       throw new Error('Project not found!');
     }
@@ -95,7 +97,7 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
       query: context.request.payload,
       model: version.prototype?.model,
       locale: version.prototype?.data.locales[0] as VoiceflowConstants.Locale,
-      tag: project.liveVersion === context.versionID ? 'Production' : 'Development',
+      tag: project.liveVersion === context.versionID ? VersionTag.PRODUCTION : VersionTag.DEVELOPMENT,
       nlp: project.prototype?.nlp,
     });
 
