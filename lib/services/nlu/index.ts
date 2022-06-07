@@ -4,6 +4,7 @@
  */
 
 import { BaseModels } from '@voiceflow/base-types';
+import VError from '@voiceflow/verror';
 import { VoiceflowConstants } from '@voiceflow/voiceflow-types';
 
 import { isTextRequest } from '@/lib/services/runtime/types';
@@ -60,10 +61,10 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
 
     // 3. finally try open regex slot matching
     if (!model) {
-      throw new Error('Model not found!');
+      throw new VError('Model not found!', 404);
     }
     if (!locale) {
-      throw new Error('Locale not found!');
+      throw new VError('Locale not found!', 404);
     }
     return handleNLCCommand({ query, model, locale, openSlot: true });
   }
@@ -82,15 +83,13 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
     }
 
     const version = await context.data.api.getVersion(context.versionID).catch(() => null);
-
     if (!version) {
-      throw new Error('Version not found!');
+      throw new VError('Version not found', 404);
     }
 
     const project = await context.data.api.getProject(version.projectID).catch(() => null);
-
     if (!project) {
-      throw new Error('Project not found!');
+      throw new VError('Project not found', 404);
     }
 
     const request = await this.predict({
