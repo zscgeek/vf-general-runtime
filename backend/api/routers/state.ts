@@ -12,43 +12,23 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
 
   router.post(
     '/user/:userID/interact',
+    middlewares.project.resolveVersionAlias,
     middlewares.rateLimit.versionConsume,
-    middlewares.project.attachID,
     controllers.stateManagement.interact
   );
 
-  router.get(
-    '/user/:userID',
-    middlewares.rateLimit.versionConsume,
-    middlewares.project.attachID,
-    controllers.stateManagement.get
-  );
+  router.get('/user/:userID', middlewares.project.resolveVersionAlias, middlewares.rateLimit.versionConsume, controllers.stateManagement.get);
 
-  router.put(
-    '/user/:userID',
-    middlewares.rateLimit.versionConsume,
-    middlewares.project.attachID,
-    controllers.stateManagement.update
-  );
+  router.put('/user/:userID', middlewares.project.resolveVersionAlias, middlewares.rateLimit.versionConsume, controllers.stateManagement.update);
 
-  router.delete(
-    '/user/:userID',
-    middlewares.rateLimit.versionConsume,
-    middlewares.project.attachID,
-    controllers.stateManagement.delete
-  );
+  router.delete('/user/:userID', middlewares.project.resolveVersionAlias, middlewares.rateLimit.versionConsume, controllers.stateManagement.delete);
 
-  router.post(
-    '/user/:userID',
-    middlewares.rateLimit.versionConsume,
-    middlewares.project.attachID,
-    controllers.stateManagement.reset
-  );
+  router.post('/user/:userID', middlewares.project.resolveVersionAlias, middlewares.rateLimit.versionConsume, controllers.stateManagement.reset);
 
   router.patch(
     '/user/:userID/variables',
+    middlewares.project.resolveVersionAlias,
     middlewares.rateLimit.versionConsume,
-    middlewares.project.attachID,
     controllers.stateManagement.updateVariables
   );
 
@@ -56,48 +36,48 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
   router.post(
     '/:versionID/user/:userID/interact',
     middlewares.project.unifyVersionID,
+    middlewares.project.resolveVersionAlias,
     middlewares.rateLimit.versionConsume,
-    middlewares.project.attachID,
     controllers.stateManagement.interact
   );
 
   router.get(
     '/:versionID/user/:userID',
     middlewares.project.unifyVersionID,
+    middlewares.project.resolveVersionAlias,
     middlewares.rateLimit.versionConsume,
-    middlewares.project.attachID,
     controllers.stateManagement.get
   );
 
   router.put(
     '/:versionID/user/:userID',
     middlewares.project.unifyVersionID,
+    middlewares.project.resolveVersionAlias,
     middlewares.rateLimit.versionConsume,
-    middlewares.project.attachID,
     controllers.stateManagement.update
   );
 
   router.delete(
     '/:versionID/user/:userID',
     middlewares.project.unifyVersionID,
+    middlewares.project.resolveVersionAlias,
     middlewares.rateLimit.versionConsume,
-    middlewares.project.attachID,
     controllers.stateManagement.delete
   );
 
   router.post(
     '/:versionID/user/:userID',
     middlewares.project.unifyVersionID,
+    middlewares.project.resolveVersionAlias,
     middlewares.rateLimit.versionConsume,
-    middlewares.project.attachID,
     controllers.stateManagement.reset
   );
 
   router.patch(
     '/:versionID/user/:userID/variables',
     middlewares.project.unifyVersionID,
+    middlewares.project.resolveVersionAlias,
     middlewares.rateLimit.versionConsume,
-    middlewares.project.attachID,
     controllers.stateManagement.updateVariables
   );
 

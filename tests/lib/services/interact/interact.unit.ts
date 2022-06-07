@@ -26,7 +26,7 @@ describe('interact service unit tests', () => {
   describe('handler', () => {
     it('works correctly', async () => {
       const data = {
-        headers: { authorization: 'auth', origin: 'origin', versionID: 'versionID', stage: VersionTag.PRODUCTION },
+        headers: { authorization: 'auth', origin: 'origin', versionID: 'versionID' },
         body: { state: { foo: 'bar' }, request: 'request', config: { tts: true, selfDelegate: true } },
         params: {},
         query: { locale: 'locale' },
@@ -42,7 +42,6 @@ describe('interact service unit tests', () => {
             tts: true,
             selfDelegate: true,
           },
-          stage: VersionTag.PRODUCTION,
           reqHeaders: {
             authorization: data.headers.authorization,
             origin: data.headers.origin,
@@ -139,7 +138,6 @@ describe('interact service unit tests', () => {
         origin: 'origin',
         sessionid: 'sessionid',
         platform: 'platform',
-        stage: VersionTag.DEVELOPMENT,
       },
       params: {},
       query: { locale: 'locale' },
@@ -158,7 +156,6 @@ describe('interact service unit tests', () => {
           sessionid: data.headers.sessionid,
           platform: data.headers.platform,
         },
-        stage: VersionTag.DEVELOPMENT,
       },
     };
 

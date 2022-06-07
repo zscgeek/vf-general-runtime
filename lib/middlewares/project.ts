@@ -1,8 +1,8 @@
 import { Validator } from '@voiceflow/backend-utils';
+import * as Utils from '@voiceflow/common';
 import VError from '@voiceflow/verror';
 import { NextFunction, Response } from 'express';
 
-import { CreatorDataApi } from '@/runtime';
 import { isVersionTag, Request, VersionTag } from '@/types';
 
 import { validate } from '../utils';
@@ -37,28 +37,31 @@ class Project extends AbstractMiddleware {
     HEADER_AUTHORIZATION: VALIDATIONS.HEADERS.AUTHORIZATION,
     HEADER_VERSION_ID: VALIDATIONS.HEADERS.VERSION_ID,
   })
-  async resolveVersionAlias(req: Request<any, any, { versionID?: string }>, _res: Response, next: NextFunction) {
-    if (!isVersionTag(req.headers.versionID)) {
-      next();
-      return;
+  async resolveVersionAlias(req: Request<any, any, { versionID?: string }>, _res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!isVersionTag(req.headers.versionID)) {
+        return next();
+      }
+
+      const api = await this.services.dataAPI.get(req.headers.authorization).catch(() => {
+        throw new VError('Error setting up data API', VError.HTTP_STATUS.UNAUTHORIZED);
+      });
+
+      if (!Utils.object.hasProperty(api, 'getProjectUsingAuthorization')) {
+        throw new VError('Project lookup via token is unsupported with current server configuration.', VError.HTTP_STATUS.INTERNAL_SERVER_ERROR);
+      }
+
+      const project = await api.getProjectUsingAuthorization(req.headers.authorization!).catch(() => null);
+      if (!project) {
+        throw new VError('Cannot infer project version, provide a specific versionID', VError.HTTP_STATUS.BAD_REQUEST);
+      }
+
+      req.headers.versionID = req.headers.versionID === VersionTag.PRODUCTION ? project.liveVersion : project.devVersion;
+
+      return next();
+    } catch (err) {
+      return next(err instanceof VError ? err : new VError('Unknown error'));
     }
-
-    const api = await this.services.dataAPI.get(req.headers.authorization).catch((error) => {
-      throw new VError(`invalid API key: ${error}`, VError.HTTP_STATUS.UNAUTHORIZED);
-    });
-
-    if (!(api instanceof CreatorDataApi)) {
-      throw new VError('Version lookup only supported via Creator Data API', VError.HTTP_STATUS.INTERNAL_SERVER_ERROR);
-    }
-
-    const project = await api.getProjectUsingAuthorization(req.headers.authorization!).catch(() => null);
-    if (!project) {
-      throw new VError('Cannot infer project version, provide a specific versionID', VError.HTTP_STATUS.BAD_REQUEST);
-    }
-
-    req.headers.versionID = req.headers.versionID === VersionTag.PRODUCTION ? project.liveVersion : project.devVersion;
-
-    next();
   }
 }
 

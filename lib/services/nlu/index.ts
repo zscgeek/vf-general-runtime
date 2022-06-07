@@ -61,10 +61,10 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
 
     // 3. finally try open regex slot matching
     if (!model) {
-      throw new VError('Model not found!', 404);
+      throw new VError('Model not found', 404);
     }
     if (!locale) {
-      throw new VError('Locale not found!', 404);
+      throw new VError('Locale not found', 404);
     }
     return handleNLCCommand({ query, model, locale, openSlot: true });
   }
