@@ -1,168 +1,102 @@
 import { BaseTrace } from '@voiceflow/base-types';
+import { EmptyObject } from '@voiceflow/common';
+import { Api as IngestApi, Client as IngestClient } from '@voiceflow/event-ingestion-service/build/lib/client';
+import { Event, IngestableInteraction, IngestableTrace } from '@voiceflow/event-ingestion-service/build/lib/types';
 
-import * as Ingest from '@/ingest';
 import log from '@/logger';
 import { Config, Context } from '@/types';
 
 import { RuntimeRequest } from '../services/runtime/types';
 import { AbstractClient } from './utils';
 
-type GeneralTurnBody = Ingest.TurnBody<{
-  locale?: string;
-  end?: boolean;
-}>;
-
-type GeneralInteractBody = Ingest.InteractBody<BaseTrace.AnyTrace | RuntimeRequest>;
+type GeneralInteractionBody = IngestableInteraction<
+  { locale?: string; end?: boolean },
+  BaseTrace.AnyTrace | RuntimeRequest | EmptyObject
+>;
+type GeneralTraceBody = IngestableTrace<BaseTrace.AnyTrace | RuntimeRequest>;
 
 export class AnalyticsSystem extends AbstractClient {
-  private ingestClient?: Ingest.Api<GeneralInteractBody, GeneralTurnBody>;
+  private ingestClient?: IngestApi<GeneralInteractionBody, GeneralTraceBody>;
 
   constructor(config: Config) {
     super(config);
 
-    if (config.INGEST_WEBHOOK_ENDPOINT) {
-      this.ingestClient = Ingest.Client(config.INGEST_WEBHOOK_ENDPOINT, undefined);
+    if (config.INGEST_V2_WEBHOOK_ENDPOINT) {
+      this.ingestClient = IngestClient(config.INGEST_V2_WEBHOOK_ENDPOINT, undefined);
     }
   }
 
-  private createInteractBody({
-    eventID,
-    turnID,
-    timestamp,
-    trace,
-    request,
+  private createTraceBody({
+    fullTrace,
+    metadata,
   }: {
-    eventID: Ingest.Event;
-    turnID: string;
-    timestamp: Date;
-    trace?: BaseTrace.AnyTrace;
-    request?: RuntimeRequest;
-  }): GeneralInteractBody {
-    let format: string;
-
-    if (trace) {
-      format = 'trace';
-    } else if (request) {
-      format = 'request';
-    } else {
-      format = 'launch';
-    }
-
-    return {
-      eventId: eventID,
-      request: {
-        turn_id: turnID,
-
-        type: (trace ?? request)?.type ?? 'launch',
-        payload: trace ?? request ?? {},
-        format,
-        timestamp: timestamp.toISOString(),
-      },
-    } as GeneralInteractBody;
+    fullTrace: readonly BaseTrace.AnyTrace[];
+    metadata: Context;
+  }): GeneralTraceBody[] {
+    return fullTrace.map((trace) => ({
+      type: (trace ?? metadata.request).type,
+      payload: trace ?? metadata.request,
+    }));
   }
 
-  private createTurnBody({
+  private createInteractionBody({
+    projectID,
     versionID,
-    eventID,
     metadata,
     timestamp,
   }: {
+    projectID: string;
     versionID: string;
-    eventID: Ingest.Event;
     metadata: Context;
     timestamp: Date;
-  }): GeneralTurnBody {
-    const sessionId =
+  }): GeneralInteractionBody {
+    const sessionID =
       metadata.data.reqHeaders?.sessionid ??
       (metadata.state?.variables ? `${versionID}.${metadata.state.variables.user_id}` : versionID);
 
     return {
-      eventId: eventID,
-      request: {
-        platform: metadata.data.reqHeaders?.platform,
-        session_id: sessionId,
-        version_id: versionID,
-        timestamp: timestamp.toISOString(),
-        metadata: {
-          end: metadata.end,
-          locale: metadata.data.locale,
-        },
+      projectID,
+      platform: metadata.data.reqHeaders?.platform ?? '',
+      sessionID,
+      versionID,
+      startTime: timestamp.toISOString(),
+      metadata: {
+        end: metadata.end,
+        locale: metadata.data.locale,
       },
+      action: {
+        type: metadata.request ? 'request' : 'launch',
+        payload: metadata.request ?? {},
+      },
+      traces: this.createTraceBody({
+        fullTrace: metadata.trace ?? [],
+        metadata,
+      }),
     };
   }
 
-  private async processTrace({
-    fullTrace,
-    turnID,
-    versionID,
-    timestamp,
-  }: {
-    fullTrace: readonly BaseTrace.AnyTrace[];
-    turnID: string;
-    versionID: string;
-    timestamp: Date;
-  }): Promise<void> {
-    log.trace(`[analytics] process trace ${log.vars({ turnID, versionID })}`);
-    // add milliseconds to put it behind response, and to maintain interact order
-    const unixTime = timestamp.getTime() + 1;
-
-    // eslint-disable-next-line no-restricted-syntax
-    for (const [index, trace] of fullTrace.entries()) {
-      const interactIngestBody = this.createInteractBody({
-        eventID: Ingest.Event.INTERACT,
-        turnID,
-        timestamp: new Date(unixTime + index),
-        trace,
-      });
-
-      if (this.ingestClient) {
-        // eslint-disable-next-line no-await-in-loop
-        await this.ingestClient.doIngest(interactIngestBody);
-      }
-    }
-  }
-
   async track({
+    projectID,
     versionID,
     event,
     metadata,
     timestamp,
   }: {
+    projectID: string;
     versionID: string;
-    event: Ingest.Event;
+    event: Event;
     metadata: Context;
     timestamp: Date;
   }): Promise<void> {
-    log.trace(`[analytics] track ${log.vars({ versionID })}`);
+    log.trace(`[analytics] process trace ${log.vars({ versionID })}`);
     switch (event) {
-      case Ingest.Event.TURN: {
-        const turnIngestBody = this.createTurnBody({ versionID, eventID: event, metadata, timestamp });
+      case Event.TURN: {
+        const interactionBody = this.createInteractionBody({ projectID, versionID, metadata, timestamp });
+        await this.ingestClient?.ingestInteraction(interactionBody);
 
-        // User/initial interact
-        const response = await this.ingestClient?.doIngest(turnIngestBody);
-
-        if (response) {
-          // Request
-          const interactIngestBody = this.createInteractBody({
-            eventID: Ingest.Event.INTERACT,
-            turnID: response.data.turn_id,
-            timestamp,
-            trace: undefined,
-            request: metadata.request,
-          });
-          await this.ingestClient?.doIngest(interactIngestBody);
-
-          // Voiceflow response
-          await this.processTrace({
-            fullTrace: metadata.trace ?? [],
-            turnID: response.data.turn_id,
-            versionID,
-            timestamp,
-          });
-        }
         break;
       }
-      case Ingest.Event.INTERACT:
+      case Event.INTERACT:
         throw new RangeError('INTERACT events are not supported');
       default:
         throw new RangeError(`Unknown event type: ${event}`);

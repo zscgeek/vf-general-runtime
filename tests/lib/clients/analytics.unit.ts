@@ -1,8 +1,8 @@
+import { Event } from '@voiceflow/event-ingestion-service/build/lib/types';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
 import AnalyticsClient from '@/lib/clients/analytics';
-import { Event } from '@/lib/clients/ingest-client';
 
 describe('Analytics client unit tests', () => {
   describe('Track', () => {
@@ -11,6 +11,7 @@ describe('Analytics client unit tests', () => {
 
       expect(
         client.track({
+          projectID: 'projectID',
           versionID: 'id',
           event: 'unknown event' as any,
           metadata: {} as any,
@@ -24,6 +25,7 @@ describe('Analytics client unit tests', () => {
 
       expect(
         client.track({
+          projectID: 'projectID',
           versionID: 'id',
           event: Event.INTERACT,
           metadata: {} as any,
@@ -32,11 +34,11 @@ describe('Analytics client unit tests', () => {
       ).to.eventually.rejectedWith(RangeError);
     });
 
-    it('works with turn events', () => {
+    it('works with turn events', async () => {
       const config = {
         ANALYTICS_WRITE_KEY: 'write key',
         ANALYTICS_ENDPOINT: 'http://localhost/analytics',
-        INGEST_WEBHOOK_ENDPOINT: 'http://localhost/ingest',
+        INGEST_V2_WEBHOOK_ENDPOINT: 'http://localhost/ingest',
       };
 
       const metadata = {
@@ -51,12 +53,19 @@ describe('Analytics client unit tests', () => {
 
       const client = AnalyticsClient(config as any);
 
-      const ingestClient = { doIngest: sinon.stub().resolves({ data: { turn_id: 1 } }) };
+      const ingestClient = { ingestInteraction: sinon.stub().resolves({ data: { turnID: 'turnID' } }) };
 
       (client as any).ingestClient = ingestClient;
       const timestamp = new Date();
 
-      client.track({ versionID: 'id', event: Event.TURN, metadata: metadata as any, timestamp });
+      const ingestResponse = await client.track({
+        projectID: 'projectID',
+        versionID: 'id',
+        event: Event.TURN,
+        metadata: metadata as any,
+        timestamp,
+      });
+      expect(ingestResponse).to.equal(undefined);
     });
   });
 });
