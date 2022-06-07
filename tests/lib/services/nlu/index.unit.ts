@@ -75,7 +75,12 @@ describe('nlu manager unit tests', () => {
       };
       const nlu = new NLUManager({ ...services, utils: { ...defaultUtils } } as any, config as any);
 
-      const context = { request: oldRequest, state: { foo: 'bar' }, versionID: 'version-id', data: { api: { getVersion: sinon.stub().rejects() } } };
+      const context = {
+        request: oldRequest,
+        state: { foo: 'bar' },
+        versionID: 'version-id',
+        data: { api: { getVersion: sinon.stub().rejects() } },
+      };
       await expect(nlu.handle(context as any)).to.eventually.be.rejectedWith('Version not found');
     });
 

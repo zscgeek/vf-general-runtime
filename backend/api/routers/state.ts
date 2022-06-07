@@ -17,13 +17,33 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     controllers.stateManagement.interact
   );
 
-  router.get('/user/:userID', middlewares.project.resolveVersionAlias, middlewares.rateLimit.versionConsume, controllers.stateManagement.get);
+  router.get(
+    '/user/:userID',
+    middlewares.project.resolveVersionAlias,
+    middlewares.rateLimit.versionConsume,
+    controllers.stateManagement.get
+  );
 
-  router.put('/user/:userID', middlewares.project.resolveVersionAlias, middlewares.rateLimit.versionConsume, controllers.stateManagement.update);
+  router.put(
+    '/user/:userID',
+    middlewares.project.resolveVersionAlias,
+    middlewares.rateLimit.versionConsume,
+    controllers.stateManagement.update
+  );
 
-  router.delete('/user/:userID', middlewares.project.resolveVersionAlias, middlewares.rateLimit.versionConsume, controllers.stateManagement.delete);
+  router.delete(
+    '/user/:userID',
+    middlewares.project.resolveVersionAlias,
+    middlewares.rateLimit.versionConsume,
+    controllers.stateManagement.delete
+  );
 
-  router.post('/user/:userID', middlewares.project.resolveVersionAlias, middlewares.rateLimit.versionConsume, controllers.stateManagement.reset);
+  router.post(
+    '/user/:userID',
+    middlewares.project.resolveVersionAlias,
+    middlewares.rateLimit.versionConsume,
+    controllers.stateManagement.reset
+  );
 
   router.patch(
     '/user/:userID/variables',

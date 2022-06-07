@@ -6,8 +6,11 @@ import sinon from 'sinon';
 import Project from '@/lib/middlewares/project';
 
 describe('project middleware unit tests', () => {
-  const getMockRequest = <P, B, H>({ params, body, headers }: { params?: P; body?: B; headers?: H } = {}): Request<P, B, H> =>
-    ({ params, body, headers } as any);
+  const getMockRequest = <P, B, H>({ params, body, headers }: { params?: P; body?: B; headers?: H } = {}): Request<
+    P,
+    B,
+    H
+  > => ({ params, body, headers } as any);
   const getMockResponse = (): Response => ({} as any);
   const getMockNext = () => sinon.fake();
 

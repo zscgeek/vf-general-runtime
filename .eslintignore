@@ -11,3 +11,4 @@ scratch.js
 /node_modules
 /routes
 /nyc_coverage
+/nyc_coverage_unit

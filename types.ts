@@ -103,7 +103,8 @@ export enum VersionTag {
   PRODUCTION = 'production',
 }
 
-export const isVersionTag = (value: unknown): value is VersionTag => value === VersionTag.DEVELOPMENT || value === VersionTag.PRODUCTION;
+export const isVersionTag = (value: unknown): value is VersionTag =>
+  value === VersionTag.DEVELOPMENT || value === VersionTag.PRODUCTION;
 
 export interface ContextData {
   api: CacheDataAPI;

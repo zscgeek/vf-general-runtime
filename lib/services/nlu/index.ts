@@ -3,7 +3,7 @@
  * @packageDocumentation
  */
 
-import { BaseModels } from '@voiceflow/base-types';
+import { BaseModels, BaseRequest } from '@voiceflow/base-types';
 import VError from '@voiceflow/verror';
 import { VoiceflowConstants } from '@voiceflow/voiceflow-types';
 
@@ -33,7 +33,7 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
     locale?: VoiceflowConstants.Locale;
     tag: string;
     nlp: BaseModels.Project.PrototypeNLP | undefined;
-  }) {
+  }): Promise<BaseRequest.IntentRequest> {
     // 1. first try restricted regex (no open slots) - exact string match
     if (model && locale) {
       const intent = handleNLCCommand({ query, model, locale, openSlot: false });
