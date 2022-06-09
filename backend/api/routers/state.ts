@@ -58,6 +58,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
+    middlewares.auth.validateOrigin,
     controllers.stateManagement.interact
   );
 

@@ -247,6 +247,9 @@ const tests = [
         },
       },
       middlewares: {
+        auth: {
+          validateOrigin: 1,
+        },
         rateLimit: {
           verify: 1,
           versionConsume: 1,
