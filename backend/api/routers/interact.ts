@@ -10,25 +10,14 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
   router.use(bodyParser.json({ limit: BODY_PARSER_SIZE_LIMIT }));
   router.use(middlewares.rateLimit.verify);
 
-  router.get(
-    '/state',
-    middlewares.project.resolveVersionAlias,
-    middlewares.rateLimit.versionConsume,
-    controllers.interact.state
-  );
+  router.get('/state', middlewares.rateLimit.versionConsume, middlewares.project.attachID, controllers.interact.state);
 
-  router.post(
-    '/',
-    middlewares.project.resolveVersionAlias,
-    middlewares.rateLimit.versionConsume,
-    controllers.interact.handler
-  );
+  router.post('/', middlewares.rateLimit.versionConsume, middlewares.project.attachID, controllers.interact.handler);
 
   // Legacy 1.0.0 routes with versionID in params
   router.get(
     '/:versionID/state',
     middlewares.project.unifyVersionID,
-    middlewares.project.resolveVersionAlias,
     middlewares.rateLimit.versionConsume,
     controllers.interact.state
   );
@@ -36,7 +25,6 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
   router.post(
     '/:versionID',
     middlewares.project.unifyVersionID,
-    middlewares.project.resolveVersionAlias,
     middlewares.rateLimit.versionConsume,
     controllers.interact.handler
   );
