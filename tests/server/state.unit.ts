@@ -261,6 +261,12 @@ const tests = [
       },
       validations: {
         middlewares: {
+          auth: {
+            validateOrigin: {
+              HEADERS_AUTHORIZATION: 1,
+              HEADERS_PROJECT_ID: 1,
+            },
+          },
           project: {
             attachID: {
               HEADERS_VERSION_ID: 1,
