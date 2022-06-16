@@ -19,6 +19,7 @@ import _V1Handler from './_v1';
 import CaptureHandler from './capture';
 import CaptureV2Handler from './captureV2';
 import CarouselHandler from './carousel';
+import CustomHandler from './custom';
 import GoToHandler from './goTo';
 import InteractionHandler from './interaction';
 import SpeakHandler from './speak';
@@ -62,6 +63,7 @@ export default ({
   VisualHandler(),
   TextHandler(),
   CarouselHandler(),
+  CustomHandler(),
 
   /* add new handlers before NextHandler.
     Whenever there is a nextId in the step, next handler will be taken as the handler,
