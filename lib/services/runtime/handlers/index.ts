@@ -70,5 +70,5 @@ export default ({
     unless the correct handler was found before it in this list.
   */
   NextHandler(),
-  _v1Handler,
+  // _v1Handler,
 ];

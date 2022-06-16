@@ -14,7 +14,7 @@ const utilsObj = {
   findEventMatcher,
 };
 
-export const CustomHandler: HandlerFactory<BaseNode._v1.Node, typeof utilsObj> = (utils) => ({
+export const CustomHandler: HandlerFactory<BaseNode.Custom.Node, typeof utilsObj> = (utils) => ({
   canHandle: (node) => node.type === NodeType.CUSTOM,
   handle: (node, runtime, variables) => {
     const defaultPath = node.paths[node.defaultPath!]?.nextID || null;
@@ -41,19 +41,24 @@ export const CustomHandler: HandlerFactory<BaseNode._v1.Node, typeof utilsObj> =
     }
 
     const variablesMap = variables.getState();
-    const type = replaceVariables(node.type, variablesMap);
-    const payload = typeof node.payload === 'string' ? replaceVariables(node.payload, variablesMap) : node.payload;
+    // TODO should these fields really support variable replacement? there's no indication in creator app
+    const customActionName = node.payload.name;
+    const customActionData =
+      typeof node.payload.body === 'string' ? replaceVariables(node.payload.body, variablesMap) : node.payload.body;
 
     runtime.trace.addTrace<BaseNode.Utils.BaseTraceFrame<unknown>>({
-      type,
-      payload,
+      type: BaseNode.Utils.TraceType.CUSTOM,
+      payload: {
+        name: customActionName,
+        data: customActionData,
+      },
       defaultPath: node.defaultPath,
       paths: node.paths.map((path) => ({ label: path.label, event: path.event! })),
     });
 
     const stopTypes = runtime.turn.get<string[]>(TurnType.STOP_TYPES) || [];
 
-    const stop = runtime.turn.get(TurnType.STOP_ALL) || stopTypes.includes(node.type) || node.stop;
+    const stop = runtime.turn.get(TurnType.STOP_ALL) || stopTypes.includes(customActionName) || node.stop;
     // if !stop continue to defaultPath otherwise
     // quit cycleStack without ending session by stopping on itself
     return !stop ? defaultPath : node.id;
