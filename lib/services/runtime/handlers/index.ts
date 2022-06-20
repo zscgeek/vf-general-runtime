@@ -28,7 +28,7 @@ import StreamHandler from './stream';
 import TextHandler from './text';
 import VisualHandler from './visual';
 
-const _v1Handler = _V1Handler();
+const _v1Handler = CustomHandler();
 
 export default ({
   API_MAX_TIMEOUT_MS,
@@ -63,12 +63,11 @@ export default ({
   VisualHandler(),
   TextHandler(),
   CarouselHandler(),
-  CustomHandler(),
 
   /* add new handlers before NextHandler.
     Whenever there is a nextId in the step, next handler will be taken as the handler,
     unless the correct handler was found before it in this list.
   */
   NextHandler(),
-  // _v1Handler,
+  _v1Handler,
 ];

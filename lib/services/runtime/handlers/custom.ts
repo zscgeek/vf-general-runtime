@@ -15,7 +15,7 @@ const utilsObj = {
 };
 
 export const CustomHandler: HandlerFactory<BaseNode.Custom.Node, typeof utilsObj> = (utils) => ({
-  canHandle: (node) => node.type === NodeType.CUSTOM,
+  canHandle: (node) => node.type === NodeType.TRACE,
   handle: (node, runtime, variables) => {
     const defaultPath = node.paths[node.defaultPath!]?.nextID || null;
 
@@ -55,6 +55,7 @@ export const CustomHandler: HandlerFactory<BaseNode.Custom.Node, typeof utilsObj
       defaultPath: node.defaultPath,
       paths: node.paths.map((path) => ({ label: path.label, event: path.event! })),
     });
+    console.log('trace', runtime.trace.get());
 
     const stopTypes = runtime.turn.get<string[]>(TurnType.STOP_TYPES) || [];
 
