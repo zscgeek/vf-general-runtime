@@ -28,8 +28,6 @@ import StreamHandler from './stream';
 import TextHandler from './text';
 import VisualHandler from './visual';
 
-const _v1Handler = CustomHandler();
-
 export default ({
   API_MAX_TIMEOUT_MS,
   API_MAX_BODY_LENGTH_BYTES,
@@ -49,7 +47,7 @@ export default ({
   EndHandler(),
   FlowHandler(),
   IfHandler(),
-  IfV2Handler({ _v1: _v1Handler }),
+  IfV2Handler({ _v1: _V1Handler() }),
   APIHandler({
     timeout: API_MAX_TIMEOUT_MS,
     maxBodyLength: API_MAX_BODY_LENGTH_BYTES,
@@ -69,5 +67,5 @@ export default ({
     unless the correct handler was found before it in this list.
   */
   NextHandler(),
-  _v1Handler,
+  CustomHandler(),
 ];

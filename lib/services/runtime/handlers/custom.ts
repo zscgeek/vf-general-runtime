@@ -1,6 +1,5 @@
 /* eslint-disable no-restricted-syntax */
 import { BaseNode } from '@voiceflow/base-types';
-import { NodeType } from '@voiceflow/base-types/build/common/node';
 import { replaceVariables } from '@voiceflow/common';
 
 import { Action, HandlerFactory } from '@/runtime';
@@ -15,8 +14,9 @@ const utilsObj = {
 };
 
 export const CustomHandler: HandlerFactory<BaseNode.Custom.Node, typeof utilsObj> = (utils) => ({
-  canHandle: (node) => node.type === NodeType.TRACE,
+  canHandle: (node) => node.type === BaseNode.NodeType.CUSTOM,
   handle: (node, runtime, variables) => {
+    console.log('>>> handling custom', node);
     const defaultPath = node.paths[node.defaultPath!]?.nextID || null;
 
     // process req if not process before (action == REQUEST)
