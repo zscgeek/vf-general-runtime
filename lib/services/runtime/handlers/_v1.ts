@@ -45,7 +45,7 @@ export const _V1Handler: HandlerFactory<BaseNode._v1.Node, typeof utilsObj> = (u
 
     const stopTypes = runtime.turn.get<string[]>(TurnType.STOP_TYPES) || [];
 
-    const stop: boolean = runtime.turn.get(TurnType.STOP_ALL) || stopTypes.includes(node.type) || node.stop;
+    const stop: boolean = !!runtime.turn.get(TurnType.STOP_ALL) || stopTypes.includes(node.type) || node.stop;
 
     runtime.trace.addTrace<BaseNode.Utils.BaseTraceFrame<unknown>>({
       type,
