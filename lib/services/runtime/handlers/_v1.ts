@@ -43,18 +43,16 @@ export const _V1Handler: HandlerFactory<BaseNode._v1.Node, typeof utilsObj> = (u
     const type = replaceVariables(node.type, variablesMap);
     const payload = typeof node.payload === 'string' ? replaceVariables(node.payload, variablesMap) : node.payload;
 
-    const stopTypes = runtime.turn.get<string[]>(TurnType.STOP_TYPES) || [];
-
-    const stop: boolean = !!runtime.turn.get(TurnType.STOP_ALL) || stopTypes.includes(node.type) || node.stop;
-
     runtime.trace.addTrace<BaseNode.Utils.BaseTraceFrame<unknown>>({
       type,
       payload,
       defaultPath: node.defaultPath,
       paths: node.paths.map((path) => ({ label: path.label, event: path.event! })),
-      stop,
     });
 
+    const stopTypes = runtime.turn.get<string[]>(TurnType.STOP_TYPES) || [];
+
+    const stop: boolean = !!runtime.turn.get(TurnType.STOP_ALL) || stopTypes.includes(node.type) || node.stop;
     // if !stop continue to defaultPath otherwise
     // quit cycleStack without ending session by stopping on itself
     return !stop ? defaultPath : node.id;
