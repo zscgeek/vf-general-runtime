@@ -1,9 +1,9 @@
 import express from 'express';
 
-import V1Router from './v1/interact';
-import V2BetaRouter from './v2beta/interact';
-
 import { ControllerMap, MiddlewareMap } from '@/lib';
+
+import V1Router from './v1';
+import V2BetaRouter from './v2alpha';
 
 export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
   const router = express.Router();

@@ -2,8 +2,8 @@ import express from 'express';
 
 import { ControllerMap, MiddlewareMap } from '@/lib';
 
+import StatefulRouter from './routers/stateful';
 import StatelessRouter from './routers/stateless';
-import StatefulRouter from './routers/state';
 
 export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
   const router = express.Router();

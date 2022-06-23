@@ -10,23 +10,19 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
   router.use(bodyParser.json({ limit: BODY_PARSER_SIZE_LIMIT }));
   router.use(middlewares.rateLimit.verify);
 
-  router.get('/state', middlewares.rateLimit.versionConsume, middlewares.project.attachID, controllers.interact.state);
-
-  router.post('/', middlewares.rateLimit.versionConsume, middlewares.project.attachID, controllers.interact.handler);
-
-  // Legacy 1.0.0 routes with versionID in params
+  // TODO may remove this functionality
   router.get(
     '/:versionID/state',
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
-    controllers.interact.state
+    controllers.stateless.v2alpha.state
   );
 
   router.post(
     '/:versionID',
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
-    controllers.interact.handler
+    controllers.stateless.v2alpha.handler
   );
 
   return router;

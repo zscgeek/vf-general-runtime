@@ -5,14 +5,13 @@
 
 import { BaseRequest, RuntimeLogs } from '@voiceflow/base-types';
 
+import { AbstractController } from '@/lib/controllers/utils';
 import { ResponseContext } from '@/lib/services/interact';
 import { RuntimeRequest } from '@/lib/services/runtime/types';
+import { validate } from '@/lib/utils';
+import { SharedValidations } from '@/lib/validations';
 import { State } from '@/runtime';
 import { Request } from '@/types';
-
-import { validate } from '../utils';
-import { SharedValidations } from '../validations';
-import { AbstractController } from './utils';
 
 class InteractController extends AbstractController {
   async state(req: { headers: { authorization?: string; origin?: string; versionID: string } }): Promise<State> {
