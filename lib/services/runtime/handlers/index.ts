@@ -3,6 +3,7 @@ import {
   CodeHandler,
   EndHandler,
   FlowHandler,
+  GoToNodeHandler,
   IfHandler,
   IfV2Handler,
   IntegrationsHandler,
@@ -62,6 +63,7 @@ export default ({
   VisualHandler(),
   TextHandler(),
   CarouselHandler(),
+  GoToNodeHandler(),
 
   /* add new handlers before NextHandler.
     Whenever there is a nextId in the step, next handler will be taken as the handler,
