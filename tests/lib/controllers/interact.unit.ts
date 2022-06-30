@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 
-import Interact from '@/lib/controllers/interact';
+import Interact from '@/lib/controllers/v1/stateless';
 
 describe('interact controller unit tests', () => {
   describe('state', () => {

@@ -4,7 +4,7 @@ import { redirect } from './utils';
 
 // alias to /stateless/v1/
 
-const REDIRECT_PREFIX = '/stateless/v1';
+const REDIRECT_PREFIX = '/v1/stateless';
 export default () => {
   const router = express.Router();
 

@@ -2,7 +2,7 @@ import express from 'express';
 
 import { redirect } from './utils';
 
-const REDIRECT_PREFIX = '/stateful/v1';
+const REDIRECT_PREFIX = '/v1/stateful';
 export default () => {
   const router = express.Router();
 

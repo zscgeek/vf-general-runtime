@@ -1,7 +1,7 @@
 import { Validator } from '@voiceflow/backend-utils';
 import { RuntimeLogs } from '@voiceflow/base-types';
 
-import { UpdateSchema } from '@/lib/controllers/stateful/requests';
+import { UpdateSchema } from '@/lib/controllers/requests';
 import { AbstractController } from '@/lib/controllers/utils';
 import { customAJV, validate } from '@/lib/utils';
 import { SharedValidations } from '@/lib/validations';

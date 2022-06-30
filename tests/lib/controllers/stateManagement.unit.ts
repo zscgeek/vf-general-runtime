@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 
-import StateManagement from '@/lib/controllers/stateManagement';
+import StateManagement from '@/lib/controllers/v1/stateful';
 
 describe('stateManagement controller unit tests', () => {
   describe('interact', () => {
