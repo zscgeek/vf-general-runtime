@@ -39,6 +39,8 @@ class LocalDataAPI<
   public getProject = async () => this.project;
 
   public fetchDisplayById = async () => null;
+
+  public getProjectUsingAuthorization = async () => this.project;
 }
 
 export default LocalDataAPI;

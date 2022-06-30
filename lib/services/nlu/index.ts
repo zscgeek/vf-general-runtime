@@ -82,13 +82,9 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
       };
     }
 
-    const version = await context.data.api.getVersion(context.versionID).catch(() => {
-      throw new VError('Version not found', HTTP_STATUS.NOT_FOUND);
-    });
+    const version = await context.data.api.getVersion(context.versionID);
 
-    const project = await context.data.api.getProject(version.projectID).catch(() => {
-      throw new VError('Project not found', HTTP_STATUS.NOT_FOUND);
-    });
+    const project = await context.data.api.getProject(version.projectID);
 
     const request = await this.predict({
       query: context.request.payload,

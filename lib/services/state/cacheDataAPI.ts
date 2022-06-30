@@ -40,6 +40,11 @@ class CacheDataAPI implements DataAPI<VoiceflowProgram.Program, VoiceflowVersion
   async fetchDisplayById(displayId: number) {
     return this.api.fetchDisplayById(displayId);
   }
+
+  async getProjectUsingAuthorization(apiKeyID: string): Promise<VoiceflowProject.Project> {
+    const apiKey = await this.api.getProjectUsingAuthorization(apiKeyID);
+    return apiKey as VoiceflowProject.Project;
+  }
 }
 
 export default CacheDataAPI;

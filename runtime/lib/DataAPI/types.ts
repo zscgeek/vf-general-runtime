@@ -20,4 +20,6 @@ export interface DataAPI<
   unhashVersionID(versionID: string): Promise<string>;
 
   getProject(projectID: string): Promise<PJ>;
+
+  getProjectUsingAuthorization(apiKeyID: string): Promise<PJ>;
 }
