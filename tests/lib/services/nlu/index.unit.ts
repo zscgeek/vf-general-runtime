@@ -167,7 +167,7 @@ describe('nlu manager unit tests', () => {
         versionID: 'version-id',
         data: { api: { getVersion: sinon.stub().rejects() } },
       };
-      await expect(nlu.handle(context as any)).to.eventually.be.rejectedWith('Version not found');
+      await expect(nlu.handle(context as any)).to.eventually.be.rejected;
     });
 
     it('rejects non text requests', async () => {
@@ -234,7 +234,7 @@ describe('nlu manager unit tests', () => {
 
       const result = nlu.handle(context as any);
 
-      await expect(result).to.be.eventually.rejectedWith('Project not found');
+      await expect(result).to.be.eventually.rejected;
     });
   });
 

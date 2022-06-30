@@ -19,7 +19,7 @@ describe('interact controller unit tests', () => {
         body: {},
       };
       expect(await controller.state(req as any)).to.eql(output);
-      expect(services.interact.state.args[0]).to.eql([versionID, authorization]);
+      expect(services.interact.state.args[0]).to.eql([versionID]);
     });
   });
 

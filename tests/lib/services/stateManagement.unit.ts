@@ -140,7 +140,7 @@ describe('stateManagement manager unit tests', () => {
 
       expect(await service.reset(data as any)).to.eql(session);
 
-      expect(services.interact.state.args[0]).to.eql([data.headers.versionID, data.headers.authorization]);
+      expect(services.interact.state.args[0]).to.eql([data.headers.versionID]);
       expect(services.session.saveToDb.args[0]).to.eql([data.headers.projectID, data.params.userID, session]);
     });
   });

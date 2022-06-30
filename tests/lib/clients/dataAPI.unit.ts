@@ -55,27 +55,6 @@ describe('dataAPI client unit tests', () => {
     expect(API.LocalDataApi.callCount).to.eql(0);
   });
 
-  it('creator api', async () => {
-    const initStub = sinon.stub();
-    const API = {
-      LocalDataApi: sinon.stub().returns({ type: 'local' }),
-      RemoteDataAPI: sinon.stub().returns({ type: 'remote' }),
-    };
-
-    const config = {
-      VF_DATA_ENDPOINT: 'endpoint',
-    };
-
-    const dataAPI = new DataAPI(config as any, API as any);
-
-    expect(await dataAPI.get()).to.eql({ type: 'creator', init: initStub });
-    expect(initStub.callCount).to.eql(1);
-    expect(API.LocalDataApi.callCount).to.eql(0);
-    expect(API.RemoteDataAPI.callCount).to.eql(0);
-
-    expect(await dataAPI.get()).to.eql({ type: 'creator', init: initStub });
-  });
-
   it('fails if no data API env configuration set', () => {
     expect(() => new DataAPI({} as any, {} as any)).to.throw('no data API env configuration set');
   });
