@@ -120,7 +120,7 @@ tags:
       All endpoints take in a `{userID}` parameter to identify the caller and associate their state to the call.
 
       ### userID
-      `{userID}` will need to be generated yourself - it should be something unique that easily references the person on the session - such as an username, email, device ID, or phone number.
+      You will need to generate `{userID}` yourself - it should be something unique that easily references the person on the session - such as an username, email, device ID, or phone number.
       (*e.g.* `user54646`, `user@gmail.com`, `1-647-424-4242`, etc.).
       If you're not sure what to call it just for testing purposes, you can just pick a random `{userID}` like *steve*.
 
@@ -320,10 +320,12 @@ paths:
       summary: interact
       description: |-
         Resolve a conversation turn.
+
         Every time a request is sent you will get a unique response based on where the user is currently on in the Voiceflow project.
 
         Send out a request with a `type` and `payload`, and get back a response with a `trace` array to act on.
-        If you've enabled the verbose response parameter you will receive the [same kind of response as the stateless interact route](https://www.voiceflow.com/api/dialog-manager#operation/statelessInteract).
+
+        If you've enabled the `verbose` parameter you will receive the [same kind of response as the stateless interact route](https://www.voiceflow.com/api/dialog-manager#operation/statelessInteract).
 
         ```
         // -> request body, send user intention or event
