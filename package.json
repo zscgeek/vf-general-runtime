@@ -14,7 +14,6 @@
   "dependencies": {
     "@opentelemetry/api-metrics": "0.26.0",
     "@types/workerpool": "^5.0.1",
-    "@voiceflow/api-sdk": "3.14.9",
     "@voiceflow/backend-utils": "4.8.1",
     "@voiceflow/base-types": "2.47.2",
     "@voiceflow/body-parser": "^1.21.1",
