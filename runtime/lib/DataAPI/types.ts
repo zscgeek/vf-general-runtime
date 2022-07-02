@@ -21,5 +21,5 @@ export interface DataAPI<
 
   getProject(projectID: string): Promise<PJ>;
 
-  getProjectUsingAuthorization(apiKeyID: string): Promise<PJ>;
+  getProjectUsingAPIKey(apiKeyID: string): Promise<PJ>;
 }

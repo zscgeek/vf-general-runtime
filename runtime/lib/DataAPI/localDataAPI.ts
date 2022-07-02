@@ -40,7 +40,7 @@ class LocalDataAPI<
 
   public fetchDisplayById = async () => null;
 
-  public getProjectUsingAuthorization = async () => this.project;
+  public getProjectUsingAPIKey = async () => this.project;
 }
 
 export default LocalDataAPI;

@@ -86,9 +86,8 @@ class ServerDataAPI<
     return data;
   };
 
-  public getProjectUsingAuthorization = async (apiKey: string): Promise<PJ> => {
-    const split = apiKey.split('.');
-    const [, , apiKeyID] = split.length === 4 ? split : ['', ...split];
+  public getProjectUsingAPIKey = async (key: string): Promise<PJ> => {
+    const apiKeyID = BaseModels.ApiKey.extractAPIKeyID(key);
 
     const { data } = await this.client.get<PJ>(`/api-key/${apiKeyID}/project`);
     return data;

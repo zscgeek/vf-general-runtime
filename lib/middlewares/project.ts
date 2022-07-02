@@ -79,7 +79,7 @@ class Project extends AbstractMiddleware {
         );
       }
 
-      const project = await api.getProjectUsingAuthorization(req.headers.authorization!).catch(() => {
+      const project = await api.getProjectUsingAPIKey(req.headers.authorization!).catch(() => {
         throw new VError(
           'Cannot resolve project version, provide a specific versionID',
           VError.HTTP_STATUS.BAD_REQUEST
