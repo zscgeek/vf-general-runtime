@@ -1,8 +1,3 @@
-/**
- * [[include:contextHandlers.md]]
- * @packageDocumentation
- */
-
 import { BaseRequest, RuntimeLogs } from '@voiceflow/base-types';
 
 import { AbstractController } from '@/lib/controllers/utils';

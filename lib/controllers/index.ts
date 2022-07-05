@@ -2,10 +2,10 @@ import { routeWrapper } from '@/lib/utils';
 import { Config, Controller } from '@/types';
 
 import { FullServiceMap } from '../services';
-import StatefulV1 from './v1/stateful';
-import StatelessV1 from './v1/stateless';
-import StatefulV2Alpha from './v2alpha/stateful';
-import StatelessV2Alpha from './v2alpha/stateless';
+import StatefulV1 from './stateful/v1';
+import StatefulV2Alpha from './stateful/v2alpha';
+import StatelessV1 from './stateless/v1';
+import StatelessV2Alpha from './stateless/v2alpha';
 
 export interface ControllerMap {
   stateless: {
