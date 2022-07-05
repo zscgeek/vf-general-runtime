@@ -8,14 +8,10 @@ import StatelessV1 from './stateless/v1';
 import StatelessV2Alpha from './stateless/v2alpha';
 
 export interface ControllerMap {
-  stateless: {
-    v1: StatelessV1;
-    v2alpha: StatelessV2Alpha;
-  };
-  stateful: {
-    v1: StatefulV1;
-    v2alpha: StatefulV2Alpha;
-  };
+  statelessV1: StatelessV1;
+  statelessV2Alpha: StatelessV2Alpha;
+  statefulV1: StatefulV1;
+  statefulV2Alpha: StatefulV2Alpha;
 }
 
 export interface ControllerClass<T = Controller> {
@@ -27,14 +23,10 @@ export interface ControllerClass<T = Controller> {
  */
 const buildControllers = (services: FullServiceMap, config: Config) => {
   const controllers: ControllerMap = {
-    stateless: {
-      v1: new StatelessV1(services, config),
-      v2alpha: new StatelessV2Alpha(services, config),
-    },
-    stateful: {
-      v1: new StatefulV1(services, config),
-      v2alpha: new StatefulV2Alpha(services, config),
-    },
+    statelessV1: new StatelessV1(services, config),
+    statelessV2Alpha: new StatelessV2Alpha(services, config),
+    statefulV1: new StatefulV1(services, config),
+    statefulV2Alpha: new StatefulV2Alpha(services, config),
   };
 
   // everything before this will be route-wrapped

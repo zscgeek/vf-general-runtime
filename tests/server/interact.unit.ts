@@ -13,7 +13,7 @@ const tests = [
     calledPath: '/interact/state',
     expected: {
       controllers: {
-        interact: {
+        statelessV1: {
           state: 1,
         },
       },
@@ -43,7 +43,7 @@ const tests = [
     calledPath: '/interact',
     expected: {
       controllers: {
-        interact: {
+        statelessV1: {
           handler: 1,
         },
       },
@@ -66,7 +66,7 @@ const tests = [
           },
         },
         controllers: {
-          interact: {
+          statelessV1: {
             handler: {
               QUERY_LOGS: 1,
             },
@@ -81,7 +81,7 @@ const tests = [
     calledPath: '/interact/:versionID/state',
     expected: {
       controllers: {
-        interact: {
+        statelessV1: {
           state: 1,
         },
       },
@@ -100,7 +100,7 @@ const tests = [
     calledPath: '/interact/:versionID',
     expected: {
       controllers: {
-        interact: {
+        statelessV1: {
           handler: 1,
         },
       },
@@ -113,7 +113,7 @@ const tests = [
       },
       validations: {
         controllers: {
-          interact: {
+          statelessV1: {
             handler: {
               QUERY_LOGS: 1,
             },

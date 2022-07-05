@@ -11,9 +11,9 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
 
   router.get('/health', (_, res) => res.send(`${process.env.NODE_ENV} Healthy`));
 
+  router.use('/', LegacyRouter(middlewares, controllers));
   router.use('/', StatefulRouter(middlewares, controllers));
   router.use('/', StatelessRouter(middlewares, controllers));
-  router.use('/', LegacyRouter());
 
   return router;
 };

@@ -15,7 +15,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v2alpha.interact
+    controllers.statefulV2Alpha.interact
   );
 
   router.get(
@@ -23,7 +23,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v2alpha.get
+    controllers.statefulV2Alpha.get
   );
 
   router.put(
@@ -31,7 +31,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v2alpha.update
+    controllers.statefulV2Alpha.update
   );
 
   router.delete(
@@ -39,7 +39,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v2alpha.delete
+    controllers.statefulV2Alpha.delete
   );
 
   router.post(
@@ -47,7 +47,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v2alpha.reset
+    controllers.statefulV2Alpha.reset
   );
 
   router.patch(
@@ -55,7 +55,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v2alpha.updateVariables
+    controllers.statefulV2Alpha.updateVariables
   );
 
   return router;

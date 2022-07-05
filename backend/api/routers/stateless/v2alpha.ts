@@ -15,14 +15,14 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     '/:versionID/state',
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
-    controllers.stateless.v2alpha.state
+    controllers.statelessV2Alpha.state
   );
 
   router.post(
     '/:versionID',
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
-    controllers.stateless.v2alpha.handler
+    controllers.statelessV2Alpha.handler
   );
 
   return router;

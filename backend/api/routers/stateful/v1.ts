@@ -14,42 +14,42 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     '/user/:userID/interact',
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v1.interact
+    controllers.statefulV1.interact
   );
 
   router.get(
     '/user/:userID',
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v1.get
+    controllers.statefulV1.get
   );
 
   router.put(
     '/user/:userID',
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v1.update
+    controllers.statefulV1.update
   );
 
   router.delete(
     '/user/:userID',
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v1.delete
+    controllers.statefulV1.delete
   );
 
   router.post(
     '/user/:userID',
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v1.reset
+    controllers.statefulV1.reset
   );
 
   router.patch(
     '/user/:userID/variables',
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v1.updateVariables
+    controllers.statefulV1.updateVariables
   );
 
   // Legacy 1.0.0 routes with versionID in params
@@ -58,7 +58,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v1.interact
+    controllers.statefulV1.interact
   );
 
   router.get(
@@ -66,7 +66,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v1.get
+    controllers.statefulV1.get
   );
 
   router.put(
@@ -74,7 +74,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v1.update
+    controllers.statefulV1.update
   );
 
   router.delete(
@@ -82,7 +82,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v1.delete
+    controllers.statefulV1.delete
   );
 
   router.post(
@@ -90,7 +90,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v1.reset
+    controllers.statefulV1.reset
   );
 
   router.patch(
@@ -98,7 +98,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     middlewares.project.unifyVersionID,
     middlewares.rateLimit.versionConsume,
     middlewares.project.attachID,
-    controllers.stateful.v1.updateVariables
+    controllers.statefulV1.updateVariables
   );
 
   return router;

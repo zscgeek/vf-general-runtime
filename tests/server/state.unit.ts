@@ -14,7 +14,7 @@ const tests = [
     calledPath: '/state/user/:userID/interact',
     expected: {
       controllers: {
-        stateManagement: {
+        statefulV1: {
           interact: 1,
         },
       },
@@ -37,7 +37,7 @@ const tests = [
           },
         },
         controllers: {
-          stateManagement: {
+          statefulV1: {
             interact: {
               HEADERS_PROJECT_ID: 1,
               HEADERS_VERSION_ID: 1,
@@ -54,7 +54,7 @@ const tests = [
     calledPath: '/state/user/:userID',
     expected: {
       controllers: {
-        stateManagement: {
+        statefulV1: {
           get: 1,
         },
       },
@@ -69,7 +69,7 @@ const tests = [
       },
       validations: {
         controllers: {
-          stateManagement: {
+          statefulV1: {
             get: {
               HEADERS_PROJECT_ID: 1,
             },
@@ -91,7 +91,7 @@ const tests = [
     calledPath: '/state/user/:userID',
     expected: {
       controllers: {
-        stateManagement: {
+        statefulV1: {
           update: 1,
         },
       },
@@ -106,7 +106,7 @@ const tests = [
       },
       validations: {
         controllers: {
-          stateManagement: {
+          statefulV1: {
             update: {
               BODY_UPDATE_SESSION: 1,
               HEADERS_PROJECT_ID: 1,
@@ -129,7 +129,7 @@ const tests = [
     calledPath: '/state/user/:userID',
     expected: {
       controllers: {
-        stateManagement: {
+        statefulV1: {
           delete: 1,
         },
       },
@@ -152,7 +152,7 @@ const tests = [
           },
         },
         controllers: {
-          stateManagement: {
+          statefulV1: {
             delete: {
               HEADERS_PROJECT_ID: 1,
             },
@@ -166,7 +166,7 @@ const tests = [
     calledPath: '/state/user/:userID',
     expected: {
       controllers: {
-        stateManagement: {
+        statefulV1: {
           reset: 1,
         },
       },
@@ -189,7 +189,7 @@ const tests = [
           },
         },
         controllers: {
-          stateManagement: {
+          statefulV1: {
             reset: {
               HEADERS_PROJECT_ID: 1,
               HEADERS_VERSION_ID: 1,
@@ -204,7 +204,7 @@ const tests = [
     calledPath: '/state/user/:userID/variables',
     expected: {
       controllers: {
-        stateManagement: {
+        statefulV1: {
           updateVariables: 1,
         },
       },
@@ -219,7 +219,7 @@ const tests = [
       },
       validations: {
         controllers: {
-          stateManagement: {
+          statefulV1: {
             updateVariables: {
               HEADERS_PROJECT_ID: 1,
               BODY_UPDATE_VARIABLES: 1,
@@ -243,7 +243,7 @@ const tests = [
     calledPath: '/state/:versionID/user/:userID/interact',
     expected: {
       controllers: {
-        stateManagement: {
+        statefulV1: {
           interact: 1,
         },
       },
@@ -267,7 +267,7 @@ const tests = [
           },
         },
         controllers: {
-          stateManagement: {
+          statefulV1: {
             interact: {
               HEADERS_PROJECT_ID: 1,
               HEADERS_VERSION_ID: 1,
@@ -284,7 +284,7 @@ const tests = [
     calledPath: '/state/:versionID/user/:userID',
     expected: {
       controllers: {
-        stateManagement: {
+        statefulV1: {
           get: 1,
         },
       },
@@ -300,7 +300,7 @@ const tests = [
       },
       validations: {
         controllers: {
-          stateManagement: {
+          statefulV1: {
             get: {
               HEADERS_PROJECT_ID: 1,
             },
@@ -322,7 +322,7 @@ const tests = [
     calledPath: '/state/:versionID/user/:userID',
     expected: {
       controllers: {
-        stateManagement: {
+        statefulV1: {
           update: 1,
         },
       },
@@ -338,7 +338,7 @@ const tests = [
       },
       validations: {
         controllers: {
-          stateManagement: {
+          statefulV1: {
             update: {
               BODY_UPDATE_SESSION: 1,
               HEADERS_PROJECT_ID: 1,
@@ -361,7 +361,7 @@ const tests = [
     calledPath: '/state/:versionID/user/:userID',
     expected: {
       controllers: {
-        stateManagement: {
+        statefulV1: {
           delete: 1,
         },
       },
@@ -385,7 +385,7 @@ const tests = [
           },
         },
         controllers: {
-          stateManagement: {
+          statefulV1: {
             delete: {
               HEADERS_PROJECT_ID: 1,
             },
@@ -399,7 +399,7 @@ const tests = [
     calledPath: '/state/:versionID/user/:userID',
     expected: {
       controllers: {
-        stateManagement: {
+        statefulV1: {
           reset: 1,
         },
       },
@@ -423,7 +423,7 @@ const tests = [
           },
         },
         controllers: {
-          stateManagement: {
+          statefulV1: {
             reset: {
               HEADERS_PROJECT_ID: 1,
               HEADERS_VERSION_ID: 1,
@@ -438,7 +438,7 @@ const tests = [
     calledPath: '/state/:versionID/user/:userID/variables',
     expected: {
       controllers: {
-        stateManagement: {
+        statefulV1: {
           updateVariables: 1,
         },
       },
@@ -454,7 +454,7 @@ const tests = [
       },
       validations: {
         controllers: {
-          stateManagement: {
+          statefulV1: {
             updateVariables: {
               HEADERS_PROJECT_ID: 1,
               BODY_UPDATE_VARIABLES: 1,
