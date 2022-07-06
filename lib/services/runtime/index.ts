@@ -6,6 +6,7 @@
 import { BaseNode } from '@voiceflow/base-types';
 
 import Client, { Action as RuntimeAction, Runtime } from '@/runtime';
+import { ContextID } from '@/runtime/lib/Context/types';
 import { Config, Context, ContextHandler } from '@/types';
 
 import { FullServiceMap } from '../index';
@@ -24,6 +25,8 @@ export const utils = {
 @injectServices({ utils })
 class RuntimeManager extends AbstractManager<{ utils: typeof utils }> implements ContextHandler {
   private handlers: ReturnType<typeof Handlers>;
+
+  private readonly contextIDToRuntimeMap: Map<ContextID, WeakRef<Runtime>> = new Map();
 
   constructor(services: FullServiceMap, config: Config) {
     super(services, config);
@@ -46,13 +49,6 @@ class RuntimeManager extends AbstractManager<{ utils: typeof utils }> implements
     if (!isRuntimeRequest(request)) throw new Error(`invalid runtime request type: ${JSON.stringify(request)}`);
 
     const runtime = this.getRuntimeForContext({ versionID, userID, state, request, ...context });
-
-    if (context.maxLogLevel) {
-      // Update the max log level if possible
-      // The types say that context.maxLogLevel can be undefined but in practice that should never happen
-
-      runtime.debugLogging.maxLogLevel = context.maxLogLevel;
-    }
 
     if (isIntentRequest(request)) {
       const confidence = getReadableConfidence(request.payload.confidence);
@@ -100,8 +96,34 @@ class RuntimeManager extends AbstractManager<{ utils: typeof utils }> implements
     };
   }
 
-  private getRuntimeForContext(context: Context): Runtime {
-    return this.createClient(context.data.api).createRuntime(context.versionID, context.state, context.request);
+  public getRuntimeForContext(context: Context): Runtime {
+    this.sweepRuntimeCache();
+
+    const maybeCachedRuntime = context.id ? this.contextIDToRuntimeMap.get(context.id)?.deref() : undefined;
+
+    if (maybeCachedRuntime) {
+      return maybeCachedRuntime;
+    }
+
+    const runtime = this.createClient(context.data.api).createRuntime(
+      context.versionID,
+      context.state,
+      context.request
+    );
+    if (context.id) {
+      this.contextIDToRuntimeMap.set(context.id, new WeakRef(runtime));
+    }
+
+    return runtime;
+  }
+
+  /** Remove runtime objects from the cache that have been reclaimed by the V8 garbage collector. */
+  private sweepRuntimeCache(): void {
+    [...this.contextIDToRuntimeMap.entries()]
+      .filter(([, runtime]) => runtime.deref() === undefined)
+      .forEach(([id]) => {
+        this.contextIDToRuntimeMap.delete(id);
+      });
   }
 }
 

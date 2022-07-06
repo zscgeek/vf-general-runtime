@@ -20,6 +20,8 @@ const utils = {
 
 @injectServices({ utils })
 class Interact extends AbstractManager<{ utils: typeof utils }> {
+  private contextIdCounter = 0;
+
   async state(versionID: string, authorization: string): Promise<State> {
     const api = await this.services.dataAPI.get(authorization);
     const version = await api.getVersion(versionID);
@@ -50,6 +52,7 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
       slots,
       state: stateManager,
       filter,
+      debugLogging,
     } = this.services;
 
     const {
@@ -65,6 +68,7 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
     if (authorization?.startsWith('VF.')) metrics.sdkRequest();
 
     const context: PartialContext<Context> = {
+      id: Symbol(`context #${this.contextIdCounter++}`),
       data: {
         locale,
         config,
@@ -79,7 +83,7 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
 
     const turn = new this.services.utils.TurnBuilder<Context>(stateManager);
 
-    turn.addHandlers(asr, nlu, slots, dialog, runtime);
+    turn.addHandlers(debugLogging, asr, nlu, slots, dialog, runtime);
     turn.addHandlers(analytics);
 
     if (config.tts) {
