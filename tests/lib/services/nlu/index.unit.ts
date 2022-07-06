@@ -104,7 +104,6 @@ describe('nlu manager unit tests', () => {
           },
         },
       };
-
       const result = await nlu.handle(context as any);
 
       expect(result).to.eql({ ...context, request: luisResponse });
@@ -144,6 +143,8 @@ describe('nlu manager unit tests', () => {
         query,
         resourceID: nlp.resourceID,
         tag: VersionTag.PRODUCTION,
+        projectID: version.projectID,
+        versionID: liveVersion,
       });
     });
 
@@ -258,7 +259,6 @@ describe('nlu manager unit tests', () => {
           post: sinon.stub().resolves({ data: luisResponse }),
         },
       };
-
       const nlu = new NLUManager({ ...services, utils: { ...defaultUtils } } as any, config as any);
 
       const arg: Parameters<typeof nlu.predict>[0] = {
@@ -282,7 +282,6 @@ describe('nlu manager unit tests', () => {
           post: sinon.stub().resolves({ data: luisResponse }),
         },
       };
-
       const nlu = new NLUManager({ ...services, utils: { ...defaultUtils } } as any, config as any);
 
       const arg: Parameters<typeof nlu.predict>[0] = {
@@ -304,7 +303,6 @@ describe('nlu manager unit tests', () => {
           post: sinon.stub().resolves({ data: undefined }),
         },
       };
-
       const nlu = new NLUManager({ ...services, utils: { ...defaultUtils } } as any, config as any);
 
       const arg: Parameters<typeof nlu.predict>[0] = {
@@ -323,7 +321,6 @@ describe('nlu manager unit tests', () => {
           post: sinon.stub().resolves({ data: undefined }),
         },
       };
-
       const nlu = new NLUManager({ ...services, utils: { ...defaultUtils } } as any, config as any);
 
       const arg: Parameters<typeof nlu.predict>[0] = {
