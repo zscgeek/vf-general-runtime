@@ -82,15 +82,13 @@ describe('flowHandler unit tests', () => {
               message: {
                 stepID: 'step-id',
                 componentName: RuntimeLogs.Kinds.StepLogKind.FLOW,
-                flow: {
-                  before: {
-                    name: 'top-frame-name',
-                    programID: 'top-frame-program-id',
-                  },
-                  after: {
-                    name: null,
-                    programID: 'new-frame-program-id',
-                  },
+                before: {
+                  name: 'top-frame-name',
+                  programID: 'top-frame-program-id',
+                },
+                after: {
+                  name: null,
+                  programID: 'new-frame-program-id',
                 },
               },
               timestamp: getISO8601Timestamp(),
@@ -168,15 +166,13 @@ describe('flowHandler unit tests', () => {
               message: {
                 stepID: 'step-id',
                 componentName: RuntimeLogs.Kinds.StepLogKind.FLOW,
-                flow: {
-                  before: {
-                    name: 'top-frame-name',
-                    programID: 'top-frame-program-id',
-                  },
-                  after: {
-                    name: 'new-frame-name',
-                    programID: 'new-frame-program-id',
-                  },
+                before: {
+                  name: 'top-frame-name',
+                  programID: 'top-frame-program-id',
+                },
+                after: {
+                  name: 'new-frame-name',
+                  programID: 'new-frame-program-id',
                 },
               },
               timestamp: getISO8601Timestamp(),

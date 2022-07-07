@@ -1,4 +1,4 @@
-import { BaseNode, BaseRequest, BaseTrace, RuntimeLogs } from '@voiceflow/base-types';
+import { BaseNode, BaseRequest, BaseTrace } from '@voiceflow/base-types';
 import { NodeType } from '@voiceflow/base-types/build/common/node';
 import { ChatNode } from '@voiceflow/chat-types';
 import { VoiceflowNode } from '@voiceflow/voiceflow-types';
@@ -67,23 +67,12 @@ export const CaptureHandler: HandlerFactory<VoiceflowNode.Capture.Node | ChatNod
 
     if (isIntentRequest(request)) {
       if (!node.variable && node.slots?.length && request.payload.entities) {
-        const variablesBefore: Record<string, RuntimeLogs.VariableValue | null> = Object.fromEntries(
-          node.slots.map((entity) => [entity, variables.get<RuntimeLogs.VariableValue>(entity) ?? null])
+        variables.merge(
+          mapEntities(
+            node.slots.map((slot) => ({ slot, variable: slot })),
+            request.payload.entities
+          )
         );
-        const variablesAfter = mapEntities(
-          node.slots.map((slot) => ({ slot, variable: slot })),
-          request.payload.entities
-        ) as Record<string, string>; // This assertion is safe because the updated value is always a string
-
-        variables.merge(variablesAfter);
-        runtime.debugLogging.recordStepLog(RuntimeLogs.Kinds.StepLogKind.CAPTURE, node, {
-          changedVariables: Object.fromEntries(
-            Object.entries(variablesBefore).map(([variable, beforeValue]) => [
-              variable,
-              { before: beforeValue, after: variablesAfter[variable] },
-            ])
-          ),
-        });
       }
       if (node.variable) {
         const { query } = request.payload;
@@ -91,18 +80,7 @@ export const CaptureHandler: HandlerFactory<VoiceflowNode.Capture.Node | ChatNod
           const num = utils.wordsToNumbers(query);
           const isValid = typeof num === 'number' && !Number.isNaN(num);
 
-          const variableBefore = variables.get<RuntimeLogs.VariableValue>(node.variable);
-          const variableAfter = isValid ? num : query;
-
-          runtime.debugLogging.recordStepLog(RuntimeLogs.Kinds.StepLogKind.CAPTURE, node, {
-            changedVariables: {
-              [node.variable]: {
-                before: variableBefore ?? null,
-                after: variableAfter,
-              },
-            },
-          });
-          variables.set(node.variable, variableAfter);
+          variables.set(node.variable, isValid ? num : query);
         }
       }
     }

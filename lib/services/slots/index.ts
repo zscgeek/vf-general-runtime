@@ -1,6 +1,3 @@
-import { RuntimeLogs } from '@voiceflow/base-types';
-import assert from 'assert/strict';
-
 import { Context, ContextHandler } from '@/types';
 
 import { isIntentRequest } from '../runtime/types';
@@ -17,26 +14,17 @@ class SlotsService extends AbstractManager<{ utils: typeof utils }> implements C
     }
 
     const version = await context.data.api.getVersion(context.versionID);
-    assert(version, new TypeError(`Version ${context.versionID} not found`));
+    if (!version) {
+      throw new Error('Version not found!');
+    }
 
     const slots = version.prototype?.model.slots;
-    const { payload } = context.request;
-
-    if (slots) {
-      natoApcoConverter(payload.entities, slots, payload.query);
+    if (!slots) {
+      return context;
     }
 
-    if (payload.confidence) {
-      const runtime = this.services.runtime.getRuntimeForContext(context);
-      runtime.debugLogging.recordGlobalLog(RuntimeLogs.Kinds.GlobalLogKind.NLU_INTENT_RESOLVED, {
-        confidence: payload.confidence,
-        resolvedIntent: payload.intent.name,
-        utterance: payload.query,
-        entities: slots
-          ? Object.fromEntries(payload.entities.map((entity) => [entity.name, { value: entity.value }]))
-          : {},
-      });
-    }
+    const payload = context.request?.payload;
+    natoApcoConverter(payload.entities, slots, payload.query);
 
     return context;
   };

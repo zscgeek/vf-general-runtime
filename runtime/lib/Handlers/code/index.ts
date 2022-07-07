@@ -1,8 +1,7 @@
-import { BaseNode, RuntimeLogs } from '@voiceflow/base-types';
+import { BaseNode } from '@voiceflow/base-types';
 import axios from 'axios';
 import safeJSONStringify from 'json-stringify-safe';
 import _ from 'lodash';
-import { isDeepStrictEqual } from 'util';
 
 import { HandlerFactory } from '@/runtime/lib/Handler';
 
@@ -43,69 +42,34 @@ const CodeHandler: HandlerFactory<BaseNode.Code.Node, CodeOptions | void> = ({
         newVariableState = vmExecute(reqData, testingEnv, callbacks);
       }
 
-      // The changes (a diff) that the execution of this code made to the variables
-      const changes: Record<string, RuntimeLogs.ValueChange<unknown>> = Object.fromEntries(
-        [...new Set([...Object.keys(variablesState), ...Object.keys(newVariableState)])]
-          .map((variable): [string, RuntimeLogs.ValueChange<unknown>] => [
-            variable,
-            {
-              before: variablesState[variable],
-              after: newVariableState[variable],
-            },
-          ])
-          .filter(([, change]) => !isDeepStrictEqual(change.before, change.after))
-      );
+      // debugging changes find variable value differences
+      const changes = _.union(Object.keys(variablesState), Object.keys(newVariableState)).reduce<string>(
+        (acc, variable) => {
+          if (!_.isEqual(variablesState[variable], newVariableState[variable])) {
+            acc += `\`{${variable}}\`: \`${JSON.stringify(variablesState[variable])}\` => \`${JSON.stringify(
+              newVariableState[variable]
+            )}\`  \n`;
+          }
 
-      const changesSummary = Object.entries(changes)
-        .map(
-          ([variable, change]) =>
-            `\`{${variable}}\`: \`${JSON.stringify(change.before)}\` => \`${JSON.stringify(change.after)}\``
-        )
-        .join('\n');
+          return acc;
+        },
+        ''
+      );
 
       runtime.trace.debug(
         // eslint-disable-next-line sonarjs/no-nested-template-literals
-        `evaluating code - ${changesSummary ? `changes:\n${changesSummary}` : 'no variable changes'}`,
+        `evaluating code - ${changes ? `changes:  \n${changes}` : 'no variable changes'}`,
         BaseNode.NodeType.CODE
       );
-
-      if (node.id !== 'PROGRAMMATICALLY-GENERATED-CODE-NODE') {
-        runtime.debugLogging.recordStepLog(RuntimeLogs.Kinds.StepLogKind.CUSTOM_CODE, node, {
-          error: null,
-          changedVariables: Object.fromEntries(
-            Object.entries(changes).map(([variable, change]) => [
-              variable,
-              // `?? null` is used to ensure that no `undefined` values make it through, since they'll be excluded
-              // in JSON.stringify
-              {
-                before: change.before ?? null,
-                after: change.after ?? null,
-              },
-            ])
-          ),
-        });
-      }
 
       variables.merge(newVariableState);
 
       return node.success_id ?? null;
     } catch (error) {
-      const serializedError = error.response?.data || error.toString();
       runtime.trace.debug(
-        `unable to resolve code  \n\`${safeJSONStringify(serializedError)}\``,
+        `unable to resolve code  \n\`${safeJSONStringify(error.response?.data || error.toString())}\``,
         BaseNode.NodeType.CODE
       );
-      if (node.id !== 'PROGRAMMATICALLY-GENERATED-CODE-NODE') {
-        runtime.debugLogging.recordStepLog(
-          RuntimeLogs.Kinds.StepLogKind.CUSTOM_CODE,
-          node,
-          {
-            error: serializedError,
-            changedVariables: null,
-          },
-          RuntimeLogs.LogLevel.ERROR
-        );
-      }
 
       return node.fail_id ?? null;
     }

@@ -182,18 +182,7 @@ const transformResponseBody = (
   };
 };
 
-export interface APICallResult {
-  variables: Record<string, Variable>;
-  request: Request;
-  response: Response;
-  responseJSON: any;
-}
-
-export const makeAPICall = async (
-  nodeData: APINodeData,
-  runtime: Runtime,
-  config: ResponseConfig
-): Promise<APICallResult> => {
+export const makeAPICall = async (nodeData: APINodeData, runtime: Runtime, config: ResponseConfig) => {
   const hostname = validateHostname(nodeData.url);
   await validateIP(hostname);
 

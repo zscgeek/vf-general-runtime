@@ -8,15 +8,12 @@ import DebugLogging from '../Runtime/DebugLogging';
 import { mapStores } from '../Runtime/utils/variables';
 
 const FlowHandler: HandlerFactory<BaseNode.Flow.Node> = () => ({
-  canHandle: (node) => node.type === BaseNode.NodeType.FLOW || !!node.diagram_id,
+  canHandle: (node) => !!node.diagram_id,
   handle: (node, runtime, variables) => {
     if (!node.diagram_id) {
-      // Exit if the linked flow is empty
-
-      runtime.debugLogging.recordStepLog(RuntimeLogs.Kinds.StepLogKind.FLOW, node, {
-        flow: null,
-      });
-
+      // TODO: Check if this runs when you run a flow node where you haven't set the linked flow
+      // Update the log type to support logging a "before: {current flow} after: null" or something
+      // Maybe just log null entirely instead of a ValueChange
       return node.nextId || null;
     }
 
@@ -40,10 +37,8 @@ const FlowHandler: HandlerFactory<BaseNode.Flow.Node> = () => ({
 
     runtime.trace.debug(`entering flow \`${newFrame.getName() || newFrame.getProgramID()}\``, BaseNode.NodeType.FLOW);
     runtime.debugLogging.recordStepLog(RuntimeLogs.Kinds.StepLogKind.FLOW, node, {
-      flow: {
-        before: DebugLogging.createFlowReference(topFrame),
-        after: DebugLogging.createFlowReference(newFrame),
-      },
+      before: DebugLogging.createFlowReference(topFrame),
+      after: DebugLogging.createFlowReference(newFrame),
     });
 
     return null;

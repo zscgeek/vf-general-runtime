@@ -7,24 +7,25 @@ export { Context, ContextHandle, ContextHandler, InitContextHandler, PartialCont
 export class ContextBuilder<C extends Context<any, any, any>> {
   private pipes: ContextHandler<C>[][] = [];
 
-  addHandlers(...handlers: ContextHandler<C>[]): this {
+  addHandlers(...handlers: ContextHandler<C>[]) {
     this.pipes.push(handlers);
     return this;
   }
 
-  async handle(baseContext: C): Promise<C> {
-    let context = baseContext;
+  async handle(_request: C) {
+    let request: C = _request;
+
     for (const handlers of this.pipes) {
-      context.end = false;
+      request.end = false;
 
       for (const handler of handlers) {
-        context = await handler.handle(context);
+        request = await handler.handle(request);
 
-        if (context.end) break;
+        if (request.end) break;
       }
     }
 
-    return context;
+    return request;
   }
 }
 
@@ -33,12 +34,12 @@ export class TurnBuilder<C extends Context<any, any, any>> extends ContextBuilde
     super();
   }
 
-  async handle(context: PartialContext<C>): Promise<C> {
-    return super.handle(await this.init.handle(context));
+  async handle(_request: PartialContext<C>): Promise<C> {
+    return super.handle(await this.init.handle(_request));
   }
 
-  async resolve(context: Promise<C>): Promise<Pick<C, 'request' | 'state' | 'trace'>> {
-    const { request, state, trace } = await context;
+  async resolve(handler: Promise<C>): Promise<Pick<C, 'request' | 'state' | 'trace'>> {
+    const { request, state, trace } = await handler;
     return { request, state, trace };
   }
 }

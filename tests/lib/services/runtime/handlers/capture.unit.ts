@@ -1,12 +1,10 @@
 /* eslint-disable max-nested-callbacks */
-import { BaseNode, BaseRequest, RuntimeLogs } from '@voiceflow/base-types';
+import { BaseRequest } from '@voiceflow/base-types';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
 import { CaptureHandler } from '@/lib/services/runtime/handlers/capture';
-import runtime, { Action, Store } from '@/runtime';
-import DebugLogging from '@/runtime/lib/Runtime/DebugLogging';
-import { getISO8601Timestamp } from '@/runtime/lib/Runtime/DebugLogging/utils';
+import { Action } from '@/runtime';
 
 const CapturePathTrace = { type: 'path', payload: { path: 'capture' } };
 
@@ -239,7 +237,7 @@ describe('Capture handler', () => {
               };
               const handler = CaptureHandler(utils as any);
 
-              const node = { id: 'node-id', variable: 'var', type: BaseNode.NodeType.CAPTURE };
+              const node = { id: 'node-id', variable: 'var' };
               const request = {
                 type: BaseRequest.RequestType.INTENT,
                 payload: { intent: { name: 'intent_name' }, entities: [], query: 'q' },
@@ -249,40 +247,16 @@ describe('Capture handler', () => {
                 getRequest: sinon.stub().returns(request),
                 trace: { addTrace: sinon.stub() },
                 storage: { delete: sinon.stub() },
-                debugLogging: null as unknown as DebugLogging,
               };
-              runtime.debugLogging = new DebugLogging(runtime.trace.addTrace);
-              const variables = new Store({ [node.variable]: 'val1' });
-              expect(handler.handle(node as any, runtime as any, variables, null as any)).to.eql(null);
+              const variables = { var1: 'val1', set: sinon.stub() };
+              expect(handler.handle(node as any, runtime as any, variables as any, null as any)).to.eql(null);
 
               expect(utils.commandHandler.canHandle.args).to.eql([[runtime]]);
               expect(utils.repeatHandler.canHandle.args).to.eql([[runtime]]);
               expect(runtime.getRequest.callCount).to.eql(1);
               expect(utils.wordsToNumbers.args).to.eql([[request.payload.query]]);
-              expect(variables).to.eql(new Store({ [node.variable]: request.payload.query }));
-              expect(runtime.trace.addTrace.args).to.eql([
-                [
-                  {
-                    type: 'log',
-                    payload: {
-                      kind: 'step.capture',
-                      level: 'info',
-                      message: {
-                        changedVariables: {
-                          var: {
-                            before: 'val1',
-                            after: request.payload.query,
-                          },
-                        },
-                        componentName: RuntimeLogs.Kinds.StepLogKind.CAPTURE,
-                        stepID: 'node-id',
-                      },
-                      timestamp: getISO8601Timestamp(),
-                    },
-                  },
-                ],
-                [CapturePathTrace],
-              ]);
+              expect(variables.set.args).to.eql([[node.variable, request.payload.query]]);
+              expect(runtime.trace.addTrace.args).to.eql([[CapturePathTrace]]);
             });
 
             it('NaN', () => {
@@ -300,7 +274,7 @@ describe('Capture handler', () => {
               };
               const handler = CaptureHandler(utils as any);
 
-              const node = { id: 'node-id', variable: 'var', type: BaseNode.NodeType.CAPTURE };
+              const node = { id: 'node-id', variable: 'var' };
               const request = {
                 type: BaseRequest.RequestType.INTENT,
                 payload: { intent: { name: 'intent_name' }, entities: [], query: 'q' },
@@ -310,40 +284,16 @@ describe('Capture handler', () => {
                 getRequest: sinon.stub().returns(request),
                 trace: { addTrace: sinon.stub() },
                 storage: { delete: sinon.stub() },
-                debugLogging: null as unknown as DebugLogging,
               };
-              runtime.debugLogging = new DebugLogging(runtime.trace.addTrace);
-              const variables = new Store({ [node.variable]: 'val1' });
-              expect(handler.handle(node as any, runtime as any, variables, null as any)).to.eql(null);
+              const variables = { var1: 'val1', set: sinon.stub() };
+              expect(handler.handle(node as any, runtime as any, variables as any, null as any)).to.eql(null);
 
               expect(utils.commandHandler.canHandle.args).to.eql([[runtime]]);
               expect(utils.repeatHandler.canHandle.args).to.eql([[runtime]]);
               expect(runtime.getRequest.callCount).to.eql(1);
               expect(utils.wordsToNumbers.args).to.eql([[request.payload.query]]);
-              expect(variables).to.eql(new Store({ [node.variable]: request.payload.query }));
-              expect(runtime.trace.addTrace.args).to.eql([
-                [
-                  {
-                    type: 'log',
-                    payload: {
-                      kind: 'step.capture',
-                      level: 'info',
-                      message: {
-                        changedVariables: {
-                          var: {
-                            before: 'val1',
-                            after: request.payload.query,
-                          },
-                        },
-                        componentName: RuntimeLogs.Kinds.StepLogKind.CAPTURE,
-                        stepID: 'node-id',
-                      },
-                      timestamp: getISO8601Timestamp(),
-                    },
-                  },
-                ],
-                [CapturePathTrace],
-              ]);
+              expect(variables.set.args).to.eql([[node.variable, request.payload.query]]);
+              expect(runtime.trace.addTrace.args).to.eql([[CapturePathTrace]]);
             });
           });
 
@@ -364,7 +314,7 @@ describe('Capture handler', () => {
               };
               const handler = CaptureHandler(utils as any);
 
-              const node = { id: 'node-id', variable: 'var', type: BaseNode.NodeType.CAPTURE };
+              const node = { id: 'node-id', variable: 'var' };
               const request = {
                 type: BaseRequest.RequestType.INTENT,
                 payload: { intent: { name: 'intent_name' }, entities: [], query: 'q' },
@@ -374,40 +324,16 @@ describe('Capture handler', () => {
                 getRequest: sinon.stub().returns(request),
                 trace: { addTrace: sinon.stub() },
                 storage: { delete: sinon.stub() },
-                debugLogging: null as unknown as DebugLogging,
               };
-              runtime.debugLogging = new DebugLogging(runtime.trace.addTrace);
-              const variables = new Store({ [node.variable]: 'val1' });
-              expect(handler.handle(node as any, runtime as any, variables, null as any)).to.eql(null);
+              const variables = { var1: 'val1', set: sinon.stub() };
+              expect(handler.handle(node as any, runtime as any, variables as any, null as any)).to.eql(null);
 
               expect(utils.commandHandler.canHandle.args).to.eql([[runtime]]);
               expect(utils.repeatHandler.canHandle.args).to.eql([[runtime]]);
               expect(runtime.getRequest.callCount).to.eql(1);
               expect(utils.wordsToNumbers.args).to.eql([[request.payload.query]]);
-              expect(variables).to.eql(new Store({ [node.variable]: num }));
-              expect(runtime.trace.addTrace.args).to.eql([
-                [
-                  {
-                    type: 'log',
-                    payload: {
-                      kind: 'step.capture',
-                      level: 'info',
-                      message: {
-                        changedVariables: {
-                          var: {
-                            before: 'val1',
-                            after: num,
-                          },
-                        },
-                        componentName: RuntimeLogs.Kinds.StepLogKind.CAPTURE,
-                        stepID: 'node-id',
-                      },
-                      timestamp: getISO8601Timestamp(),
-                    },
-                  },
-                ],
-                [CapturePathTrace],
-              ]);
+              expect(variables.set.args).to.eql([[node.variable, num]]);
+              expect(runtime.trace.addTrace.args).to.eql([[CapturePathTrace]]);
             });
           });
         });
