@@ -47,13 +47,6 @@ class RuntimeManager extends AbstractManager<{ utils: typeof utils }> implements
 
     const runtime = this.getRuntimeForContext({ versionID, userID, state, request, ...context });
 
-    if (context.maxLogLevel) {
-      // Update the max log level if possible
-      // The types say that context.maxLogLevel can be undefined but in practice that should never happen
-
-      runtime.debugLogging.maxLogLevel = context.maxLogLevel;
-    }
-
     if (isIntentRequest(request)) {
       const confidence = getReadableConfidence(request.payload.confidence);
 
@@ -101,7 +94,18 @@ class RuntimeManager extends AbstractManager<{ utils: typeof utils }> implements
   }
 
   private getRuntimeForContext(context: Context): Runtime {
-    return this.createClient(context.data.api).createRuntime(context.versionID, context.state, context.request);
+    const runtime = this.createClient(context.data.api).createRuntime(
+      context.versionID,
+      context.state,
+      context.request
+    );
+
+    runtime.debugLogging.refreshContext(context);
+
+    // Import any traces already present in the context
+    context.trace?.forEach((trace) => runtime.trace.addTrace(trace));
+
+    return runtime;
   }
 }
 

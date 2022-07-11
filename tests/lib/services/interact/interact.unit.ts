@@ -1,3 +1,5 @@
+import { RuntimeLogs } from '@voiceflow/base-types';
+import assert from 'assert';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
@@ -16,11 +18,16 @@ const buildServices = (context: any) => ({
   runtime: { handle: sinon.stub().resolves(output(context, 'runtime')) },
   analytics: { handle: sinon.stub().resolves(output(context, 'analytics')) },
   dialog: { handle: sinon.stub().resolves(output(context, 'dialog')) },
-  debugLogging: { handle: sinon.stub().resolves(output(context, 'debugLogging')) },
   filter: { handle: sinon.stub().resolves(output(context, 'filter', { trace: 'trace' })) },
   metrics: { generalRequest: sinon.stub() },
   utils: { TurnBuilder },
 });
+
+type ServiceName = Exclude<keyof ReturnType<typeof buildServices>, 'metrics' | 'utils'>;
+
+interface MockService {
+  handle: sinon.SinonStub;
+}
 
 describe('interact service unit tests', () => {
   describe('handler', () => {
@@ -29,14 +36,14 @@ describe('interact service unit tests', () => {
         headers: { authorization: 'auth', origin: 'origin', versionID: 'versionID' },
         body: { state: { foo: 'bar' }, request: 'request', config: { tts: true, selfDelegate: true } },
         params: {},
-        query: { locale: 'locale' },
+        query: { locale: 'locale', logs: RuntimeLogs.LogLevel.INFO },
       };
       const context = {
         state: data.body.state,
         request: data.body.request,
         versionID: data.headers.versionID,
         userID: undefined,
-        maxLogLevel: undefined,
+        maxLogLevel: RuntimeLogs.DEFAULT_LOG_LEVEL,
         data: {
           locale: data.query.locale,
           config: {
@@ -62,16 +69,38 @@ describe('interact service unit tests', () => {
         trace: 'trace',
       });
 
-      expect(services.state.handle.args).to.eql([[context]]);
-      expect(services.asr.handle.args).to.eql([[output(context, 'state')]]);
-      expect(services.nlu.handle.args).to.eql([[output(context, 'asr')]]);
-      expect(services.slots.handle.args).to.eql([[output(context, 'nlu')]]);
-      expect(services.dialog.handle.args).to.eql([[output(context, 'slots')]]);
-      expect(services.runtime.handle.args).to.eql([[output(context, 'dialog')]]);
-      expect(services.analytics.handle.args).to.eql([[output(context, 'runtime')]]);
-      expect(services.tts.handle.args).to.eql([[output(context, 'analytics')]]);
-      expect(services.speak.handle.args).to.eql([[output(context, 'tts')]]);
-      expect(services.debugLogging.handle.callCount).to.eql(0);
+      const servicesToAssertWith: ServiceName[] = [
+        'state',
+        'asr',
+        'nlu',
+        'slots',
+        'dialog',
+        'runtime',
+        'analytics',
+        'tts',
+        'speak',
+      ];
+
+      servicesToAssertWith
+        .map(
+          (
+            serviceName,
+            index
+          ): { serviceName: ServiceName; service: MockService; previousServiceName: ServiceName | undefined } => ({
+            serviceName,
+            service: services[serviceName],
+            previousServiceName: servicesToAssertWith[index - 1],
+          })
+        )
+        .forEach(({ serviceName, service, previousServiceName }) => {
+          if (serviceName === 'state') {
+            expect(service.handle.args).to.eql([[context]]);
+          } else {
+            assert(previousServiceName);
+            expect(service.handle.args).to.eql([[output(context, previousServiceName)]]);
+          }
+        });
+
       expect(services.metrics.generalRequest.callCount).to.eql(1);
     });
 
@@ -142,14 +171,14 @@ describe('interact service unit tests', () => {
         platform: 'platform',
       },
       params: {},
-      query: { locale: 'locale' },
+      query: { locale: 'locale', logs: RuntimeLogs.LogLevel.INFO },
     };
     const context = {
       state: data.body.state,
       userID: undefined,
       request: data.body.request,
       versionID: data.headers.versionID,
-      maxLogLevel: undefined,
+      maxLogLevel: RuntimeLogs.LogLevel.INFO,
       data: {
         locale: data.query.locale,
         config: {},
