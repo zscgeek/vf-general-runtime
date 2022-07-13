@@ -8,7 +8,7 @@ import Server from './server';
 
 (async () => {
   const serviceManager = new ServiceManager(config);
-  const server = new Server(serviceManager, config);
+  const server = new Server(serviceManager);
 
   // Graceful shutdown from SIGTERM
   process.on('SIGTERM', async () => {
@@ -27,7 +27,7 @@ import Server from './server';
   });
 
   try {
-    await server.start();
+    await server.start(config.PORT);
   } catch (error) {
     log.error(`[app] [http] failed to start server ${log.vars({ error })}`);
   }

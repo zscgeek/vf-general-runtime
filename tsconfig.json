@@ -30,7 +30,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+  },
+  "typeAcquisition": {
+    "include": ["jest"]
   },
   "compileOnSave": false,
   "include": ["backend", "lib", "runtime", "tests", "typings", "./*.ts"],

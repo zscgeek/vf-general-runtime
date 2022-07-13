@@ -11,6 +11,13 @@ import {
 import { initClients, stopClients } from '@/lib/clients';
 import { Config } from '@/types';
 
+export interface ServiceManagerBuilders {
+  buildClients?: typeof buildClients;
+  buildServices?: typeof buildServices;
+  buildMiddleware?: typeof buildMiddleware;
+  buildControllers?: typeof buildControllers;
+}
+
 class ServiceManager {
   clients: ClientMap;
 
@@ -20,18 +27,19 @@ class ServiceManager {
 
   controllers: ControllerMap;
 
-  constructor(public config: Config) {
+  constructor(public config: Config, builders: ServiceManagerBuilders = {}) {
+
     // Clients
-    this.clients = buildClients(config);
+    this.clients = (builders.buildClients ?? buildClients)(config);
 
     // Services
-    this.services = buildServices(config, this.clients);
+    this.services = (builders.buildServices ?? buildServices)(config, this.clients);
 
     // Middleware
-    this.middlewares = buildMiddleware(this.services, config);
+    this.middlewares = (builders.buildMiddleware ?? buildMiddleware)(this.services, config);
 
     // Controllers
-    this.controllers = buildControllers(this.services, config);
+    this.controllers = (builders.buildControllers ?? buildControllers)(this.services, config);
   }
 
   /**

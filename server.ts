@@ -8,28 +8,15 @@ import https from 'https';
 import { ExpressMiddleware, ServiceManager } from './backend';
 import log from './logger';
 import pjson from './package.json';
-import { Config } from './types';
 
 const name = pjson.name.replace(/^@[\dA-Za-z-]+\//g, '');
 
-/**
- * @class
- */
-class Server {
-  app: Express | null = null;
+export default class Server {
+  public readonly app: Express;
 
-  server: https.Server | http.Server | null = null;
+  public readonly server: https.Server | http.Server;
 
-  constructor(public serviceManager: ServiceManager, public config: Config) {}
-
-  /**
-   * Start server
-   * - Creates express app and services
-   */
-  async start() {
-    // Start services.
-    await this.serviceManager.start();
-
+  constructor(public serviceManager: ServiceManager) {
     this.app = express();
 
     if (process.env.NODE_ENV === 'e2e') {
@@ -49,11 +36,20 @@ class Server {
     const { middlewares, controllers } = this.serviceManager;
 
     ExpressMiddleware.attach(this.app, middlewares, controllers);
+  }
 
-    this.server.listen(this.config.PORT);
+  /**
+   * Start server
+   * - Creates express app and services
+   */
+  async start(port: number | string) {
+    // Start services.
+    await this.serviceManager.start();
+
+    this.server.listen(port);
     await once(this.server, 'listening');
 
-    log.info(`[http] ${name} listening ${log.vars({ port: this.config.PORT })}`);
+    log.info(`[http] ${name} listening ${log.vars({ port })}`);
   }
 
   /**
@@ -70,5 +66,3 @@ class Server {
     }
   }
 }
-
-export default Server;
