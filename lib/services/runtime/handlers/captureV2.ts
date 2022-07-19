@@ -4,6 +4,7 @@ import { VoiceflowNode } from '@voiceflow/voiceflow-types';
 
 import { Action, HandlerFactory } from '@/runtime';
 
+import { DMStore } from '../../dialog';
 import { isIntentRequest, StorageType } from '../types';
 import { addButtonsIfExists, mapEntities } from '../utils';
 import CommandHandler from './command';
@@ -80,6 +81,8 @@ export const CaptureV2Handler: HandlerFactory<VoiceflowNode.CaptureV2.Node, type
       return utils.repeatHandler.handle(runtime);
     }
 
+    const { hasEntityPrompt, hasUnfulfilledEntity } = runtime.storage.get<DMStore>(StorageType.DM) ?? {};
+
     // on successful match
     if (isIntentRequest(request)) {
       const { query, intent } = request.payload;
@@ -93,7 +96,7 @@ export const CaptureV2Handler: HandlerFactory<VoiceflowNode.CaptureV2.Node, type
         return node.nextId ?? null;
       };
 
-      if (isNodeCapturingEntity(node) && intent.name === node.intent?.name) {
+      if (isNodeCapturingEntity(node) && intent.name === node.intent?.name && !hasUnfulfilledEntity) {
         const variablesBefore: Record<string, RuntimeLogs.VariableValue | null> = Object.fromEntries(
           node.intent.entities.map((entity) => [entity, variables.get<RuntimeLogs.VariableValue>(entity) ?? null])
         );
@@ -132,9 +135,15 @@ export const CaptureV2Handler: HandlerFactory<VoiceflowNode.CaptureV2.Node, type
 
     const noMatchHandler = utils.entityFillingNoMatchHandler.handle(node, runtime, variables);
 
-    return captureIntentName
-      ? noMatchHandler([captureIntentName], entityFillingRequest(captureIntentName))
-      : noMatchHandler();
+    if (!captureIntentName) {
+      return noMatchHandler();
+    }
+
+    if (!hasEntityPrompt) {
+      return noMatchHandler([captureIntentName]);
+    }
+
+    return noMatchHandler([captureIntentName], entityFillingRequest(captureIntentName));
   },
 });
 

@@ -39,6 +39,8 @@ export const utils = {
 export interface DMStore {
   intentRequest?: BaseRequest.IntentRequest;
   priorIntent?: BaseRequest.IntentRequest;
+  hasEntityPrompt?: boolean;
+  hasUnfulfilledEntity?: boolean;
 }
 
 @injectServices({ utils })
@@ -222,6 +224,11 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
         },
       });
 
+      context = DialogManagement.setDMStore(context, {
+        ...dmStateStore,
+        hasUnfulfilledEntity: true,
+        hasEntityPrompt: !!prompt,
+      });
       return {
         ...context,
         end: true,
@@ -241,10 +248,12 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
       intentRequest = setElicit(intentRequest, false);
     }
 
+    // cannot clear the DM state store as it is needed for the capture step
+    context = DialogManagement.setDMStore(context, { ...dmStateStore, hasUnfulfilledEntity: false });
+
     context.request = intentRequest;
 
-    // Clear the DM state store
-    return DialogManagement.setDMStore(context, undefined);
+    return context;
   };
 }
 
