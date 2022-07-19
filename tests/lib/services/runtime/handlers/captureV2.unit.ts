@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 
 import { CaptureV2Handler } from '@/lib/services/runtime/handlers/captureV2';
+import { StorageType } from '@/lib/services/runtime/types';
 import { Action, Store } from '@/runtime';
 import DebugLogging from '@/runtime/lib/Runtime/DebugLogging';
 import { getISO8601Timestamp } from '@/runtime/lib/Runtime/DebugLogging/utils';
@@ -33,7 +34,7 @@ describe('CaptureV2 handler', () => {
         getAction: sinon.stub().returns(Action.RUNNING),
         getRequest: sinon.stub().returns({}),
         trace: { addTrace: sinon.stub() },
-        storage: { delete: sinon.stub() },
+        storage: { delete: sinon.stub(), get: sinon.stub() },
       };
       const variables = { var1: 'val1' };
       expect(handler.handle(node as any, runtime as any, variables as any, null as any)).to.eql(node.id);
@@ -72,7 +73,7 @@ describe('CaptureV2 handler', () => {
           getAction: sinon.stub().returns(Action.REQUEST),
           setAction: sinon.stub(),
           getRequest: sinon.stub().returns({}),
-          storage: { delete: sinon.stub() },
+          storage: { delete: sinon.stub(), get: sinon.stub() },
         };
         const variables = { var1: 'val1' };
         expect(handler.handle(node as any, runtime as any, variables as any, null as any)).to.eql(output);
@@ -102,7 +103,7 @@ describe('CaptureV2 handler', () => {
           getAction: sinon.stub().returns(Action.REQUEST),
           setAction: sinon.stub(),
           getRequest: sinon.stub().returns({}),
-          storage: { delete: sinon.stub() },
+          storage: { delete: sinon.stub(), get: sinon.stub() },
         };
         const variables = { var1: 'val1' };
         expect(handler.handle(node as any, runtime as any, variables as any, null as any)).to.eql(output);
@@ -127,7 +128,7 @@ describe('CaptureV2 handler', () => {
           getAction: sinon.stub().returns(Action.REQUEST),
           setAction: sinon.stub(),
           getRequest: sinon.stub().returns({}),
-          storage: { delete: sinon.stub() },
+          storage: { delete: sinon.stub(), get: sinon.stub() },
         };
         const variables = { var1: 'val1' };
         expect(handler.handle(node as any, runtime as any, variables as any, null as any)).to.eql(output);
@@ -174,7 +175,7 @@ describe('CaptureV2 handler', () => {
             getAction: sinon.stub().returns(Action.REQUEST),
             getRequest: sinon.stub().returns(request),
             trace: { addTrace: sinon.stub() },
-            storage: { delete: sinon.stub() },
+            storage: { delete: sinon.stub(), get: sinon.stub() },
             debugLogging: null as unknown as DebugLogging,
           };
           runtime.debugLogging = new DebugLogging(runtime.trace.addTrace);
@@ -248,7 +249,7 @@ describe('CaptureV2 handler', () => {
             getAction: sinon.stub().returns(Action.REQUEST),
             getRequest: sinon.stub().returns(request),
             trace: { addTrace: sinon.stub() },
-            storage: { delete: sinon.stub() },
+            storage: { delete: sinon.stub(), get: sinon.stub() },
             debugLogging: null as unknown as DebugLogging,
           };
           runtime.debugLogging = new DebugLogging(runtime.trace.addTrace);
@@ -317,7 +318,7 @@ describe('CaptureV2 handler', () => {
             getAction: sinon.stub().returns(Action.REQUEST),
             getRequest: sinon.stub().returns(request),
             trace: { addTrace: sinon.stub() },
-            storage: { delete: sinon.stub() },
+            storage: { delete: sinon.stub(), get: sinon.stub() },
             debugLogging: null as unknown as DebugLogging,
           };
           runtime.debugLogging = new DebugLogging(runtime.trace.addTrace);
@@ -377,7 +378,10 @@ describe('CaptureV2 handler', () => {
             getAction: sinon.stub().returns(Action.REQUEST),
             getRequest: sinon.stub().returns(request),
             trace: { addTrace: sinon.stub() },
-            storage: { delete: sinon.stub() },
+            storage: {
+              delete: sinon.stub(),
+              get: sinon.stub().withArgs(StorageType.DM).returns({ hasEntityPrompt: true }),
+            },
           };
           const variables = { var1: 'val1' };
           expect(handler.handle(node as any, runtime as any, variables as any, null as any)).to.eql('no-match-path');
@@ -418,7 +422,7 @@ describe('CaptureV2 handler', () => {
           const runtime = {
             getAction: sinon.stub().returns(Action.REQUEST),
             getRequest: sinon.stub().returns(request),
-            storage: { delete: sinon.stub() },
+            storage: { delete: sinon.stub(), get: sinon.stub() },
           };
           const variables = { var1: 'val1' };
           expect(handler.handle(node as any, runtime as any, variables as any, null as any)).to.eql('no-match-path');
@@ -453,7 +457,10 @@ describe('CaptureV2 handler', () => {
           const runtime = {
             getAction: sinon.stub().returns(Action.REQUEST),
             getRequest: sinon.stub().returns(request),
-            storage: { delete: sinon.stub() },
+            storage: {
+              delete: sinon.stub(),
+              get: sinon.stub().withArgs(StorageType.DM).returns({ hasEntityPrompt: true }),
+            },
           };
           const variables = { var1: 'val1' };
           expect(handler.handle(node as any, runtime as any, variables as any, null as any)).to.eql('no-match-path');
@@ -468,6 +475,44 @@ describe('CaptureV2 handler', () => {
               { type: 'intent', payload: { intent: { name: node.intent.name }, entities: [], query: '' } },
             ],
           ]);
+        });
+
+        it('node.intent nomatch with no prompt handler', () => {
+          const noMatchHandler = sinon.stub().returns('no-match-path');
+          const utils = {
+            commandHandler: {
+              canHandle: sinon.stub().returns(false),
+            },
+            repeatHandler: {
+              canHandle: sinon.stub().returns(false),
+            },
+            noReplyHandler: {
+              canHandle: sinon.stub().returns(false),
+            },
+            entityFillingNoMatchHandler: {
+              handle: sinon.stub().returns(noMatchHandler),
+            },
+          };
+          const handler = CaptureV2Handler(utils as any);
+
+          const node = { id: 'node-id', intent: { name: 'intentName' } };
+          const request = { foo: 'bar' };
+          const runtime = {
+            getAction: sinon.stub().returns(Action.REQUEST),
+            getRequest: sinon.stub().returns(request),
+            storage: {
+              delete: sinon.stub(),
+              get: sinon.stub().withArgs(StorageType.DM).returns({ hasEntityPrompt: false }),
+            },
+          };
+          const variables = { var1: 'val1' };
+          expect(handler.handle(node as any, runtime as any, variables as any, null as any)).to.eql('no-match-path');
+
+          expect(utils.commandHandler.canHandle.args).to.eql([[runtime]]);
+          expect(utils.repeatHandler.canHandle.args).to.eql([[runtime]]);
+          expect(runtime.getRequest.callCount).to.eql(1);
+          expect(utils.entityFillingNoMatchHandler.handle.args).to.eql([[node, runtime, variables]]);
+          expect(noMatchHandler.args).to.eql([[[node.intent.name]]]);
         });
       });
     });
