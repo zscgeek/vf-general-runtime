@@ -381,6 +381,8 @@ paths:
 
         Common response traces include `speak`, `visual`, `choice`, with custom types available - reference **Responses Samples** on the right panel for examples.
         Each trace gets produced by a particular block on your Voiceflow project.
+
+        The `logs` query parameter can be used to enable [debug logging](https://developer.voiceflow.com/reference/logs-reference), which includes `log` traces in the response.
       operationId: stateInteract
       security:
         - APIKey:
@@ -407,6 +409,13 @@ paths:
           schema:
             type: boolean
             example: false
+        - name: logs
+          in: query
+          description: configure debug logs
+          required: false
+          schema:
+            $ref: '#/components/schemas/DebugLogsConfig'
+            default: 'off'
       requestBody:
         description: info and config required for an interaction
         required: true
@@ -695,6 +704,14 @@ paths:
       security:
         - APIKey:
             - ''
+      parameters:
+        - name: logs
+          in: query
+          description: configure debug logs
+          required: false
+          schema:
+            $ref: '#/components/schemas/DebugLogsConfig'
+            default: 'off'
       description: |
         The stateless API receives a request with `action` + `state`, and responds with a new `state` + `trace`. Here's what it looks like from the Voiceflow creator app prototype tool:
 
@@ -765,6 +782,8 @@ paths:
         This will return an updated `state`, an updated `action` (not shown in examples), and the trace array containing the traces to display.
 
         if `state` is undefined/empty, it will automatically use the **default state** (starting from the first block).
+
+        The `logs` query parameter can be used to enable [debug logging](https://developer.voiceflow.com/reference/logs-reference), which includes `log` traces in the response.
       requestBody:
         content:
           application/json:
@@ -1389,6 +1408,21 @@ components:
               type:
                 type: string
               payload: {}
+    DebugLogsConfig:
+      # Maps to LogLevelResolvable internally
+      title: Debug Logs Config
+      oneOf:
+        - type: string
+          description: A specific log level to use
+          example: 'info'
+          enum:
+            - 'error'
+            - 'warn'
+            - 'info'
+            - 'verbose'
+            - 'off'
+        - type: boolean
+          description: A boolean for whether logs should be "info" or "off"
   responses:
     Trace:
       description: A sequential array of response "traces" to display back to the user. They can take a variety of types - common types are defined here.
