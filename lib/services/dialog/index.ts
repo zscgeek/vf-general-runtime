@@ -3,7 +3,7 @@
  * @packageDocumentation
  */
 
-import { BaseModels, BaseRequest, BaseTrace, RuntimeLogs } from '@voiceflow/base-types';
+import { BaseModels, BaseNode, BaseRequest, BaseTrace, RuntimeLogs } from '@voiceflow/base-types';
 import { ChatModels } from '@voiceflow/chat-types';
 import { VF_DM_PREFIX } from '@voiceflow/common';
 import VError from '@voiceflow/verror';
@@ -194,6 +194,12 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
         | ChatModels.Prompt
         | VoiceModels.IntentPrompt<VoiceflowConstants.Voice>;
 
+      const addTrace = (traceFrame: BaseNode.Utils.BaseTraceFrame): void => {
+        trace.push(traceFrame as any);
+      };
+      const debugLogging = new DebugLogging(addTrace);
+      debugLogging.refreshContext(context);
+
       if (!hasElicit(incomingRequest) && prompt) {
         const variables = getEntitiesMap(dmStateStore!.intentRequest);
 
@@ -204,7 +210,12 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
             )
           : prompt.content;
 
-        trace.push(outputTrace({ output, variables }));
+        utils.outputTrace({
+          addTrace,
+          debugLogging,
+          output,
+          variables,
+        });
       }
       if (prompt || hasElicit(incomingRequest)) {
         trace.push({
@@ -214,10 +225,7 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
             intent: dmStateStore.intentRequest,
           },
         });
-        const debugLogging = new DebugLogging((traceFrame) => {
-          trace.push(traceFrame as any);
-        });
-        debugLogging.refreshContext(context);
+
         debugLogging.recordGlobalLog(RuntimeLogs.Kinds.GlobalLogKind.NLU_INTENT_RESOLVED, {
           confidence: dmStateStore.intentRequest.payload.confidence ?? 1,
           resolvedIntent: dmStateStore.intentRequest.payload.intent.name,

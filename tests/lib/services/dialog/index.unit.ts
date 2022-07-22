@@ -5,6 +5,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 
 import DialogManager, { utils as defaultUtils } from '@/lib/services/dialog';
+import { getISO8601Timestamp } from '@/runtime/lib/Runtime/DebugLogging/utils';
 
 import {
   mockDMPrefixedMultipleEntityResult,
