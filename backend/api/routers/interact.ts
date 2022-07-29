@@ -3,6 +3,7 @@ import express from 'express';
 
 import { BODY_PARSER_SIZE_LIMIT } from '@/backend/constants';
 import { ControllerMap, MiddlewareMap } from '@/lib';
+import { Permission } from '@/lib/clients/auth';
 
 // stateless API routes
 export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
@@ -11,7 +12,11 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
   router.use(bodyParser.json({ limit: BODY_PARSER_SIZE_LIMIT }));
   router.use(middlewares.rateLimit.verify);
 
-  const interactMiddleware = [middlewares.project.resolveVersionAlias, middlewares.rateLimit.versionConsume];
+  const interactMiddleware = [
+    middlewares.project.resolveVersionAlias,
+    middlewares.rateLimit.versionConsume,
+    middlewares.auth.requirePermissions(Permission.PROJECT_READ, Permission.VERSION_READ),
+  ];
 
   const legacyMiddleware = [middlewares.project.unifyVersionID, ...interactMiddleware];
 

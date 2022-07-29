@@ -39,14 +39,11 @@ const CONFIG: Config = {
 
   GENERAL_SERVICE_ENDPOINT: getOptionalProcessEnv('GENERAL_SERVICE_ENDPOINT'), // voiceflow nlu/tts services
   LUIS_SERVICE_ENDPOINT: getOptionalProcessEnv('LUIS_SERVICE_ENDPOINT'),
+  AUTH_SERVICE_ENDPOINT: getRequiredProcessEnv('AUTH_SERVICE_ENDPOINT'),
 
   // server-data-api config
   VF_DATA_ENDPOINT: getOptionalProcessEnv('VF_DATA_ENDPOINT'), // server-data-api endpoint
   ADMIN_SERVER_DATA_API_TOKEN: getOptionalProcessEnv('ADMIN_SERVER_DATA_API_TOKEN'), // Server-data-api auth token
-
-  // creator-api config
-  CREATOR_API_ENDPOINT: getOptionalProcessEnv('CREATOR_API_ENDPOINT'),
-  CREATOR_API_AUTHORIZATION: getOptionalProcessEnv('CREATOR_API_AUTHORIZATION'),
 
   // creator-app config
   CREATOR_APP_ORIGIN: getOptionalProcessEnv('CREATOR_APP_ORIGIN'),

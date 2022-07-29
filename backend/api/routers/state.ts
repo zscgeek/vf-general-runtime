@@ -3,6 +3,7 @@ import express from 'express';
 
 import { BODY_PARSER_SIZE_LIMIT } from '@/backend/constants';
 import { ControllerMap, MiddlewareMap } from '@/lib';
+import { Permission } from '@/lib/clients/auth';
 
 // stateful API routes
 export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
@@ -15,6 +16,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     middlewares.project.resolveVersionAlias,
     middlewares.project.attachProjectID,
     middlewares.rateLimit.versionConsume,
+    middlewares.auth.requirePermissions(Permission.PROJECT_READ, Permission.VERSION_READ),
   ];
 
   const legacyAPIMiddleware = [middlewares.project.unifyVersionID, ...statefulAPIMiddleware];

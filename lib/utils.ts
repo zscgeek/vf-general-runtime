@@ -19,6 +19,12 @@ export const validate =
     return descriptor;
   };
 
+export const ignore = () => (_target: object, _key: string, descriptor: PropertyDescriptor) => {
+  descriptor.value = Object.assign(descriptor.value, { ignoreFromRoutes: true });
+
+  return descriptor;
+};
+
 export const customAJV = (schema: Record<string, any>) => (value: any) => {
   const ajv = new Ajv({ useDefaults: true, allErrors: true, verbose: true });
   const valid = ajv.validate(schema, value);
@@ -52,7 +58,7 @@ const responseBuilder = new ResponseBuilder();
 export const routeWrapper = (routers: ControllerMap | MiddlewareMap) => {
   Object.values(routers).forEach((routes) => {
     getInstanceMethodNames(routes).forEach((route) => {
-      if (typeof routes[route] === 'function' && !routes[route].route) {
+      if (typeof routes[route] === 'function' && !routes[route].route && !routes[route].ignoreFromRoutes) {
         const routeHandler = routes[route].bind(routes);
         routeHandler.validations = routes[route].validations;
         routeHandler.callback = routes[route].callback;

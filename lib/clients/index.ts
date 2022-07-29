@@ -4,6 +4,7 @@ import { MongoSession } from '@/lib/services/session';
 import { Config } from '@/types';
 
 import Analytics, { AnalyticsSystem } from './analytics';
+import Auth, { AuthType } from './auth';
 import DataAPI from './dataAPI';
 import Metrics, { MetricsType } from './metrics';
 import MongoDB from './mongodb';
@@ -17,6 +18,7 @@ export interface ClientMap extends StaticType {
   rateLimitClient: ReturnType<typeof RateLimitClient>;
   mongo: MongoDB | null;
   analyticsClient: AnalyticsSystem | null;
+  auth: AuthType;
 }
 
 /**
@@ -33,6 +35,7 @@ const buildClients = (config: Config): ClientMap => {
     rateLimitClient: RateLimitClient('general-runtime', redis, config),
     mongo: MongoSession.enabled(config) ? new MongoDB(config) : null,
     analyticsClient: Analytics(config),
+    auth: Auth(config),
   };
 };
 
