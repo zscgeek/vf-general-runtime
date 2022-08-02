@@ -5,7 +5,8 @@ import { Config } from '@/types';
 
 export type AuthType = AuthSDK<Permission>;
 
-const Auth = (config: Config): AuthType => new AuthSDK(config.AUTH_SERVICE_ENDPOINT, fetch);
+const Auth = (config: Config): AuthType =>
+  new AuthSDK({ authServiceURI: config.AUTH_SERVICE_ENDPOINT, fetchPonyfill: fetch });
 
 export default Auth;
 
