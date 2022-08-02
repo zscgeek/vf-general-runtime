@@ -1,11 +1,11 @@
 import { AuthSDK } from '@voiceflow/sdk-auth';
-import * as undici from 'undici';
+import fetch from 'node-fetch';
 
 import { Config } from '@/types';
 
 export type AuthType = AuthSDK<Permission>;
 
-const Auth = (config: Config): AuthType => new AuthSDK(config.AUTH_SERVICE_ENDPOINT, undici.fetch);
+const Auth = (config: Config): AuthType => new AuthSDK(config.AUTH_SERVICE_ENDPOINT, fetch);
 
 export default Auth;
 
