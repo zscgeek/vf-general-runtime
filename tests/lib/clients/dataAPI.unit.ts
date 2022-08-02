@@ -22,7 +22,7 @@ describe('dataAPI client unit tests', () => {
       PROJECT_SOURCE: 'cool.vf',
       ADMIN_SERVER_DATA_API_TOKEN: 'token',
       VF_DATA_ENDPOINT: 'endpoint',
-      CREATOR_API_ENDPOINT: 'creator endpoint',
+      AUTH_SERVICE_ENDPOINT: 'auth endpoint',
     };
 
     expect(await new DataAPI(config as any, API as any).get()).to.eql({ type: 'local' });
@@ -43,7 +43,7 @@ describe('dataAPI client unit tests', () => {
     const config = {
       ADMIN_SERVER_DATA_API_TOKEN: 'token',
       VF_DATA_ENDPOINT: 'endpoint',
-      CREATOR_API_ENDPOINT: 'creator endpoint',
+      AUTH_SERVICE_ENDPOINT: 'auth endpoint',
     };
 
     expect(await new DataAPI(config as any, API as any).get()).to.eql({ type: 'remote' });
@@ -59,36 +59,6 @@ describe('dataAPI client unit tests', () => {
     ]);
     expect(API.CreatorDataApi.callCount).to.eql(0);
     expect(API.LocalDataApi.callCount).to.eql(0);
-  });
-
-  it('creator api', async () => {
-    const initStub = sinon.stub();
-    const API = {
-      LocalDataApi: sinon.stub().returns({ type: 'local' }),
-      RemoteDataAPI: sinon.stub().returns({ type: 'remote' }),
-      CreatorDataApi: sinon.stub().returns({ type: 'creator', init: initStub }),
-    };
-
-    const config = {
-      VF_DATA_ENDPOINT: 'endpoint',
-      CREATOR_API_AUTHORIZATION: 'creator auth',
-      CREATOR_API_ENDPOINT: 'creator endpoint',
-    };
-
-    const dataAPI = new DataAPI(config as any, API as any);
-
-    expect(await dataAPI.get()).to.eql({ type: 'creator', init: initStub });
-    expect(API.CreatorDataApi.args).to.eql([
-      [{ endpoint: `${config.CREATOR_API_ENDPOINT}/v2`, authorization: config.CREATOR_API_AUTHORIZATION }],
-    ]);
-    expect(initStub.callCount).to.eql(1);
-    expect(API.LocalDataApi.callCount).to.eql(0);
-    expect(API.RemoteDataAPI.callCount).to.eql(0);
-
-    expect(await dataAPI.get('new auth')).to.eql({ type: 'creator', init: initStub });
-    expect(API.CreatorDataApi.secondCall.args).to.eql([
-      { endpoint: `${config.CREATOR_API_ENDPOINT}/v2`, authorization: 'new auth' },
-    ]);
   });
 
   it('fails if no data API env configuration set', () => {
@@ -110,7 +80,7 @@ describe('dataAPI client unit tests', () => {
       const config = {
         ADMIN_SERVER_DATA_API_TOKEN: 'token',
         VF_DATA_ENDPOINT: 'endpoint',
-        CREATOR_API_ENDPOINT: 'creator endpoint',
+        AUTH_SERVICE_ENDPOINT: 'auth endpoint',
       };
 
       await new DataAPI(config as any, API as any).init();
@@ -135,7 +105,7 @@ describe('dataAPI client unit tests', () => {
         PROJECT_SOURCE: 'cool.vf',
         ADMIN_SERVER_DATA_API_TOKEN: 'token',
         VF_DATA_ENDPOINT: 'endpoint',
-        CREATOR_API_ENDPOINT: 'creator endpoint',
+        AUTH_SERVICE_ENDPOINT: 'auth endpoint',
       };
 
       await new DataAPI(config as any, API as any).init();
