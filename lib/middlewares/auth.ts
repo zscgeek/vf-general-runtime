@@ -62,8 +62,7 @@ export class Auth extends AbstractMiddleware {
 
     try {
       await this.services.auth.assertAuthorized(
-        // TODO: Pretty sure this is wrong
-        `ApiKey ${req.headers.authorization}`,
+        Auth.createAuthorizationHeader(req.headers.authorization),
         this.permissions,
         // This assertion is safe, it's okay if no headers are present & every permissions check fails as unauthorized
         { versionID, projectID } as ResourceIDs
@@ -79,5 +78,13 @@ export class Auth extends AbstractMiddleware {
     }
 
     next();
+  }
+
+  private static createAuthorizationHeader(incomingAuthorizationHeader: string): string {
+    if (incomingAuthorizationHeader.startsWith('VF.')) {
+      return `ApiKey ${incomingAuthorizationHeader}`;
+    }
+
+    return `Bearer ${incomingAuthorizationHeader}`;
   }
 }
