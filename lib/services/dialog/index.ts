@@ -124,7 +124,7 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
 
       try {
         const prefix = dmPrefix(dmStateStore.intentRequest.payload.intent.name);
-        const dmPrefixedResult = this.config.LUIS_SERVICE_ENDPOINT
+        const dmPrefixedResult = this.config.ML_SERVICE_ENDPOINT
           ? await this.services.nlu.predict({
               query: `${prefix} ${query}`,
               projectID: version.projectID,

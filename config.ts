@@ -11,6 +11,10 @@ import { Config } from './types';
 
 const NODE_ENV = getRequiredProcessEnv('NODE_ENV');
 const CLOUD_ENV = getOptionalProcessEnv('CLOUD_ENV', 'public');
+const LUIS_SERVICE_ENDPOINT = getOptionalProcessEnv('LUIS_SERVICE_ENDPOINT');
+// eslint-disable-next-line no-secrets/no-secrets
+const MLGATEWAY_SERVICE_ENDPOINT = getOptionalProcessEnv('MLGATEWAY_SERVICE_ENDPOINT');
+const PROXY_TO_MLGATEWAY = getOptionalProcessEnv('PROXY_TO_MLGATEWAY') === 'true';
 
 const CONFIG: Config = {
   // Configs
@@ -38,7 +42,10 @@ const CONFIG: Config = {
   PROJECT_SOURCE: getOptionalProcessEnv('PROJECT_SOURCE'),
 
   GENERAL_SERVICE_ENDPOINT: getOptionalProcessEnv('GENERAL_SERVICE_ENDPOINT'), // voiceflow nlu/tts services
-  LUIS_SERVICE_ENDPOINT: getOptionalProcessEnv('LUIS_SERVICE_ENDPOINT'),
+  LUIS_SERVICE_ENDPOINT,
+  MLGATEWAY_SERVICE_ENDPOINT,
+  PROXY_TO_MLGATEWAY,
+  ML_SERVICE_ENDPOINT: PROXY_TO_MLGATEWAY ? MLGATEWAY_SERVICE_ENDPOINT : LUIS_SERVICE_ENDPOINT,
 
   // server-data-api config
   VF_DATA_ENDPOINT: getOptionalProcessEnv('VF_DATA_ENDPOINT'), // server-data-api endpoint
