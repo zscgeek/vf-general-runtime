@@ -32,10 +32,10 @@ class StateManagement extends AbstractManager {
     params: { userID: string };
   }) {
     const {
-      headers: { projectID, versionID, authorization },
+      headers: { projectID, versionID },
       params: { userID },
     } = data;
-    const state = await this.services.interact.state(versionID, authorization);
+    const state = await this.services.interact.state(versionID);
     await this.services.session.saveToDb(projectID, userID, state);
     return state;
   }
