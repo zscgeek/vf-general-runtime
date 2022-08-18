@@ -19,6 +19,7 @@ import { Config } from '@/types';
 import _V1Handler from './_v1';
 import CaptureHandler from './capture';
 import CaptureV2Handler from './captureV2';
+import CardHandler from './card';
 import CardV2Handler from './cardV2';
 import CarouselHandler from './carousel';
 import ChannelActionHandler from './channelAction';
@@ -65,6 +66,7 @@ export default ({
   VisualHandler(),
   TextHandler(),
   CardV2Handler(),
+  CardHandler(),
   CarouselHandler(),
   GoToNodeHandler(),
   ChannelActionHandler(),
