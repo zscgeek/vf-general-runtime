@@ -1,8 +1,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { Validator } from '@voiceflow/backend-utils';
-import { AuthorizationException, ResourceIDs } from '@voiceflow/sdk-auth';
-import VError from '@voiceflow/verror';
+import { createAuthGuard } from '@voiceflow/sdk-auth/express';
 import express from 'express';
 
 import { Config, Next, Request, Response } from '@/types';
@@ -34,6 +33,8 @@ export class AuthFactory {
 }
 
 export class Auth extends AbstractMiddleware {
+  private readonly middleware = createAuthGuard(this.services.auth);
+
   constructor(
     services: FullServiceMap,
     config: Config,
@@ -47,37 +48,10 @@ export class Auth extends AbstractMiddleware {
     HEADER_VERSION_ID: VALIDATIONS.HEADERS.VERSION_ID,
     HEADER_PROJECT_ID: VALIDATIONS.HEADERS.PROJECT_ID,
   })
-  async assertPermissionsMiddleware(_req: Request, _res: Response, next: express.NextFunction): Promise<void | never> {
-    const req = _req as Request<
-      any,
-      any,
-      {
-        versionID?: string;
-        projectID?: string;
-        authorization: string;
-      }
-    >;
+  async assertPermissionsMiddleware(req: Request, res: Response, next: express.NextFunction): Promise<void | never> {
+    const middleware = this.middleware(this.permissions);
 
-    const { versionID, projectID } = req.headers;
-
-    try {
-      await this.services.auth.assertAuthorized(
-        Auth.createAuthorizationHeader(req.headers.authorization),
-        this.permissions,
-        // This assertion is safe, it's okay if no headers are present & every permissions check fails as unauthorized
-        { versionID, projectID } as ResourceIDs
-      );
-    } catch (error) {
-      if (AuthorizationException.isAuthorizationException(error)) {
-        next(new VError(error.message, VError.HTTP_STATUS.FORBIDDEN));
-        return;
-      }
-
-      next(error instanceof VError ? error : new VError('Unknown error', VError.HTTP_STATUS.INTERNAL_SERVER_ERROR));
-      return;
-    }
-
-    next();
+    return middleware(req, res, next);
   }
 
   private static createAuthorizationHeader(incomingAuthorizationHeader: string): string {
