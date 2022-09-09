@@ -53,12 +53,4 @@ export class Auth extends AbstractMiddleware {
 
     return middleware(req, res, next);
   }
-
-  private static createAuthorizationHeader(incomingAuthorizationHeader: string): string {
-    if (incomingAuthorizationHeader.startsWith('VF.')) {
-      return `ApiKey ${incomingAuthorizationHeader}`;
-    }
-
-    return `Bearer ${incomingAuthorizationHeader}`;
-  }
 }

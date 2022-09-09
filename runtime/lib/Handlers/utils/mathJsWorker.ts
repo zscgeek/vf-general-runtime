@@ -1,3 +1,4 @@
+// @ts-expect-error MathJS types use ESM instead of CJS, even though the package itself is CJS
 import { all, create } from 'mathjs';
 import workerpool from 'workerpool';
 
