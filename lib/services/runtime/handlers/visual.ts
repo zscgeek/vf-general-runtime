@@ -15,6 +15,8 @@ const VisualHandler: HandlerFactory<BaseNode.Visual.Node, typeof handlerUtils> =
 
     if (node.data.visualType === BaseNode.Visual.VisualType.APL && node.data.imageURL) {
       node.data.imageURL = utils.replaceVariables(node.data.imageURL, variables.getState());
+    } else if (node.data.visualType === BaseNode.Visual.VisualType.IMAGE && node.data.image) {
+      node.data.image = utils.replaceVariables(node.data.image, variables.getState());
     }
 
     runtime.trace.addTrace<BaseTrace.VisualTrace>({
