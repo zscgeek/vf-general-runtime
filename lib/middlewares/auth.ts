@@ -33,7 +33,7 @@ export class AuthFactory {
 }
 
 export class Auth extends AbstractMiddleware {
-  private readonly middleware = createAuthGuard(this.services.auth);
+  private readonly middleware = this.services.auth ? createAuthGuard(this.services.auth) : undefined;
 
   constructor(
     services: FullServiceMap,
@@ -49,8 +49,8 @@ export class Auth extends AbstractMiddleware {
     HEADER_PROJECT_ID: VALIDATIONS.HEADERS.PROJECT_ID,
   })
   async assertPermissionsMiddleware(req: Request, res: Response, next: express.NextFunction): Promise<void | never> {
-    const middleware = this.middleware(this.permissions);
+    const middleware = this.middleware?.(this.permissions);
 
-    return middleware(req, res, next);
+    return middleware ? middleware(req, res, next) : next();
   }
 }

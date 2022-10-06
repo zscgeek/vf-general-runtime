@@ -38,7 +38,7 @@ export interface Config extends RateLimitConfig {
 
   GENERAL_SERVICE_ENDPOINT: string | null;
   LUIS_SERVICE_ENDPOINT: string | null;
-  AUTH_SERVICE_ENDPOINT: string;
+  AUTH_SERVICE_ENDPOINT: string | null;
 
   CREATOR_APP_ORIGIN: string | null;
   DISABLE_ORIGIN_CHECK: boolean;

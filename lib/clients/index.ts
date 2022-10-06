@@ -18,7 +18,7 @@ export interface ClientMap extends StaticType {
   rateLimitClient: ReturnType<typeof RateLimitClient>;
   mongo: MongoDB | null;
   analyticsClient: AnalyticsSystem | null;
-  auth: AuthType;
+  auth: AuthType | null;
 }
 
 /**

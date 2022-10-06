@@ -15,7 +15,7 @@ class DataAPI {
   remoteDataApi?: RemoteDataAPI;
 
   constructor(config: Config, API = { LocalDataApi, RemoteDataAPI }) {
-    const { PROJECT_SOURCE, ADMIN_SERVER_DATA_API_TOKEN, VF_DATA_ENDPOINT } = config;
+    const { PROJECT_SOURCE, ADMIN_SERVER_DATA_API_TOKEN, VF_DATA_ENDPOINT, AUTH_SERVICE_ENDPOINT } = config;
 
     // fetch from local VF file
     if (PROJECT_SOURCE) {
@@ -24,6 +24,10 @@ class DataAPI {
 
     // fetch from server-data-api
     if (ADMIN_SERVER_DATA_API_TOKEN && VF_DATA_ENDPOINT) {
+      if (!AUTH_SERVICE_ENDPOINT) {
+        throw new TypeError('AUTH_SERVICE_ENDPOINT environment variable must be defined to use server-data-api');
+      }
+
       this.remoteDataApi = new API.RemoteDataAPI(
         {
           platform: VoiceflowConstants.PlatformType.GENERAL,
@@ -35,7 +39,7 @@ class DataAPI {
     }
 
     // configuration not set
-    if (!PROJECT_SOURCE && (!VF_DATA_ENDPOINT || !ADMIN_SERVER_DATA_API_TOKEN)) {
+    if (!this.localDataApi && !this.remoteDataApi) {
       throw new Error('no data API env configuration set');
     }
   }
