@@ -15,7 +15,7 @@ class DataAPI {
   remoteDataApi?: RemoteDataAPI;
 
   constructor(config: Config, API = { LocalDataApi, RemoteDataAPI }) {
-    const { PROJECT_SOURCE, ADMIN_SERVER_DATA_API_TOKEN, VF_DATA_ENDPOINT, AUTH_SERVICE_ENDPOINT } = config;
+    const { PROJECT_SOURCE, ADMIN_SERVER_DATA_API_TOKEN, VF_DATA_ENDPOINT, AUTH_API_URL } = config;
 
     // fetch from local VF file
     if (PROJECT_SOURCE) {
@@ -24,8 +24,8 @@ class DataAPI {
 
     // fetch from server-data-api
     if (ADMIN_SERVER_DATA_API_TOKEN && VF_DATA_ENDPOINT) {
-      if (!AUTH_SERVICE_ENDPOINT) {
-        throw new TypeError('AUTH_SERVICE_ENDPOINT environment variable must be defined to use server-data-api');
+      if (!AUTH_API_URL) {
+        throw new TypeError('AUTH_API_URL environment variable must be defined to use server-data-api');
       }
 
       this.remoteDataApi = new API.RemoteDataAPI(

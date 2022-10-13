@@ -23,7 +23,7 @@
     "@voiceflow/logger": "^1.6.1",
     "@voiceflow/metrics": "1.4.1",
     "@voiceflow/natural-language-commander": "^0.5.1",
-    "@voiceflow/sdk-auth": "1.9.3",
+    "@voiceflow/sdk-auth": "1.23.0",
     "@voiceflow/verror": "^1.1.0",
     "@voiceflow/voice-types": "2.8.10",
     "@voiceflow/voiceflow-types": "3.20.10",

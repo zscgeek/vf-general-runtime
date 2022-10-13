@@ -1,12 +1,12 @@
 /* eslint-disable max-classes-per-file */
 
 import { Validator } from '@voiceflow/backend-utils';
+import { Permission } from '@voiceflow/sdk-auth';
 import { createAuthGuard } from '@voiceflow/sdk-auth/express';
 import express from 'express';
 
 import { Config, Next, Request, Response } from '@/types';
 
-import { Permission } from '../clients/auth';
 import { FullServiceMap } from '../services';
 import { ignore, validate } from '../utils';
 import { AbstractMiddleware } from './utils';

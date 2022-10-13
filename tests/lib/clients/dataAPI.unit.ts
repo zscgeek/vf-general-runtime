@@ -22,7 +22,7 @@ describe('dataAPI client unit tests', () => {
       PROJECT_SOURCE: 'cool.vf',
       ADMIN_SERVER_DATA_API_TOKEN: 'token',
       VF_DATA_ENDPOINT: 'endpoint',
-      AUTH_SERVICE_ENDPOINT: 'auth endpoint',
+      AUTH_API_URL: 'auth endpoint',
     };
 
     expect(await new DataAPI(config as any, API as any).get()).to.eql({ type: 'local' });
@@ -43,7 +43,7 @@ describe('dataAPI client unit tests', () => {
     const config = {
       ADMIN_SERVER_DATA_API_TOKEN: 'token',
       VF_DATA_ENDPOINT: 'endpoint',
-      AUTH_SERVICE_ENDPOINT: 'auth endpoint',
+      AUTH_API_URL: 'auth endpoint',
     };
 
     expect(await new DataAPI(config as any, API as any).get()).to.eql({ type: 'remote' });
@@ -80,7 +80,7 @@ describe('dataAPI client unit tests', () => {
       const config = {
         ADMIN_SERVER_DATA_API_TOKEN: 'token',
         VF_DATA_ENDPOINT: 'endpoint',
-        AUTH_SERVICE_ENDPOINT: 'auth endpoint',
+        AUTH_API_URL: 'auth endpoint',
       };
 
       await new DataAPI(config as any, API as any).init();
@@ -105,7 +105,7 @@ describe('dataAPI client unit tests', () => {
         PROJECT_SOURCE: 'cool.vf',
         ADMIN_SERVER_DATA_API_TOKEN: 'token',
         VF_DATA_ENDPOINT: 'endpoint',
-        AUTH_SERVICE_ENDPOINT: 'auth endpoint',
+        AUTH_API_URL: 'auth endpoint',
       };
 
       await new DataAPI(config as any, API as any).init();

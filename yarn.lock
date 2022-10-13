@@ -1625,12 +1625,10 @@
   resolved "https://registry.yarnpkg.com/@voiceflow/prettier-config/-/prettier-config-1.2.1.tgz#906bc852bcd8b2586fa62e4635392a0bea1fdb59"
   integrity sha512-J7wnJCwRWSNX33Ji2eLeBxtwXplAKIk9/aOfrHVfKmYrLHqXvOcrl2/7xa37jqnuTl8vw3+UsfFo3sMDY6weTg==
 
-"@voiceflow/sdk-auth@1.9.3":
-  version "1.9.3"
-  resolved "https://registry.yarnpkg.com/@voiceflow/sdk-auth/-/sdk-auth-1.9.3.tgz#be99e7e33712e09cdca7c6559195a4a12f27a129"
-  integrity sha512-BBz4LYCxycsN7mAiZhLp69SX6PazJOUB3R+MTtzgxiohtQPu3YdZTnvizHyOFt/NquNr0T6Xus2xuLj1EBsOJg==
-  dependencies:
-    type-fest "^2.17.0"
+"@voiceflow/sdk-auth@1.23.0":
+  version "1.23.0"
+  resolved "https://registry.yarnpkg.com/@voiceflow/sdk-auth/-/sdk-auth-1.23.0.tgz#490cf57ffadff6ea5203b81ddab79579f8018dd2"
+  integrity sha512-mIqmqlD88zxgDCFXRA8OsYRk2Yb4599oCaQj4niMzLf7OygdtoRN1t5a6bsO/Sg6Wm93eMWRG8t5gDwEOmoGrQ==
 
 "@voiceflow/verror@^1.1.0":
   version "1.1.0"
@@ -10035,11 +10033,6 @@ type-fest@^0.8.0, type-fest@^0.8.1:
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.8.1.tgz#09e249ebde851d3b1e48d27c105444667f17b83d"
   integrity sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==
-
-type-fest@^2.17.0:
-  version "2.17.0"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.17.0.tgz#c677030ce61e5be0c90c077d52571eb73c506ea9"
-  integrity sha512-U+g3/JVXnOki1kLSc+xZGPRll3Ah9u2VIG6Sn9iH9YX6UkPERmt6O/0fIyTgsd2/whV0+gAaHAg8fz6sG1QzMA==
 
 type-is@^1.6.4, type-is@~1.6.17, type-is@~1.6.18:
   version "1.6.18"
