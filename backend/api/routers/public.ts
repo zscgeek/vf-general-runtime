@@ -18,5 +18,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     controllers.stateManagement.publicInteract
   );
 
+  router.get('/:projectID/publishing', interactMiddleware, controllers.stateManagement.getPublicPublishing);
+
   return router;
 };
