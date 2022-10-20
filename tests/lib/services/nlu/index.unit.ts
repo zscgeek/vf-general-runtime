@@ -6,7 +6,6 @@ import sinon from 'sinon';
 
 import NLUManager, { utils as defaultUtils } from '@/lib/services/nlu';
 import * as NLC from '@/lib/services/nlu/nlc';
-import { NONE_INTENT } from '@/lib/services/nlu/utils';
 import { VersionTag } from '@/types';
 
 chai.use(chaiAsPromised);
@@ -61,7 +60,7 @@ describe('nlu manager unit tests', () => {
     type: BaseRequest.RequestType.INTENT,
     payload: {
       intent: {
-        name: NONE_INTENT,
+        name: VoiceflowConstants.IntentName.NONE,
       },
       query,
       entities: [],
@@ -235,7 +234,7 @@ describe('nlu manager unit tests', () => {
   });
 
   describe('predict', () => {
-    it('works with model and locale defined and intent is not NONE_INTENT', async () => {
+    it('works with model and locale defined and intent is not VoiceflowConstants.IntentName.NONE', async () => {
       const services = {
         axios: {
           post: sinon.stub().resolves({ data: {} }),
@@ -250,7 +249,7 @@ describe('nlu manager unit tests', () => {
       expect(result).to.eql(nlcMatchedIntent);
     });
 
-    it('works with model and locale defined and intent is NONE_INTENT, prediction is not empty', async () => {
+    it('works with model and locale defined and intent is VoiceflowConstants.IntentName.NONE, prediction is not empty', async () => {
       const services = {
         axios: {
           post: sinon.stub().resolves({ data: luisResponse }),
@@ -273,7 +272,7 @@ describe('nlu manager unit tests', () => {
       expect(result).to.eql(luisResponse);
     });
 
-    it('works with model and locale undefined, intent is not NONE_INTENT, prediction is not empty', async () => {
+    it('works with model and locale undefined, intent is not VoiceflowConstants.IntentName.NONE, prediction is not empty', async () => {
       const services = {
         axios: {
           post: sinon.stub().resolves({ data: luisResponse }),
@@ -294,7 +293,7 @@ describe('nlu manager unit tests', () => {
       expect(result).to.eql(luisResponse);
     });
 
-    it('works with model and locale undefined, intent is not NONE_INTENT, prediction empty', async () => {
+    it('works with model and locale undefined, intent is not VoiceflowConstants.IntentName.NONE, prediction empty', async () => {
       const services = {
         axios: {
           post: sinon.stub().resolves({ data: undefined }),
@@ -312,7 +311,7 @@ describe('nlu manager unit tests', () => {
       await expect(nlu.predict(arg)).to.be.rejectedWith('Model not found');
     });
 
-    it('works with model defined and locale undefined, intent is not NONE_INTENT, prediction empty', async () => {
+    it('works with model defined and locale undefined, intent is not VoiceflowConstants.IntentName.NONE, prediction empty', async () => {
       const services = {
         axios: {
           post: sinon.stub().resolves({ data: undefined }),
@@ -331,7 +330,7 @@ describe('nlu manager unit tests', () => {
       await expect(nlu.predict(arg)).to.be.rejectedWith('Locale not found');
     });
 
-    it('works with model and locale defined, intent is NONE_INTENT, prediction is empty', async () => {
+    it('works with model and locale defined, intent is VoiceflowConstants.IntentName.NONE, prediction is empty', async () => {
       const services = {
         axios: {
           post: sinon.stub().resolves({ data: undefined }),
