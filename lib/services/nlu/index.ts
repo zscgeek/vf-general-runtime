@@ -51,7 +51,7 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
       const { appID, resourceID } = nlp;
 
       const { data } = await this.services.axios
-        .post(`${this.config.LUIS_SERVICE_ENDPOINT}/predict/${appID}`, {
+        .post(`${this.config.ML_GATEWAY_ENDPOINT}/predict/${appID}`, {
           query,
           resourceID,
           tag,
