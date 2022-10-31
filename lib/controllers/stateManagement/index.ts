@@ -38,7 +38,7 @@ class StateManagementController extends AbstractController {
       { userID: string },
       any,
       { projectID: string; authorization: string; versionID: string },
-      { verbose?: boolean; logs: RuntimeLogs.LogLevel }
+      { verbose?: boolean; logs?: RuntimeLogs.LogLevel }
     >
   ) {
     return this.services.stateManagement.interact(req);

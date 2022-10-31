@@ -17,7 +17,7 @@ import DebugLogging from '@/runtime/lib/Runtime/DebugLogging';
 import { Context, ContextHandler, VersionTag } from '@/types';
 
 import { handleNLCDialog } from '../nlu/nlc';
-import { getNoneIntentRequest, NONE_INTENT } from '../nlu/utils';
+import { getNoneIntentRequest } from '../nlu/utils';
 import { isIntentRequest, StorageType } from '../runtime/types';
 import { outputTrace } from '../runtime/utils';
 import { AbstractManager, injectServices } from '../utils';
@@ -133,6 +133,8 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
               locale: version.prototype?.data.locales[0] as VoiceflowConstants.Locale,
               tag: project.liveVersion === context.versionID ? VersionTag.PRODUCTION : VersionTag.DEVELOPMENT,
               nlp: project.nlp,
+              hasChannelIntents: project?.platformData?.hasChannelIntents,
+              platform: version.prototype.platform as VoiceflowConstants.PlatformType,
             })
           : incomingRequest;
 
@@ -143,7 +145,7 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
 
         this.handleDMContext(dmStateStore, dmPrefixedResult, incomingRequest, version.prototype.model);
 
-        if (dmStateStore.intentRequest.payload.intent.name === NONE_INTENT) {
+        if (dmStateStore.intentRequest.payload.intent.name === VoiceflowConstants.IntentName.NONE) {
           return {
             ...DialogManagement.setDMStore(context, { ...dmStateStore, intentRequest: undefined }),
             request: getNoneIntentRequest(query),
@@ -157,7 +159,7 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
           dmRequest: dmStateStore.intentRequest,
         });
 
-        if (resultNLC.payload.intent.name === NONE_INTENT) {
+        if (resultNLC.payload.intent.name === VoiceflowConstants.IntentName.NONE) {
           return {
             ...DialogManagement.setDMStore(context, { ...dmStateStore, intentRequest: undefined }),
             request: getNoneIntentRequest(query),

@@ -3,14 +3,18 @@ import { object } from '@voiceflow/common';
 import VError from '@voiceflow/verror';
 import DNS from 'dns/promises';
 import FormData from 'form-data';
+import { Agent } from 'https';
 import ipRangeCheck from 'ip-range-check';
 import safeJSONStringify from 'json-stringify-safe';
-import _merge from 'lodash/merge';
+import _ from 'lodash';
 import fetch, { BodyInit, Headers, Request, Response } from 'node-fetch';
 import { setTimeout as sleep } from 'timers/promises';
 import validator from 'validator';
 
 import Runtime from '@/runtime/lib/Runtime';
+
+import { createS3Client, readFileFromS3 } from '../../AWSClient';
+import { APIHandlerConfig, DEFAULT_API_HANDLER_CONFIG } from './types';
 
 export type APINodeData = BaseNode.Api.NodeData['action_data'];
 const PROHIBITED_IP_RANGES = [
@@ -112,38 +116,25 @@ const validateIP = async (hostname: string) => {
   }
 };
 
-export interface ResponseConfig {
-  requestTimeoutMs?: number;
-  maxResponseBodySizeBytes?: number;
-  maxRequestBodySizeBytes?: number;
-}
-
-const DEFAULT_RESPONSE_CONFIG: Readonly<Required<ResponseConfig>> = {
-  requestTimeoutMs: 20_000,
-  maxResponseBodySizeBytes: 1_000_000,
-  maxRequestBodySizeBytes: 1_000_000,
-};
-
 const doFetch = async (
-  config: ResponseConfig,
+  config: APIHandlerConfig,
   nodeData: BaseNode.Api.NodeData['action_data']
 ): Promise<{ response: Response; requestOptions: Request }> => {
-  const actualConfig = _merge(DEFAULT_RESPONSE_CONFIG, config);
-  const requestOptions = createRequest(nodeData);
+  const requestOptions = await createRequest(nodeData, config);
 
-  if (requestOptions.size > actualConfig.maxRequestBodySizeBytes) {
+  if (requestOptions.size > config.maxRequestBodySizeBytes) {
     throw new Error(
-      `Request body size of ${requestOptions.size} bytes exceeds max request body size of ${actualConfig.maxRequestBodySizeBytes} bytes`
+      `Request body size of ${requestOptions.size} bytes exceeds max request body size of ${config.maxRequestBodySizeBytes} bytes`
     );
   }
 
   const abortController = new AbortController();
-  const abortTimeout = setTimeout(() => abortController.abort(), actualConfig.requestTimeoutMs);
+  const abortTimeout = setTimeout(() => abortController.abort(), config.requestTimeoutMs);
 
   try {
     const response = await fetch(requestOptions, {
       signal: abortController.signal as any,
-      size: actualConfig.maxResponseBodySizeBytes,
+      size: config.maxResponseBodySizeBytes,
     });
 
     return { response, requestOptions };
@@ -189,27 +180,8 @@ export interface APICallResult {
   responseJSON: any;
 }
 
-export const makeAPICall = async (
-  nodeData: APINodeData,
-  runtime: Runtime,
-  config: ResponseConfig
-): Promise<APICallResult> => {
-  const hostname = validateHostname(nodeData.url);
-  await validateIP(hostname);
-
-  try {
-    if (await runtime.outgoingApiLimiter.addHostnameUseAndShouldThrottle(hostname)) {
-      // if the use of the hostname is high, delay the api call but let it happen
-      await sleep(THROTTLE_DELAY);
-    }
-  } catch (error) {
-    runtime.trace.debug(
-      `Outgoing Api Rate Limiter failed - Error: \n${safeJSONStringify(error.response?.data || error)}`,
-      BaseNode.NodeType.API
-    );
-  }
-
-  const { response, requestOptions } = await doFetch(config, nodeData);
+export const callAPI = async (nodeData: APINodeData, config: Partial<APIHandlerConfig>): Promise<APICallResult> => {
+  const { response, requestOptions } = await doFetch(_.merge(DEFAULT_API_HANDLER_CONFIG, config), nodeData);
 
   const rawResponseJSON = await response
     .json()
@@ -227,7 +199,61 @@ export const makeAPICall = async (
   };
 };
 
-export const createRequest = (actionData: BaseNode.Api.NodeData['action_data']): Request => {
+export const makeAPICall = async (
+  nodeData: APINodeData,
+  runtime: Runtime,
+  config: Partial<APIHandlerConfig>
+): Promise<APICallResult> => {
+  const hostname = validateHostname(nodeData.url);
+  await validateIP(hostname);
+
+  try {
+    if (await runtime.outgoingApiLimiter.addHostnameUseAndShouldThrottle(hostname)) {
+      // if the use of the hostname is high, delay the api call but let it happen
+      await sleep(THROTTLE_DELAY);
+    }
+  } catch (error) {
+    runtime.trace.debug(
+      `Outgoing Api Rate Limiter failed - Error: \n${safeJSONStringify(error.response?.data || error)}`,
+      BaseNode.NodeType.API
+    );
+  }
+
+  return callAPI(nodeData, config);
+};
+
+const createAgent = async (
+  config: APIHandlerConfig,
+  tls: BaseNode.Api.NodeData['action_data']['tls']
+): Promise<Agent | undefined> => {
+  if (
+    !tls?.cert ||
+    !tls?.key ||
+    !config.s3TLSBucket ||
+    !config.awsAccessKey ||
+    !config.awsSecretAccessKey ||
+    !config.awsRegion
+  )
+    return;
+
+  const s3Client = createS3Client(config);
+
+  if (!s3Client) return;
+  const [cert, key] = await Promise.all([
+    readFileFromS3(s3Client, config.s3TLSBucket, tls?.cert),
+    readFileFromS3(s3Client, config.s3TLSBucket, tls?.key),
+  ]);
+
+  if (!cert || !key) return;
+
+  // eslint-disable-next-line consistent-return
+  return new Agent({ cert, key });
+};
+
+export const createRequest = async (
+  actionData: BaseNode.Api.NodeData['action_data'],
+  config: APIHandlerConfig
+): Promise<Request> => {
   let headers = new Headers(
     actionData.headers
       // Filter out invalid headers - avoid an Error: " is not a legal HTTP header name"
@@ -270,5 +296,6 @@ export const createRequest = (actionData: BaseNode.Api.NodeData['action_data']):
     method: actionData.method,
     body,
     headers,
+    agent: await createAgent(config, actionData.tls),
   });
 };

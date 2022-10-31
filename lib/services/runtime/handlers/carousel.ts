@@ -1,5 +1,5 @@
 import { BaseNode, BaseTrace } from '@voiceflow/base-types';
-import { replaceVariables, sanitizeVariables } from '@voiceflow/common';
+import { deepVariableSubstitution, replaceVariables, sanitizeVariables } from '@voiceflow/common';
 
 import { Action, HandlerFactory } from '@/runtime';
 
@@ -44,10 +44,7 @@ export const CarouselHandler: HandlerFactory<BaseNode.Carousel.Node, typeof hand
             slate,
             text,
           },
-          buttons: card.buttons.map((button) => ({
-            ...button,
-            name: replaceVariables(button.name, variablesMap),
-          })),
+          buttons: card.buttons.map((button) => deepVariableSubstitution(button, variablesMap)),
         };
 
         if (item.title || item.imageUrl || item.description.text || item.buttons.length) {
