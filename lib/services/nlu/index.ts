@@ -61,6 +61,7 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
           tag,
           projectID,
           versionID,
+          language: locale || VoiceflowConstants.Locale.EN_US,
         })
         .catch(() => ({ data: null }));
 
