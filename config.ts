@@ -17,7 +17,7 @@ const CONFIG: Config = {
   NODE_ENV,
   PORT: getRequiredProcessEnv('PORT'),
   PORT_METRICS: getOptionalProcessEnv('PORT_METRICS'),
-  ERROR_RESPONSE_MS: Number(getOptionalProcessEnv('ERROR_RESPONSE_MS', (10 * 1000).toString())),
+  ERROR_RESPONSE_MS: Number(getOptionalProcessEnv('ERROR_RESPONSE_MS', (80 * 1000).toString())),
 
   CLOUD_ENV,
 
@@ -40,7 +40,7 @@ const CONFIG: Config = {
 
   GENERAL_SERVICE_ENDPOINT: getOptionalProcessEnv('GENERAL_SERVICE_ENDPOINT'), // voiceflow nlu/tts services
   LUIS_SERVICE_ENDPOINT: getOptionalProcessEnv('LUIS_SERVICE_ENDPOINT'),
-  ML_GATEWAY_ENDPOINT: 'https://ml-gateway-dev-yash.development.voiceflow.com/api/v1/nlp',
+  ML_GATEWAY_ENDPOINT: 'https://ml-gateway.test.e2e:8015/api/v1/nlp',
 
   // server-data-api config
   VF_DATA_ENDPOINT: getOptionalProcessEnv('VF_DATA_ENDPOINT'), // server-data-api endpoint
@@ -68,7 +68,7 @@ const CONFIG: Config = {
   LOG_LEVEL: getOptionalProcessEnv('LOG_LEVEL'),
   MIDDLEWARE_VERBOSITY: getOptionalProcessEnv('MIDDLEWARE_VERBOSITY'),
 
-  REDIS_CLUSTER_HOST: 'redis-master.dev-yash',
+  REDIS_CLUSTER_HOST: getRequiredProcessEnv('REDIS_CLUSTER_HOST'),
   REDIS_CLUSTER_PORT: Number(getOptionalProcessEnv('REDIS_CLUSTER_PORT', '6379')),
 
   // rate limiting
