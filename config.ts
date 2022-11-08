@@ -12,6 +12,7 @@ import { Config } from './types';
 const NODE_ENV = getRequiredProcessEnv('NODE_ENV');
 const CLOUD_ENV = getOptionalProcessEnv('CLOUD_ENV', 'public');
 
+//
 const CONFIG: Config = {
   // Configs
   NODE_ENV,
