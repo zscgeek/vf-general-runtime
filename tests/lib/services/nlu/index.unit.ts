@@ -137,6 +137,7 @@ describe('nlu manager unit tests', () => {
       expect(result).to.eql({ ...context, request: luisResponse });
       expect(services.axios.post.args[0][1]).to.eql({
         query,
+        language: 'en-US',
         resourceID: nlp.resourceID,
         tag: VersionTag.PRODUCTION,
         projectID: version.projectID,
