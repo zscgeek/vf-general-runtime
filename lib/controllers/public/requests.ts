@@ -20,5 +20,6 @@ export const TranscriptSchema = {
     os: StringField('os'),
     device: StringField('device'),
     browser: StringField('browser'),
+    user: ObjectField('user'),
   },
 };

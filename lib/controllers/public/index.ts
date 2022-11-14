@@ -62,28 +62,46 @@ class PublicController extends AbstractController {
     BODY_TRANSCRIPT: VALIDATIONS.BODY.TRANSCRIPT,
   })
   async createTranscript(
-    req: Request<never, { sessionID: string; device?: string; os?: string; browser?: string }, { projectID: string }>
+    req: Request<
+      never,
+      { sessionID: string; device?: string; os?: string; browser?: string; user?: { name?: string; image?: string } },
+      { projectID: string }
+    >
   ) {
     const {
-      body: { sessionID, device, os, browser },
+      body: { sessionID, device, os, browser, user },
       headers: { projectID },
     } = req;
     const { mongo } = this.services;
     if (!mongo) throw new Error('mongo not initialized');
 
-    const {
-      ops: [document],
-    } = await mongo.db.collection('transcripts').insertOne({
+    const data = {
       projectID: new ObjectId(projectID),
       sessionID,
       createdAt: new Date(),
+      updatedAt: new Date(),
+      ...(os && { os }),
       ...(device && { device }),
       ...(browser && { browser }),
-      ...(os && { os }),
+      ...(user && {
+        user: {
+          ...(user.name && { name: user.name }),
+          ...(user.image && { image: user.image }),
+        },
+      }),
+      unread: true,
       reportTags: [],
-    });
+    };
 
-    return document;
+    const { value } = await mongo.db
+      .collection('transcripts')
+      .findOneAndUpdate(
+        { projectID: data.projectID, sessionID: data.sessionID },
+        { $set: data },
+        { upsert: true, returnOriginal: false }
+      );
+
+    return value;
   }
 }
 

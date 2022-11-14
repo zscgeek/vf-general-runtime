@@ -24,7 +24,10 @@ export interface Config extends RateLimitConfig {
 
   DYNAMO_ENDPOINT: string | null;
 
+  S3_ACCESS_KEY_ID: string | null;
+  S3_SECRET_ACCESS_KEY: string | null;
   S3_TLS_BUCKET: string | null;
+  S3_ENDPOINT: string | null;
 
   CODE_HANDLER_ENDPOINT: string | null;
   INTEGRATIONS_HANDLER_ENDPOINT: string;
@@ -82,8 +85,8 @@ export type Response = Express.Response;
 
 export type Next = () => void;
 
-export interface Route<P = Record<string, any>, T = void> {
-  (req: Request<P>): Promise<T>;
+export interface Route<Params = Record<string, any>, T = void> {
+  (req: Request<Params>): Promise<T>;
 
   validations?: Validator.ValidationChain[];
   callback?: boolean;
