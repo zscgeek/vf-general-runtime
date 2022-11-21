@@ -8,6 +8,7 @@ import VError, { HTTP_STATUS } from '@voiceflow/verror';
 import { VoiceflowConstants } from '@voiceflow/voiceflow-types';
 
 import { isTextRequest } from '@/lib/services/runtime/types';
+import log from '@/logger';
 import { Context, ContextHandler, VersionTag } from '@/types';
 
 import { AbstractManager, injectServices } from '../utils';
@@ -54,6 +55,7 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
     if (nlp && nlp.appID && nlp.resourceID) {
       const { appID, resourceID } = nlp;
 
+      const startPredict = Date.now();
       const { data } = await this.services.axios
         .post(`${this.config.ML_GATEWAY_ENDPOINT}/predict/${appID}`, {
           query,
@@ -64,6 +66,9 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
           language: locale || VoiceflowConstants.Locale.EN_US,
         })
         .catch(() => ({ data: null }));
+      log.info(
+        `started prediction in general-runtime=${startPredict}, ended prediction in general-runtime=${Date.now()}`
+      );
 
       if (data) {
         return mapChannelData(data, platform, hasChannelIntents);
