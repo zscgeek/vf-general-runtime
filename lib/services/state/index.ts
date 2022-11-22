@@ -1,4 +1,5 @@
 import { BaseModels, BaseRequest, BaseTrace } from '@voiceflow/base-types';
+import _ from 'lodash';
 
 import { PartialContext, State } from '@/runtime';
 import { Context, InitContextHandler } from '@/types';
@@ -6,7 +7,9 @@ import { Context, InitContextHandler } from '@/types';
 import { AbstractManager, injectServices } from '../utils';
 import CacheDataAPI from './cacheDataAPI';
 
-export const utils = {};
+export const utils = {
+  getTime: () => Math.floor(Date.now() / 1000),
+};
 
 const initializeStore = (variables: string[], defaultValue = 0) =>
   variables.reduce<Record<string, any>>((acc, variable) => {
@@ -20,7 +23,7 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
    * generate a context for a new session
    * @param versionID - project version to generate the context for
    */
-  generate({ prototype, rootDiagramID }: BaseModels.Version.Model<any>, state?: State): State {
+  generate({ prototype, rootDiagramID }: BaseModels.Version.Model<any>, state?: State, userID?: string): State {
     const DEFAULT_STACK = [{ programID: rootDiagramID, storage: {}, variables: {} }];
 
     const stack =
@@ -30,12 +33,18 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
         variables: frame.variables || {},
       })) || DEFAULT_STACK;
 
+    const variables = {
+      ...prototype?.context.variables,
+      ...state?.variables,
+    };
+
+    // new session default variables
+    variables.sessions = (_.isNumber(variables.sessions) ? variables.sessions : 0) + 1;
+    if (userID) variables.user_id = userID;
+
     return {
       stack,
-      variables: {
-        ...prototype?.context.variables,
-        ...state?.variables,
-      },
+      variables,
       storage: {
         ...prototype?.context.storage,
         ...state?.storage,
@@ -44,15 +53,16 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
   }
 
   // initialize all entities and variables to 0, it is important that they are defined
-  initializeVariables({ prototype, variables }: BaseModels.Version.Model<any>, state: State) {
-    const entities = prototype?.model.slots.map(({ name }) => name) || [];
+  initializeVariables(version: BaseModels.Version.Model<any>, state: State) {
+    const entities = version.prototype?.model.slots.map(({ name }) => name) || [];
 
     return {
       ...state,
       variables: {
         ...initializeStore(entities),
-        ...initializeStore(variables),
+        ...initializeStore(version.variables),
         ...state.variables,
+        timestamp: this.services.utils.getTime(), // unix time in seconds
       },
     };
   }
@@ -84,7 +94,7 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
 
     // if stack or state is empty, repopulate the stack
     if (!state?.stack?.length) {
-      state = this.generate(version, state);
+      state = this.generate(version, state, context.userID);
     }
 
     return {
