@@ -1,6 +1,6 @@
 FROM node:16-alpine
 
-RUN apk add --no-cache dumb-init python3 make g++
+RUN apk add --no-cache dumb-init python make g++
 
 ARG NPM_TOKEN
 
