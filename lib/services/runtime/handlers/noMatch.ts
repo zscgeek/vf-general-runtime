@@ -13,6 +13,7 @@ import {
   removeEmptyPrompts,
 } from '../utils';
 import { addNoReplyTimeoutIfExists } from './noReply';
+import { generateNoMatch } from './utils/generativeNoMatch';
 
 export type NoMatchNode = BaseRequest.NodeButton & VoiceflowNode.Utils.NoMatchNode;
 
@@ -38,7 +39,7 @@ const removeEmptyNoMatches = (node: NoMatchNode) => {
   return removeEmptyPrompts(prompts);
 };
 
-const getOutput = (node: NoMatchNode, runtime: Runtime, noMatchCounter: number) => {
+const getOutput = async (node: NoMatchNode, runtime: Runtime, noMatchCounter: number) => {
   const nonEmptyNoMatches = removeEmptyNoMatches(node);
   const globalNoMatchPrompt = getGlobalNoMatchPrompt(runtime);
   const exhaustedReprompts = noMatchCounter >= nonEmptyNoMatches.length;
@@ -55,6 +56,9 @@ const getOutput = (node: NoMatchNode, runtime: Runtime, noMatchCounter: number) 
     return null;
   }
 
+  const autoComplete = await generateNoMatch(runtime);
+  if (autoComplete) return [{ text: autoComplete }];
+
   if (!isPromptContentEmpty(globalNoMatchPrompt?.content)) {
     return globalNoMatchPrompt?.content;
   }
@@ -63,10 +67,10 @@ const getOutput = (node: NoMatchNode, runtime: Runtime, noMatchCounter: number) 
 };
 
 export const NoMatchHandler = (utils: typeof utilsObj) => ({
-  handle: (_node: NoMatchNode, runtime: Runtime, variables: Store) => {
+  handle: async (_node: NoMatchNode, runtime: Runtime, variables: Store) => {
     const node = convertDeprecatedNoMatch(_node);
     const noMatchCounter = runtime.storage.get<NoMatchCounterStorage>(StorageType.NO_MATCHES_COUNTER) ?? 0;
-    const output = getOutput(node, runtime, noMatchCounter);
+    const output = await getOutput(node, runtime, noMatchCounter);
 
     if (!output) {
       // clean up no matches counter

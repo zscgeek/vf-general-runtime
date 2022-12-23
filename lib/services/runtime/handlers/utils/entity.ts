@@ -31,7 +31,7 @@ const noMatchHandler = NoMatchHandler();
 export const EntityFillingNoMatchHandler = () => ({
   handle:
     (node: NoMatchNode, runtime: Runtime, variables: Store) =>
-    (intents?: string[], defaultRequest?: BaseRequest.IntentRequest) => {
+    async (intents?: string[], defaultRequest?: BaseRequest.IntentRequest) => {
       // see if the prior entity filling intent is within context
       const priorIntent = runtime.storage.get<DMStore>(StorageType.DM)?.priorIntent;
       const priorIntentMatch =
@@ -50,7 +50,7 @@ export const EntityFillingNoMatchHandler = () => ({
         return node.id;
       }
 
-      const noMatchPath = noMatchHandler.handle(node, runtime, variables);
+      const noMatchPath = await noMatchHandler.handle(node, runtime, variables);
       if (noMatchPath === node.id && nextRequest) {
         runtime.trace.addTrace<BaseTrace.GoToTrace>({
           type: BaseNode.Utils.TraceType.GOTO,
