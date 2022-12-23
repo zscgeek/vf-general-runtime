@@ -17,6 +17,13 @@ class Transcript extends AbstractManager implements ContextHandler {
   }
 
   handle = (context: Context) => {
+    /**
+    // skip storing no matches into transcript
+    if (context.trace?.find((trace: any) => trace.type === Trace.TraceType.PATH && trace.payload.path === 'reprompt')) {
+      return context;
+    }
+    */
+
     const { request, trace } = context;
 
     const input = Transcript.getInput(request);
@@ -35,6 +42,7 @@ class Transcript extends AbstractManager implements ContextHandler {
     if (!input && !output) return context;
 
     const transcript = context.state.storage[Transcript.StorageKey] || [];
+
     transcript.push([input, output]);
 
     if (transcript.length > MAX_TURNS) transcript.shift();

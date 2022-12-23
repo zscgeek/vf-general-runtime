@@ -203,13 +203,20 @@ export function outputTrace({ node, addTrace, debugLogging, output, variables = 
   const sanitizedVars = sanitizeVariables(variables);
 
   if (Array.isArray(output)) {
+    const outputAny = output as any;
+    let ai: boolean | undefined;
+    if (outputAny[0]?.text?.startsWith?.('_*AI*_:')) {
+      outputAny[0].text = outputAny[0]?.text.replace('_*AI*_:', '');
+      ai = true;
+    }
+
     const content = slateInjectVariables(output, sanitizedVars);
     const plainContent = slateToPlaintext(content);
     const richContent = { id: cuid.slug(), content };
 
     addTrace({
       type: BaseNode.Utils.TraceType.TEXT,
-      payload: { slate: richContent, message: plainContent },
+      payload: { slate: richContent, message: plainContent, ai },
     });
     debugLogging.recordStepLog(RuntimeLogs.Kinds.StepLogKind.TEXT, node, {
       plainContent,
