@@ -14,6 +14,7 @@ import Slots from './slots';
 import Speak from './speak';
 import State from './state';
 import StateManagement from './stateManagement';
+import Transcript from './transcript';
 import TTS from './tts';
 
 export interface ServiceMap {
@@ -29,6 +30,7 @@ export interface ServiceMap {
   session: Session;
   interact: Interact;
   analytics: Analytics;
+  transcript: Transcript;
   stateManagement: StateManagement;
 }
 
@@ -53,6 +55,7 @@ const buildServices = (config: Config, clients: ClientMap): FullServiceMap => {
   services.filter = new Filter(services, config);
   services.analytics = new Analytics(services, config);
   services.stateManagement = new StateManagement(services, config);
+  services.transcript = new Transcript(services, config);
   services.interact = new Interact(services, config);
 
   if (config.SESSIONS_SOURCE === Source.LOCAL) {

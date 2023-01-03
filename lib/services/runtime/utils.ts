@@ -197,9 +197,10 @@ interface OutputParams<V> {
   node?: BaseModels.BaseNode;
   debugLogging: DebugLogging;
   addTrace: AddTraceFn;
+  ai?: boolean;
 }
 
-export function outputTrace({ node, addTrace, debugLogging, output, variables = {} }: OutputParams<Output>): void {
+export function outputTrace({ node, addTrace, debugLogging, output, variables = {}, ai }: OutputParams<Output>): void {
   const sanitizedVars = sanitizeVariables(variables);
 
   if (Array.isArray(output)) {
@@ -209,7 +210,7 @@ export function outputTrace({ node, addTrace, debugLogging, output, variables = 
 
     addTrace({
       type: BaseNode.Utils.TraceType.TEXT,
-      payload: { slate: richContent, message: plainContent },
+      payload: { slate: richContent, message: plainContent, ai },
     });
     debugLogging.recordStepLog(RuntimeLogs.Kinds.StepLogKind.TEXT, node, {
       plainContent,
