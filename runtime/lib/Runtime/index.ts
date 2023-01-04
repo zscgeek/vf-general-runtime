@@ -137,6 +137,15 @@ class Runtime<
     return this.getAction() === Action.END;
   }
 
+  public hasStartedFromBlock(blockID: string): boolean {
+    return (
+      this.getAction() === Action.REQUEST &&
+      !this.getRequest() &&
+      this.trace.get()?.[0]?.type === 'flow' &&
+      this.trace.get()?.[1]?.payload?.blockID === blockID
+    );
+  }
+
   public async callEvent<K extends EventType>(type: K, event: Event<K>) {
     await super.callEvent<K>(type, event, this);
   }

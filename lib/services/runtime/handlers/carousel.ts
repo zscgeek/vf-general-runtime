@@ -22,12 +22,10 @@ const handlerUtils = {
 
 export const CarouselHandler: HandlerFactory<BaseNode.Carousel.Node, typeof handlerUtils> = (utils) => ({
   canHandle: (node) => node.type === BaseNode.NodeType.CAROUSEL,
-  // eslint-disable-next-line sonarjs/cognitive-complexity
   handle: (node, runtime, variables) => {
     const defaultPath = node.nextId || null;
-    const isStartingFromCarouselStep = runtime.getAction() === Action.REQUEST && !runtime.getRequest();
 
-    if (runtime.getAction() === Action.RUNNING || isStartingFromCarouselStep) {
+    if (runtime.getAction() === Action.RUNNING || runtime.hasStartedFromBlock(node.id)) {
       const variablesMap = variables.getState();
       const sanitizedVars = utils.sanitizeVariables(variables.getState());
       const cards: BaseNode.Carousel.TraceCarouselCard[] = [];
