@@ -17,8 +17,10 @@ class Transcript extends AbstractManager implements ContextHandler {
   }
 
   handle = async (context: Context) => {
+    if (!context.version?.projectID) return context;
+
     // only store transcript if freestyle is enabled
-    const project = await context.data.api.getProject(context.versionID).catch(() => null);
+    const project = await context.data.api.getProject(context.version.projectID).catch(() => null);
     if (!project?.aiAssistSettings?.freestyle) return context;
 
     /**
