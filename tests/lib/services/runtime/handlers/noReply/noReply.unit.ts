@@ -1,4 +1,3 @@
-import { BaseNode } from '@voiceflow/base-types';
 import { expect } from 'chai';
 import sinon from 'sinon';
 

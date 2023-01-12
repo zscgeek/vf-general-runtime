@@ -9,18 +9,18 @@ const handlerUtils = {
   replaceVariables,
 };
 
-export const StreamHandler: HandlerFactory<BaseNode.Stream.Node, typeof handlerUtils> = (u) => ({
+export const StreamHandler: HandlerFactory<BaseNode.Stream.Node, typeof handlerUtils> = (utils) => ({
   canHandle: (node) => node.type === BaseNode.NodeType.STREAM && !!node.src,
   handle: (node, runtime, variables) => {
     const variablesMap = variables.getState();
 
     runtime.storage.set<StreamPlayStorage>(StorageType.STREAM_PLAY, {
-      src: u.replaceVariables(node.src, variablesMap),
+      src: utils.replaceVariables(node.src, variablesMap),
       loop: node.loop,
-      description: node.description,
-      title: node.title,
-      iconImage: node.iconImage,
-      backgroundImage: node.backgroundImage,
+      description: utils.replaceVariables(node.description, variablesMap),
+      title: utils.replaceVariables(node.title, variablesMap),
+      iconImage: utils.replaceVariables(node.iconImage, variablesMap),
+      backgroundImage: utils.replaceVariables(node.backgroundImage, variablesMap),
       token: node.id,
       action: StreamAction.START,
       offset: 0,

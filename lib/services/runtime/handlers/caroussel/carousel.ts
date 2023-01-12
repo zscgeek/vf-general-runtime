@@ -3,17 +3,16 @@ import { deepVariableSubstitution, replaceVariables, sanitizeVariables } from '@
 
 import { Action, HandlerFactory } from '@/runtime';
 
-import { StorageType } from '../types';
-import { slateInjectVariables, slateToPlaintext } from '../utils';
-import CommandHandler from './command';
-import NoMatchHandler from './noMatch';
-import NoReplyHandler, { addNoReplyTimeoutIfExists } from './noReply';
+import { StorageType } from '../../types';
+import { slateInjectVariables, slateToPlaintext } from '../../utils';
+import CommandHandler from '../command';
+import NoMatchHandler from '../noMatch';
+import NoReplyHandler, { addNoReplyTimeoutIfExists } from '../noReply';
 
-const handlerUtils = {
+export const handlerUtils = {
   commandHandler: CommandHandler(),
   noMatchHandler: NoMatchHandler(),
   noReplyHandler: NoReplyHandler(),
-
   slateToPlaintext,
   sanitizeVariables,
   slateInjectVariables,
