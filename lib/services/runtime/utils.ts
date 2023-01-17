@@ -285,3 +285,11 @@ export const processOutput = (output: string | Text.SlateTextValue | undefined, 
   const content = slateInjectVariables(output, sanitizedVars);
   return slateToPlaintext(content);
 };
+
+export const isGooglePlatform = (platform: VoiceflowConstants.PlatformType) =>
+  [
+    VoiceflowConstants.PlatformType.GOOGLE,
+    VoiceflowConstants.PlatformType.DIALOGFLOW_ES,
+    VoiceflowConstants.PlatformType.DIALOGFLOW_ES_CHAT,
+    VoiceflowConstants.PlatformType.DIALOGFLOW_ES_VOICE,
+  ].includes(platform);

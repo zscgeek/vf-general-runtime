@@ -8,8 +8,7 @@ import wordsToNumbers from 'words-to-numbers';
 
 import { Action, HandlerFactory } from '@/runtime';
 
-import { addButtonsIfExists, addRepromptIfExists } from '../../utils';
-import { isGooglePlatform } from '../../utils.google';
+import { addButtonsIfExists, addRepromptIfExists, isGooglePlatform } from '../../utils';
 import CommandHandler from '../command';
 import { addNoReplyTimeoutIfExists } from '../noReply';
 import NoReplyHandler from '../noReply/noReply.google';

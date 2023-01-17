@@ -8,8 +8,7 @@ import { VoiceflowConstants, VoiceflowNode } from '@voiceflow/voiceflow-types';
 
 import { Action, HandlerFactory } from '@/runtime';
 
-import { addRepromptIfExists, mapEntities } from '../../utils';
-import { isGooglePlatform } from '../../utils.google';
+import { addRepromptIfExists, isGooglePlatform, mapEntities } from '../../utils';
 import CommandHandler from '../command';
 import { addNoReplyTimeoutIfExists } from '../noReply';
 import NoReplyHandler from '../noReply/noReply.google';

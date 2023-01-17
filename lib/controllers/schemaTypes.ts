@@ -8,6 +8,11 @@ export const StringField = (field: string) => ({
   description: `${field} must be a string and is required`,
 });
 
+export const StringOrNullField = (field: string) => ({
+  type: ['string', 'null'],
+  description: `${field} must be a string/null and is required`,
+});
+
 export const ObjectField = (field: string) => ({
   type: 'object',
   description: `${field} must be an object and is required`,

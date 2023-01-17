@@ -10,8 +10,7 @@ import { VoiceflowConstants, VoiceflowNode } from '@voiceflow/voiceflow-types';
 import { Action, HandlerFactory } from '@/runtime';
 
 import { StorageType, TurnType } from '../../types';
-import { addButtonsIfExists, addRepromptIfExists, mapEntities } from '../../utils';
-import { isGooglePlatform } from '../../utils.google';
+import { addButtonsIfExists, addRepromptIfExists, isGooglePlatform, mapEntities } from '../../utils';
 import CommandHandler from '../command';
 import NoMatchHandler from '../noMatch';
 import { addNoReplyTimeoutIfExists } from '../noReply';
@@ -32,7 +31,6 @@ export const InteractionGoogleHandler: HandlerFactory<VoiceflowNode.Interaction.
   utils: typeof utilsObj
 ) => ({
   canHandle: (node) => isGooglePlatform(node.platform as VoiceflowConstants.PlatformType) && !!node.interactions,
-  // canHandle: (node) => false,
   // eslint-disable-next-line sonarjs/cognitive-complexity
   handle: (node, runtime, variables) => {
     const request = runtime.getRequest();

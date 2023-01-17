@@ -6,7 +6,7 @@ import { VoiceflowConstants, VoiceflowNode } from '@voiceflow/voiceflow-types';
 
 import { HandlerFactory } from '@/runtime';
 
-import { isGooglePlatform } from '../../utils.google';
+import { isGooglePlatform } from '../../utils';
 import { NoReplyGoogleHandler } from '../noReply/noReply.google';
 import { CardV2Handler, handlerUtils } from './cardV2';
 

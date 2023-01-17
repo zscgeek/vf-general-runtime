@@ -1,11 +1,11 @@
-import { ArrayField, BooleanField, ObjectField, StringField } from '@/lib/controllers/schemaTypes';
+import { ArrayField, BooleanField, ObjectField, StringField, StringOrNullField } from '@/lib/controllers/schemaTypes';
 
 const StackFrame = {
   type: 'object',
   additionalProperties: true,
   required: ['programID'],
   properties: {
-    nodeID: StringField('nodeID'),
+    nodeID: StringOrNullField('nodeID'),
     programID: StringField('programID'),
     storage: ObjectField('storage'),
     commands: ArrayField('commands', ObjectField('command')),

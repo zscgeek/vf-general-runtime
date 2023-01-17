@@ -103,16 +103,20 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
     if (!isIntentRequest(context.request)) {
       return context;
     }
-
     const version = await context.data.api.getVersion(context.versionID);
 
     if (!version.prototype?.model) {
       throw new VError('Model not found. Ensure project is properly rendered.');
     }
 
+    // if this is an entity filling request but all entities have been filled, ignore
+    const incomingRequest = context.request;
+    if (incomingRequest.payload.entities.length && !getUnfulfilledEntity(incomingRequest, version.prototype.model)) {
+      return context;
+    }
+
     const project = await context.data.api.getProjectNLP(version.projectID);
 
-    const incomingRequest = context.request;
     const currentStore = context.state.storage[StorageType.DM];
     const dmStateStore: DMStore = { ...currentStore, priorIntent: currentStore?.intentRequest };
     const { query } = incomingRequest.payload;
