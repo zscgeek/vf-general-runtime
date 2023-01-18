@@ -1,3 +1,4 @@
+import { VoiceflowConstants } from '@voiceflow/voiceflow-types';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
@@ -85,7 +86,10 @@ describe('noReply handler unit tests', () => {
         trace: {
           addTrace: sinon.stub(),
         },
+        debugLogging: null as unknown as DebugLogging,
       };
+
+      runtime.debugLogging = new DebugLogging(runtime.trace.addTrace);
       const variables = {
         getState: sinon.stub().returns({}),
       };
@@ -113,7 +117,11 @@ describe('noReply handler unit tests', () => {
         trace: {
           addTrace: sinon.stub(),
         },
+        debugLogging: null as unknown as DebugLogging,
       };
+
+      runtime.debugLogging = new DebugLogging(runtime.trace.addTrace);
+
       const variables = {
         getState: sinon.stub().returns({}),
       };

@@ -1,3 +1,4 @@
+import { VoiceflowConstants } from '@voiceflow/voiceflow-types';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
@@ -43,6 +44,7 @@ describe('noInput handler unit tests', () => {
       const runtime = {
         storage: {
           delete: sinon.stub(),
+          set: sinon.stub(),
           get: sinon.stub().returns(2),
         },
         trace: {
@@ -50,9 +52,11 @@ describe('noInput handler unit tests', () => {
         },
         debugLogging: { recordStepLog: sinon.stub() },
       };
-
+      const variables = {
+        getState: sinon.stub().returns({}),
+      };
       const noInputHandler = NoReplyGoogleHandler();
-      expect(noInputHandler.handle(node as any, runtime as any, {} as any)).to.eql(node.noReply.nodeID);
+      expect(noInputHandler.handle(node as any, runtime as any, variables as any)).to.eql(node.noReply.nodeID);
     });
 
     it('with old reprompt format', () => {
