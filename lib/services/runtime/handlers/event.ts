@@ -50,10 +50,6 @@ export const intentEventMatcher: Matcher<BaseRequest.IntentRequest, BaseNode.Uti
   },
 };
 
-export interface GeneralEvent extends BaseNode.Utils.BaseEvent {
-  name: string;
-}
-
 export const generalEventMatcher: Matcher<BaseRequest.BaseRequest, BaseNode.Utils.BaseEvent> = {
   match: (context): context is SideEffectContext<BaseRequest.BaseRequest, BaseNode.Utils.BaseEvent> => {
     const request = context.runtime.getRequest();

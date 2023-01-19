@@ -87,7 +87,7 @@ export const InteractionGoogleHandler: HandlerFactory<VoiceflowNode.Interaction.
       variables.merge(utils.mapEntities(variableMap, entities));
     }
 
-    if (nextId !== undefined) {
+    if (nextId) {
       return nextId;
     }
 
