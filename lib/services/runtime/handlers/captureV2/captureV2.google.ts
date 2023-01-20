@@ -53,9 +53,7 @@ export const CaptureV2GoogleHandler: HandlerFactory<VoiceflowNode.CaptureV2.Node
       return utils.noReplyHandler.handle(node, runtime, variables);
     }
 
-    // TODO: refactor on adapter code
-    // prototype tool sends input on query, dialogflow sends on input
-    const { input, intent, entities, query } = request.payload;
+    const { input, intent, entities } = request.payload;
     if (intent.name === node.intent?.name && node.intent?.entities) {
       variables.merge(
         mapEntities(
@@ -67,7 +65,7 @@ export const CaptureV2GoogleHandler: HandlerFactory<VoiceflowNode.CaptureV2.Node
       return node.nextId ?? null;
     }
     if (node.variable) {
-      variables.set(node.variable, input ?? query);
+      variables.set(node.variable, input);
 
       return node.nextId ?? null;
     }

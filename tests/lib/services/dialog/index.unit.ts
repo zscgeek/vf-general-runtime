@@ -207,7 +207,7 @@ describe('dialog manager unit tests', () => {
 
         const result = await dm.handle(fulfilledContext);
 
-        expect(result.request).to.deep.equal({ ...mockFulfilledIntentRequest });
+        expect(result.request).to.deep.equal({ ...mockFulfilledIntentRequest, ELICIT: false });
       });
     });
   });

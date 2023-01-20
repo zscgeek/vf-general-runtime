@@ -113,7 +113,7 @@ describe('capture handler unit tests', async () => {
           const captureHandler = CaptureGoogleHandler(utils as any);
 
           const block = { nextId: 'next-id', variable: 'var' };
-          const request = { type: BaseRequest.RequestType.INTENT, payload: { input: 'input' } };
+          const request = { type: BaseRequest.RequestType.INTENT, payload: { query: 'query' } };
           const runtime = {
             getRequest: sinon.stub().returns(request),
             getAction: sinon.stub().returns(Action.REQUEST),
@@ -123,8 +123,8 @@ describe('capture handler unit tests', async () => {
           expect(captureHandler.handle(block as any, runtime as any, variables as any, null as any)).to.eql(
             block.nextId
           );
-          expect(utils.wordsToNumbers.args).to.eql([[request.payload.input]]);
-          expect(variables.set.args).to.eql([[block.variable, request.payload.input]]);
+          expect(utils.wordsToNumbers.args).to.eql([[request.payload.query]]);
+          expect(variables.set.args).to.eql([[block.variable, request.payload.query]]);
         });
 
         it('input is number', () => {
@@ -141,7 +141,7 @@ describe('capture handler unit tests', async () => {
           const captureHandler = CaptureGoogleHandler(utils as any);
 
           const block = { variable: 'var' };
-          const request = { type: BaseRequest.RequestType.INTENT, payload: { input: 'input' } };
+          const request = { type: BaseRequest.RequestType.INTENT, payload: { query: 'query' } };
           const runtime = {
             getRequest: sinon.stub().returns(request),
             getAction: sinon.stub().returns(Action.REQUEST),
@@ -149,7 +149,7 @@ describe('capture handler unit tests', async () => {
           const variables = { set: sinon.stub() };
 
           expect(captureHandler.handle(block as any, runtime as any, variables as any, null as any)).to.eql(null);
-          expect(utils.wordsToNumbers.args).to.eql([[request.payload.input]]);
+          expect(utils.wordsToNumbers.args).to.eql([[request.payload.query]]);
           expect(variables.set.args).to.eql([[block.variable, word]]);
         });
       });

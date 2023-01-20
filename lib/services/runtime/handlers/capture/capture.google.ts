@@ -48,15 +48,13 @@ export const CaptureGoogleHandler: HandlerFactory<VoiceflowNode.Capture.Node, ty
       return utils.noReplyHandler.handle(node, runtime, variables);
     }
 
-    const { input, query } = request.payload;
+    const { query } = request.payload;
 
-    // TODO: refactor on adapter code
-    // prototype tool sends input on query, dialogflow sends on input
-    if (input ?? query) {
-      const num = utils.wordsToNumbers(input ?? query);
+    if (query) {
+      const num = utils.wordsToNumbers(query);
 
       if (typeof num !== 'number' || Number.isNaN(num)) {
-        variables.set(node.variable, input ?? query);
+        variables.set(node.variable, query);
       } else {
         variables.set(node.variable, num);
       }

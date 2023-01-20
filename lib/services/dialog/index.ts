@@ -109,17 +109,23 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
       throw new VError('Model not found. Ensure project is properly rendered.');
     }
 
-    // if this is an entity filling request but all entities have been filled, ignore
-    const incomingRequest = context.request;
-    if (incomingRequest.payload.entities.length && !getUnfulfilledEntity(incomingRequest, version.prototype.model)) {
-      return context;
-    }
-
     const project = await context.data.api.getProjectNLP(version.projectID);
 
+    const incomingRequest = context.request;
     const currentStore = context.state.storage[StorageType.DM];
     const dmStateStore: DMStore = { ...currentStore, priorIntent: currentStore?.intentRequest };
     const { query } = incomingRequest.payload;
+
+    // when capturing multiple intents on dfes, the currentStore.payload.entities only has the latest entity
+    // not the previous ones, we need to add them here since the dfes request has all
+    incomingRequest.payload.entities.forEach((requestEntity) => {
+      const dmRequestHasEntity = dmStateStore.intentRequest?.payload.entities.find(
+        (storeEntity) => requestEntity.name === storeEntity.name
+      );
+      if (!dmRequestHasEntity) {
+        dmStateStore.intentRequest?.payload.entities.push(requestEntity);
+      }
+    });
 
     // if there is an existing entity filling request
     if (dmStateStore?.intentRequest) {
