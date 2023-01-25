@@ -82,7 +82,7 @@ export const InteractionGoogleHandler: HandlerFactory<VoiceflowNode.Interaction.
       }
     });
 
-    if (variableMap && entities) {
+    if (variableMap && entities?.length) {
       // map request mappings to variables
       variables.merge(utils.mapEntities(variableMap, entities));
     }

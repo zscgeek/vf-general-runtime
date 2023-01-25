@@ -128,7 +128,8 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
     });
 
     // if there is an existing entity filling request
-    if (dmStateStore?.intentRequest) {
+    // AND there are slots to be filled, call predict
+    if (dmStateStore?.intentRequest && getUnfulfilledEntity(dmStateStore!.intentRequest, version.prototype.model)) {
       log.debug('[app] [runtime] [dm] in entity filling context');
 
       try {
@@ -165,7 +166,7 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
         // if something happens just say the intent is the initially resolved intent
         dmStateStore.intentRequest = incomingRequest;
       }
-    } else {
+    } else if (!dmStateStore?.intentRequest) {
       log.debug('[app] [runtime] [dm] in regular context');
 
       if (!(await this.services.utils.isIntentInScope(context))) {
