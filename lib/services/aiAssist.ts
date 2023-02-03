@@ -8,9 +8,9 @@ import { AbstractManager } from './utils';
 
 const MAX_TURNS = 3;
 
-// writes a primative string transcript into the context state storage
-class Transcript extends AbstractManager implements ContextHandler {
-  static StorageKey = 'transcript';
+// writes a primative string aiAssistTranscript into the context state storage
+class AIAssist extends AbstractManager implements ContextHandler {
+  static StorageKey = 'aiAssistTranscript';
 
   static getInput(request: RuntimeRequest) {
     return (isIntentRequest(request) && request.payload.query) || (isTextRequest(request) && request.payload) || null;
@@ -19,12 +19,12 @@ class Transcript extends AbstractManager implements ContextHandler {
   handle = async (context: Context) => {
     if (!context.version?.projectID) return context;
 
-    // only store transcript if freestyle is enabled
+    // only store aiAssistTranscript if freestyle is enabled
     const project = await context.data.api.getProject(context.version.projectID).catch(() => null);
     if (!project?.aiAssistSettings?.freestyle) return context;
 
     /**
-    // skip storing no matches into transcript
+    // skip storing no matches into aiAssistTranscript
     if (context.trace?.find((trace: any) => trace.type === Trace.TraceType.PATH && trace.payload.path === 'reprompt')) {
       return context;
     }
@@ -32,7 +32,7 @@ class Transcript extends AbstractManager implements ContextHandler {
 
     const { request, trace } = context;
 
-    const input = Transcript.getInput(request);
+    const input = AIAssist.getInput(request);
 
     const output =
       trace?.reduce((acc, t) => {
@@ -47,11 +47,11 @@ class Transcript extends AbstractManager implements ContextHandler {
 
     if (!input && !output) return context;
 
-    const transcript = context.state.storage[Transcript.StorageKey] || [];
+    const aiAssistTranscript = context.state.storage[AIAssist.StorageKey] || [];
 
-    transcript.push([input, output]);
+    aiAssistTranscript.push([input, output]);
 
-    if (transcript.length > MAX_TURNS) transcript.shift();
+    if (aiAssistTranscript.length > MAX_TURNS) aiAssistTranscript.shift();
 
     return {
       ...context,
@@ -59,11 +59,11 @@ class Transcript extends AbstractManager implements ContextHandler {
         ...context.state,
         storage: {
           ...context.state.storage,
-          [Transcript.StorageKey]: transcript,
+          [AIAssist.StorageKey]: aiAssistTranscript,
         },
       },
     };
   };
 }
 
-export default Transcript;
+export default AIAssist;

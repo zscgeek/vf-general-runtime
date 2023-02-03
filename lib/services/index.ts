@@ -1,6 +1,7 @@
 import { Config } from '@/types';
 
 import { ClientMap } from '../clients';
+import AIAssist from './aiAssist';
 import Analytics from './analytics';
 import ASR from './asr';
 import Dialog from './dialog';
@@ -20,6 +21,7 @@ import TTS from './tts';
 export interface ServiceMap {
   runtime: Runtime;
   state: State;
+  aiAssist: AIAssist;
   asr: ASR;
   speak: Speak;
   nlu: NLU;
@@ -56,6 +58,7 @@ const buildServices = (config: Config, clients: ClientMap): FullServiceMap => {
   services.analytics = new Analytics(services, config);
   services.stateManagement = new StateManagement(services, config);
   services.transcript = new Transcript(services, config);
+  services.aiAssist = new AIAssist(services, config);
   services.interact = new Interact(services, config);
 
   if (config.SESSIONS_SOURCE === Source.LOCAL) {
