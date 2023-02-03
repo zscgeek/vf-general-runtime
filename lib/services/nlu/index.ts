@@ -25,10 +25,8 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
     query,
     model,
     locale,
-    projectID,
     versionID,
     tag,
-    nlp,
     hasChannelIntents,
     platform,
     dmRequest,
@@ -36,10 +34,8 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
     query: string;
     model?: BaseModels.PrototypeModel;
     locale?: VoiceflowConstants.Locale;
-    projectID: string;
     versionID: string;
     tag: VersionTag | string;
-    nlp: BaseModels.Project.PrototypeNLP | undefined;
     hasChannelIntents: boolean;
     platform: VoiceflowConstants.PlatformType;
     dmRequest?: BaseRequest.IntentRequestPayload;
@@ -52,23 +48,30 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
       }
     }
 
-    // 2. next try to resolve with luis NLP
-    if (nlp && nlp.appID && nlp.resourceID) {
-      const { appID, resourceID } = nlp;
+    const response = await this.services.axios
+      .post(`${this.config.NLU_GATEWAY_ENDPOINT}/v1alpha1/predict/${versionID}`, {
+        tag,
+        utterance: query,
+      })
+      .then(({ data }) => {
+        return {
+          data: {
+            type: BaseRequest.RequestType.INTENT,
+            payload: {
+              query: data.utterance,
+              intent: {
+                name: data.predictedIntent,
+              },
+              entities: data.predictedSlots,
+              confidence: data.confidence,
+            },
+          },
+        };
+      })
+      .catch(() => ({ data: null }));
 
-      const { data } = await this.services.axios
-        .post(`${this.config.LUIS_SERVICE_ENDPOINT}/predict/${appID}`, {
-          query,
-          resourceID,
-          tag,
-          projectID,
-          versionID,
-        })
-        .catch(() => ({ data: null }));
-
-      if (data) {
-        return mapChannelData(data, platform, hasChannelIntents);
-      }
+    if (response.data) {
+      return mapChannelData(response.data, platform, hasChannelIntents);
     }
 
     // 3. finally try open regex slot matching
@@ -103,10 +106,8 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
       query: context.request.payload,
       model: version.prototype?.model,
       locale: version.prototype?.data.locales[0] as VoiceflowConstants.Locale,
-      projectID: version.projectID,
       versionID: context.versionID,
       tag: project.liveVersion === context.versionID ? VersionTag.PRODUCTION : VersionTag.DEVELOPMENT,
-      nlp: project.nlp,
       hasChannelIntents: project?.platformData?.hasChannelIntents,
       platform: version?.prototype?.platform as VoiceflowConstants.PlatformType,
     });
