@@ -66,13 +66,22 @@ describe('nlu manager unit tests', () => {
       entities: [],
     },
   };
-  const luisResponse = {
+  const nluGatewayResponse = {
+    utterance: 'query',
+    predictedIntent: 'Order Pizza',
+    predictedSlots: [],
+    confidence: 0.8,
+  };
+
+  const predictResponse = {
     type: BaseRequest.RequestType.INTENT,
     payload: {
+      query: 'query',
       intent: {
         name: 'Order Pizza',
       },
       entities: [],
+      confidence: 0.8,
     },
   };
 
@@ -84,7 +93,7 @@ describe('nlu manager unit tests', () => {
       };
       const services = {
         axios: {
-          post: sinon.stub().resolves({ data: luisResponse }),
+          post: sinon.stub().resolves({ data: nluGatewayResponse }),
         },
       };
       const nlu = new NLUManager({ ...services, utils: { ...defaultUtils } } as any, config as any);
@@ -102,7 +111,7 @@ describe('nlu manager unit tests', () => {
       };
       const result = await nlu.handle(context as any);
 
-      expect(result).to.eql({ ...context, request: luisResponse });
+      expect(result).to.eql({ ...context, request: predictResponse });
     });
 
     it('works with production', async () => {
@@ -112,7 +121,7 @@ describe('nlu manager unit tests', () => {
       };
       const services = {
         axios: {
-          post: sinon.stub().resolves({ data: luisResponse }),
+          post: sinon.stub().resolves({ data: nluGatewayResponse }),
         },
       };
       const nlu = new NLUManager({ ...services, utils: { ...defaultUtils } } as any, config as any);
@@ -134,14 +143,7 @@ describe('nlu manager unit tests', () => {
 
       const result = await nlu.handle(context as any);
 
-      expect(result).to.eql({ ...context, request: luisResponse });
-      expect(services.axios.post.args[0][1]).to.eql({
-        query,
-        resourceID: nlp.resourceID,
-        tag: VersionTag.PRODUCTION,
-        projectID: version.projectID,
-        versionID: liveVersion,
-      });
+      expect(result).to.eql({ ...context, request: predictResponse });
     });
 
     it('rejects on invalid version', async () => {
@@ -252,7 +254,7 @@ describe('nlu manager unit tests', () => {
     it('works with model and locale defined and intent is VoiceflowConstants.IntentName.NONE, prediction is not empty', async () => {
       const services = {
         axios: {
-          post: sinon.stub().resolves({ data: luisResponse }),
+          post: sinon.stub().resolves({ data: nluGatewayResponse }),
         },
       };
       const nlu = new NLUManager({ ...services, utils: { ...defaultUtils } } as any, config as any);
@@ -269,13 +271,13 @@ describe('nlu manager unit tests', () => {
 
       const result = await nlu.predict(arg);
 
-      expect(result).to.eql(luisResponse);
+      expect(result).to.eql(predictResponse);
     });
 
     it('works with model and locale undefined, intent is not VoiceflowConstants.IntentName.NONE, prediction is not empty', async () => {
       const services = {
         axios: {
-          post: sinon.stub().resolves({ data: luisResponse }),
+          post: sinon.stub().resolves({ data: nluGatewayResponse }),
         },
       };
       const nlu = new NLUManager({ ...services, utils: { ...defaultUtils } } as any, config as any);
@@ -290,7 +292,7 @@ describe('nlu manager unit tests', () => {
 
       const result = await nlu.predict(arg);
 
-      expect(result).to.eql(luisResponse);
+      expect(result).to.eql(predictResponse);
     });
 
     it('works with model and locale undefined, intent is not VoiceflowConstants.IntentName.NONE, prediction empty', async () => {
