@@ -64,7 +64,7 @@ export const getOutput = async (
     return null;
   }
 
-  if (runtime.project?.aiAssistSettings?.freestyle) {
+  if (runtime.project?.aiAssistSettings?.generateNoMatch) {
     const output = await generateNoMatch(runtime);
 
     if (output) return { output, ai: true };
