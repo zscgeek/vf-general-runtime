@@ -11,6 +11,7 @@ import * as Runtime from './runtime';
 export interface Config extends RateLimitConfig {
   NODE_ENV: string;
   PORT: string;
+
   PORT_METRICS: string | null;
   ERROR_RESPONSE_MS: number;
 
@@ -42,8 +43,9 @@ export interface Config extends RateLimitConfig {
   BUILD_URL: string | null;
 
   GENERAL_SERVICE_ENDPOINT: string | null;
-  LUIS_SERVICE_ENDPOINT: string | null;
   ML_GATEWAY_ENDPOINT: string | null;
+  NLU_GATEWAY_SERVICE_HOST: string | null;
+  NLU_GATEWAY_SERVICE_PORT_APP: string | null;
 
   CREATOR_API_ENDPOINT: string | null;
   CREATOR_API_AUTHORIZATION: string | null;
