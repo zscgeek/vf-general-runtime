@@ -12,6 +12,9 @@ export class Metrics extends VFMetrics.Client.Metrics {
     sdk: {
       request: Counter;
     };
+    deprecatedAPIKeys: {
+      request: Counter;
+    };
   };
 
   constructor(config: Config) {
@@ -28,6 +31,11 @@ export class Metrics extends VFMetrics.Client.Metrics {
       sdk: {
         request: this.meter.createCounter('sdk_request', { description: 'SDK requests' }),
       },
+      deprecatedAPIKeys: {
+        request: this.meter.createCounter('deprecated_api_keys', {
+          description: 'Requests made with deprecated Workspace API Keys',
+        }),
+      },
     };
   }
 
@@ -37,6 +45,10 @@ export class Metrics extends VFMetrics.Client.Metrics {
 
   sdkRequest(): void {
     this.counters.sdk.request.add(1);
+  }
+
+  deprecatedAPIKey(apiKey: string): void {
+    this.counters.deprecatedAPIKeys.request.add(1, { apiKey });
   }
 }
 

@@ -64,6 +64,9 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
 
     metrics.generalRequest();
     if (authorization?.startsWith('VF.')) metrics.sdkRequest();
+    // If we are using a non-DM key, assume this is a deprecated Workspace API Key.
+    if (authorization?.startsWith('VF.') && !authorization?.startsWith('VF.DM'))
+      metrics.deprecatedAPIKey(authorization);
 
     const context: PartialContext<Context> = {
       data: {
