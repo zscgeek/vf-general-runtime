@@ -20,4 +20,12 @@ describe('metrics client unit tests', () => {
 
     await fixture.assert();
   });
+
+  it('deprecatedAPIKey', async () => {
+    const fixture = await metricsAsserter.assertMetric({ expected: /^deprecated_api_keys 1 \d+$/m });
+
+    fixture.metrics.deprecatedAPIKey('somekey');
+
+    await fixture.assert();
+  });
 });
