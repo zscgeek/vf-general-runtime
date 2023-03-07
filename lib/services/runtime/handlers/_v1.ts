@@ -36,7 +36,7 @@ export const _V1Handler: HandlerFactory<BaseNode._v1.Node, typeof utilsObj> = (u
         return utils.commandHandler.handle(runtime, variables);
       }
 
-      return null;
+      return defaultPath;
     }
 
     const variablesMap = variables.getState();
