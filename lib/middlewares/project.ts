@@ -55,7 +55,7 @@ class Project extends AbstractMiddleware {
         }
 
         if (isVersionTag(req.headers.versionID)) {
-          throw new VError('Cannot resolve version alias from a workspace API key', VError.HTTP_STATUS.BAD_REQUEST);
+          throw new VError('Cannot resolve version alias', VError.HTTP_STATUS.BAD_REQUEST);
         }
 
         return next();
