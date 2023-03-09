@@ -26,30 +26,11 @@ class LocalDataAPI<
     this.programs = content.programs;
   }
 
-  public init = async () => {
-    // no-op
-  };
-
   public getVersion = async () => this.version;
-
-  public unhashVersionID = async (versionID: string) => versionID;
 
   public getProgram = async (programID: string) => this.programs[programID];
 
   public getProject = async () => this.project;
-
-  public fetchDisplayById = async () => null;
-
-  public getProjectNLP = async () => {
-    return {
-      nlp: this.project.prototype?.nlp,
-      devVersion: this.project.devVersion,
-      liveVersion: this.project.liveVersion,
-      platformData: this.project.platformData,
-    };
-  };
-
-  public getProjectUsingAPIKey = async () => this.project;
 }
 
 export default LocalDataAPI;

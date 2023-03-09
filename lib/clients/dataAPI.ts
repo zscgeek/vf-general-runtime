@@ -1,9 +1,10 @@
-import { VoiceflowConstants, VoiceflowProgram, VoiceflowVersion } from '@voiceflow/voiceflow-types';
+import { VoiceflowProgram, VoiceflowVersion } from '@voiceflow/voiceflow-types';
 
 import { CreatorDataApi, LocalDataApi } from '@/runtime';
 import { Config } from '@/types';
 
-import RemoteDataAPI from './remoteDataAPI';
+import MongoDB from './mongodb';
+import PrototypeDataAPI from './prototypeDataAPI';
 import Static from './static';
 
 /**
@@ -12,20 +13,17 @@ import Static from './static';
 class DataAPI {
   localDataApi?: LocalDataApi<VoiceflowProgram.Program, VoiceflowVersion.Version>;
 
-  remoteDataApi?: RemoteDataAPI;
+  prototypeDataApi?: PrototypeDataAPI;
 
   creatorAPIAuthorization?: string;
 
   creatorDataApi?: (authorization: string) => CreatorDataApi<VoiceflowProgram.Program, VoiceflowVersion.Version>;
 
-  constructor(config: Config, API = { LocalDataApi, RemoteDataAPI, CreatorDataApi }) {
-    const {
-      PROJECT_SOURCE,
-      ADMIN_SERVER_DATA_API_TOKEN,
-      VF_DATA_ENDPOINT,
-      CREATOR_API_AUTHORIZATION,
-      CREATOR_API_ENDPOINT,
-    } = config;
+  constructor(
+    { config, mongo }: { config: Config; mongo: MongoDB | null },
+    API = { LocalDataApi, PrototypeDataAPI, CreatorDataApi }
+  ) {
+    const { PROJECT_SOURCE, CREATOR_API_AUTHORIZATION, CREATOR_API_ENDPOINT } = config;
 
     if (CREATOR_API_ENDPOINT) {
       this.creatorAPIAuthorization = CREATOR_API_AUTHORIZATION || '';
@@ -42,41 +40,27 @@ class DataAPI {
     }
 
     // fetch from server-data-api
-    if (ADMIN_SERVER_DATA_API_TOKEN && VF_DATA_ENDPOINT) {
-      this.remoteDataApi = new API.RemoteDataAPI(
-        {
-          platform: VoiceflowConstants.PlatformType.GENERAL,
-          adminToken: ADMIN_SERVER_DATA_API_TOKEN,
-          dataEndpoint: VF_DATA_ENDPOINT,
-        },
-        { axios: Static.axios }
-      );
+    if (mongo) {
+      this.prototypeDataApi = new API.PrototypeDataAPI(mongo);
     }
 
     // configuration not set
-    if (!PROJECT_SOURCE && (!VF_DATA_ENDPOINT || !ADMIN_SERVER_DATA_API_TOKEN) && !CREATOR_API_ENDPOINT) {
+    if (!PROJECT_SOURCE && !mongo && !CREATOR_API_ENDPOINT) {
       throw new Error('no data API env configuration set');
     }
   }
 
-  public async init() {
-    await this.localDataApi?.init();
-    await this.remoteDataApi?.init();
-  }
-
   public async get(authorization = this.creatorAPIAuthorization) {
     if (this.creatorDataApi && authorization) {
-      const dataApi = this.creatorDataApi(authorization);
-      await dataApi.init();
-      return dataApi;
+      return this.creatorDataApi(authorization);
     }
 
     if (this.localDataApi) {
       return this.localDataApi;
     }
 
-    if (this.remoteDataApi) {
-      return this.remoteDataApi;
+    if (this.prototypeDataApi) {
+      return this.prototypeDataApi;
     }
 
     throw new Error('no data API env configuration set');
