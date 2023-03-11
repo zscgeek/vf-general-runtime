@@ -83,7 +83,7 @@ class MongoDataAPI<
     const program = await this.client.db
       .collection(this.programsCollection)
       .findOne<{ legacyID: string } | null>(
-        { programID: new ObjectId(version.rootDiagramID) },
+        { _id: new ObjectId(version.rootDiagramID) },
         { projection: { legacyID: 1 } }
       );
 
