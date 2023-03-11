@@ -28,10 +28,10 @@ const buildClients = (config: Config): ClientMap => {
 
   return {
     ...Static,
-    dataAPI: new DataAPI({ config, mongo }),
-    metrics: Metrics(config),
     redis,
     mongo,
+    dataAPI: new DataAPI({ config, mongo }),
+    metrics: Metrics(config),
     rateLimitClient: RateLimitClient('general-runtime', redis, config),
     analyticsClient: Analytics(config),
   };
