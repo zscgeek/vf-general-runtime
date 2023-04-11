@@ -31,22 +31,6 @@ const CONFIG: Config = {
   S3_TLS_BUCKET: getOptionalProcessEnv('S3_TLS_BUCKET'),
   S3_ENDPOINT: getOptionalProcessEnv('S3_ENDPOINT'),
 
-  // code block
-  CODE_HANDLER_ENDPOINT: getOptionalProcessEnv('CODE_HANDLER_ENDPOINT'),
-  // integrations block
-  INTEGRATIONS_HANDLER_ENDPOINT: getOptionalProcessEnv('INTEGRATIONS_HANDLER_ENDPOINT') || 'none',
-  // api-block
-  API_REQUEST_TIMEOUT_MS: Number(getOptionalProcessEnv('API_MAX_TIMEOUT_MS')) || null,
-  API_MAX_CONTENT_LENGTH_BYTES: Number(getOptionalProcessEnv('API_MAX_CONTENT_LENGTH_BYTES')) || null,
-  API_MAX_BODY_LENGTH_BYTES: Number(getOptionalProcessEnv('API_MAX_BODY_LENGTH_BYTES')) || null,
-
-  PROJECT_SOURCE: getOptionalProcessEnv('PROJECT_SOURCE'),
-
-  GENERAL_SERVICE_ENDPOINT: getOptionalProcessEnv('GENERAL_SERVICE_ENDPOINT'), // voiceflow nlu/tts services
-  ML_GATEWAY_ENDPOINT: getOptionalProcessEnv('ML_GATEWAY_ENDPOINT'),
-  NLU_GATEWAY_SERVICE_HOST: getOptionalProcessEnv('NLU_GATEWAY_SERVICE_HOST'),
-  NLU_GATEWAY_SERVICE_PORT_APP: getOptionalProcessEnv('NLU_GATEWAY_SERVICE_PORT_APP'),
-
   // creator-api config
   CREATOR_API_ENDPOINT: getOptionalProcessEnv('CREATOR_API_ENDPOINT'),
   CREATOR_API_AUTHORIZATION: getOptionalProcessEnv('CREATOR_API_AUTHORIZATION'),
