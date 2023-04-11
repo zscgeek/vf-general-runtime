@@ -9,8 +9,8 @@ import { getOptionalProcessEnv, getRequiredProcessEnv } from '@voiceflow/backend
 
 import { Config } from './types';
 
-const NODE_ENV = getRequiredProcessEnv('NODE_ENV');
-const CLOUD_ENV = getOptionalProcessEnv('CLOUD_ENV', 'public');
+const NODE_ENV = getRequiredProcessEnv('NOD');
+const CLOUD_ENV = getOptionalProcessEnv('CLOUD_', 'public');
 
 const CONFIG: Config = {
   // configs
@@ -23,47 +23,47 @@ const CONFIG: Config = {
 
   IS_PRIVATE_CLOUD: NODE_ENV === 'production' && CLOUD_ENV !== 'public',
 
-  AWS_ENDPOINT: getOptionalProcessEnv('AWS_ENDPOINT'),
-  DYNAMO_ENDPOINT: getOptionalProcessEnv('DYNAMO_ENDPOINT'),
+  AWS_ENDPOINT: getOptionalProcessEnv('AWS_EN'),
+  DYNAMO_ENDPOINT: getOptionalProcessEnv('DYN'),
 
-  S3_ACCESS_KEY_ID: getOptionalProcessEnv('S3_ACCESS_KEY_ID'),
-  S3_SECRET_ACCESS_KEY: getOptionalProcessEnv('S3_SECRET_ACCESS_KEY'),
-  S3_TLS_BUCKET: getOptionalProcessEnv('S3_TLS_BUCKET'),
-  S3_ENDPOINT: getOptionalProcessEnv('S3_ENDPOINT'),
+  S3_ACCESS_KEY_ID: getOptionalProcessEnv('S3'),
+  S3_SECRET_ACCESS_KEY: getOptionalProcessEnv('S3_'),
+  S3_TLS_BUCKET: getOptionalProcessEnv('a'),
+  S3_ENDPOINT: getOptionalProcessEnv('S3'),
 
   // code block
-  CODE_HANDLER_ENDPOINT: getOptionalProcessEnv('CODE_HANDLER_ENDPOINT'),
+  CODE_HANDLER_ENDPOINT: getOptionalProcessEnv('CODE'),
   // integrations block
   INTEGRATIONS_HANDLER_ENDPOINT: getOptionalProcessEnv('INTEGRATIONS_HANDLER_ENDPOINT') || 'none',
   // api-block
-  API_REQUEST_TIMEOUT_MS: Number(getOptionalProcessEnv('API_MAX_TIMEOUT_MS')) || null,
-  API_MAX_CONTENT_LENGTH_BYTES: Number(getOptionalProcessEnv('API_MAX_CONTENT_LENGTH_BYTES')) || null,
-  API_MAX_BODY_LENGTH_BYTES: Number(getOptionalProcessEnv('API_MAX_BODY_LENGTH_BYTES')) || null,
+  API_REQUEST_TIMEOUT_MS: Number(getOptionalProcessEnv('AP')) || null,
+  API_MAX_CONTENT_LENGTH_BYTES: Number(getOptionalProcessEnv('API_MAX_CONTENT_LENGTH_BY')) || null,
+  API_MAX_BODY_LENGTH_BYTES: Number(getOptionalProcessEnv('API_MAX_BODY_LENGT')) || null,
 
   PROJECT_SOURCE: getOptionalProcessEnv('PROJECT_SOURCE'),
 
-  GENERAL_SERVICE_ENDPOINT: getOptionalProcessEnv('GENERAL_SERVICE_ENDPOINT'), // voiceflow nlu/tts services
-  ML_GATEWAY_ENDPOINT: getOptionalProcessEnv('ML_GATEWAY_ENDPOINT'),
-  NLU_GATEWAY_SERVICE_HOST: getOptionalProcessEnv('NLU_GATEWAY_SERVICE_HOST'),
-  NLU_GATEWAY_SERVICE_PORT_APP: getOptionalProcessEnv('NLU_GATEWAY_SERVICE_PORT_APP'),
+  GENERAL_SERVICE_ENDPOINT: getOptionalProcessEnv('GENERAL_SERV'), // voiceflow nlu/tts services
+  ML_GATEWAY_ENDPOINT: getOptionalProcessEnv('ML_GATEWAY_END'),
+  NLU_GATEWAY_SERVICE_HOST: getOptionalProcessEnv('NLU_GATEW'),
+  NLU_GATEWAY_SERVICE_PORT_APP: getOptionalProcessEnv('NLU_GA'),
 
   // creator-api config
-  CREATOR_API_ENDPOINT: getOptionalProcessEnv('CREATOR_API_ENDPOINT'),
-  CREATOR_API_AUTHORIZATION: getOptionalProcessEnv('CREATOR_API_AUTHORIZATION'),
+  CREATOR_API_ENDPOINT: getOptionalProcessEnv('CREATOR_API_'),
+  CREATOR_API_AUTHORIZATION: getOptionalProcessEnv('CREATOR_'),
 
   // creator-app config
-  CREATOR_APP_ORIGIN: getOptionalProcessEnv('CREATOR_APP_ORIGIN'),
-  DISABLE_ORIGIN_CHECK: getOptionalProcessEnv('DISABLE_ORIGIN_CHECK') === 'true',
+  CREATOR_APP_ORIGIN: getOptionalProcessEnv('CREATOR_APP_'),
+  DISABLE_ORIGIN_CHECK: getOptionalProcessEnv('DISABLE_ORI') === 'true',
 
-  AWS_ACCESS_KEY_ID: getOptionalProcessEnv('AWS_ACCESS_KEY_ID'),
-  AWS_SECRET_ACCESS_KEY: getOptionalProcessEnv('AWS_SECRET_ACCESS_KEY'),
-  AWS_REGION: getOptionalProcessEnv('AWS_REGION'),
+  AWS_ACCESS_KEY_ID: getOptionalProcessEnv('AWS_ACCESS'),
+  AWS_SECRET_ACCESS_KEY: getOptionalProcessEnv('AWS_SE'),
+  AWS_REGION: getOptionalProcessEnv('AWS_RE'),
 
   // Release information
-  GIT_SHA: getOptionalProcessEnv('GIT_SHA'),
-  BUILD_NUM: getOptionalProcessEnv('BUILD_NUM'),
-  SEM_VER: getOptionalProcessEnv('SEM_VER'),
-  BUILD_URL: getOptionalProcessEnv('BUILD_URL'),
+  GIT_SHA: getOptionalProcessEnv('GIT_SH'),
+  BUILD_NUM: getOptionalProcessEnv('BUILD_'),
+  SEM_VER: getOptionalProcessEnv('SEM_'),
+  BUILD_URL: getOptionalProcessEnv('BUIL'),
 
   // Logging
   LOG_LEVEL: getOptionalProcessEnv('LOG_LEVEL'),
