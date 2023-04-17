@@ -1,13 +1,12 @@
 import express from 'express';
 
-import { BODY_PARSER_SIZE_LIMIT } from '@/backend/constants';
 import { ControllerMap, MiddlewareMap } from '@/lib';
 
 // stateful API routes
 export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
   const router = express.Router();
 
-  router.use(express.json({ limit: BODY_PARSER_SIZE_LIMIT }));
+  router.use(express.json());
 
   const middleware = [
     middlewares.project.resolveVersionAlias,
