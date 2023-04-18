@@ -6,7 +6,7 @@ import { ControllerMap, MiddlewareMap } from '@/lib';
 export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
   const router = express.Router();
 
-  router.use(express.json());
+  router.use(express.json({ limit: Number.POSITIVE_INFINITY }));
 
   const middleware = [
     middlewares.project.resolveVersionAlias,

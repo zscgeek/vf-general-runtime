@@ -6,7 +6,7 @@ import { ControllerMap, MiddlewareMap } from '@/lib';
 export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
   const router = express.Router();
 
-  router.use(bodyParser.json());
+  router.use(bodyParser.json({ limit: Number.POSITIVE_INFINITY }));
   // router.use(middlewares.auth.verify);
   router.use(middlewares.rateLimit.verify);
 
