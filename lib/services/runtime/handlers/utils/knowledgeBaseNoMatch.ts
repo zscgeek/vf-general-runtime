@@ -22,7 +22,7 @@ interface KnowledgeBaseResponse {
 }
 
 const createKnowledgeString = ({ chunks }: KnowledgeBaseResponse) => {
-  return chunks.map((chunk) => `"${chunk.originalText}"\n\n`).join('');
+  return chunks.map((chunk, index) => `${index}: "${chunk.originalText}"\n\n`).join('');
 };
 
 export const knowledgeBaseNoMatch = async (runtime: Runtime): Promise<Output | null> => {
@@ -94,13 +94,19 @@ export const knowledgeBaseNoMatch = async (runtime: Runtime): Promise<Output | n
     } else {
       // for GPT-3.5 and 4.0 chat models
 
-      prompt += `reference info:\n\n${createKnowledgeString(data)}\n\n`;
+      const messages = [
+        {
+          role: 'user' as const,
+          content: `reference info:\n\n${createKnowledgeString(
+            data
+          )}\n\nUse the references to help answer but don't explicitly make reference to the info. If you don't know the answer say exactly "NOT_FOUND".\n\n${question}`,
+        },
+      ];
 
-      const system = (options.system ? `${options.system}\n` : '') + prompt;
-
-      // TODO: memory depends on the size of the prompt
-      response = await fetchChat({ ...options, system, messages: memory }, variables);
+      response = await fetchChat({ ...options, messages }, variables);
     }
+
+    if (response.output?.toUpperCase().includes('NOT_FOUND')) return null;
 
     const { output, ...meta } = response;
 
