@@ -41,7 +41,7 @@ export const answerSynthesis = async ({
     // for GPT-3.5 and 4.0 chat models
     const messages = [
       {
-        role: 'user' as const,
+        role: 'system' as const,
         content: `context:\n${context}`,
       },
       {
