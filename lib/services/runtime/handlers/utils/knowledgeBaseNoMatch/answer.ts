@@ -46,7 +46,7 @@ export const answerSynthesis = async ({
       },
       {
         role: 'user' as const,
-        content: `If you don't know the answer say exactly "NOT_FOUND".\n\n${question}`,
+        content: `If you don't know the answer say exactly "NOT_FOUND".\n\nQuestion:\n${question}`,
       },
     ];
 
