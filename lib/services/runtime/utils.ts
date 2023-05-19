@@ -168,13 +168,17 @@ export const addButtonsIfExists = <N extends BaseRequest.NodeButton>(
 
 export const getReadableConfidence = (confidence?: number): string => ((confidence ?? 1) * 100).toFixed(2);
 
+export const getGlobalNoMatch = (runtime: Runtime) => {
+  return runtime.version?.platformData.settings?.globalNoMatch;
+};
+
 export const getGenericGlobalNoMatchPrompt =
   ({ isPrompt }: { isPrompt: (prompt: unknown) => prompt is Prompt }) =>
   (runtime: Runtime) => {
-    const { version } = runtime;
-    const prompt = version?.platformData.settings?.globalNoMatch?.prompt;
-    return prompt && isPrompt(prompt) ? prompt : null;
+    const noMatch = getGlobalNoMatch(runtime);
+    return noMatch?.prompt && isPrompt(noMatch.prompt) ? noMatch.prompt : null;
   };
+
 export const getGlobalNoMatchPrompt = getGenericGlobalNoMatchPrompt({ isPrompt });
 
 export const getGlobalNoReplyPrompt = (runtime: Runtime) => {
@@ -189,7 +193,7 @@ export const slateToPlaintext = (content: Readonly<BaseText.SlateTextValue> = []
     .join('\n')
     .trim();
 
-export const isPromptContentInitialyzed = (content: BaseText.SlateTextValue | string | null | undefined) =>
+export const isPromptContentInitialized = (content: BaseText.SlateTextValue | string | null | undefined) =>
   content != null;
 
 export const isPromptContentEmpty = (content: BaseText.SlateTextValue | string | null | undefined) => {
