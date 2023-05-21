@@ -1,6 +1,10 @@
 import { getAPIBlockHandlerOptions } from '@/lib/services/runtime/handlers/api';
-import { fetchKnowledgeBase } from '@/lib/services/runtime/handlers/utils/knowledgeBaseNoMatch';
-import { answerSynthesis } from '@/lib/services/runtime/handlers/utils/knowledgeBaseNoMatch/answer';
+import {
+  answerSynthesis,
+  fetchKnowledgeBase,
+  KnowledegeBaseChunk,
+  questionExpansion,
+} from '@/lib/services/runtime/handlers/utils/knowledgeBaseNoMatch';
 import { callAPI } from '@/runtime/lib/Handlers/api/utils';
 import { ivmExecute } from '@/runtime/lib/Handlers/code/utils';
 import { Request, Response } from '@/types';
@@ -43,19 +47,30 @@ class TestController extends AbstractController {
 
     const { question, settings, synthesis = true } = req.body;
 
-    const data = await fetchKnowledgeBase(project._id, question, settings);
+    // const questions = await questionExpansion(question);
+    const questions = [question];
+
+    const data = await Promise.all(questions.map((question) => fetchKnowledgeBase(project._id, question, settings)));
+
+    const chunkMap: Record<string, KnowledegeBaseChunk & { source: any }> = {};
+    data.forEach((data) => {
+      if (!data) return;
+      data.chunks.forEach((chunk) => {
+        // attach metadata to chunks
+        chunkMap[chunk.chunkID] = { ...chunk, source: project.knowledgeBase?.documents?.[chunk.documentID]?.data };
+      });
+    });
+
+    const chunks = Object.values(chunkMap);
+    // keep the 3 top chunks with lowest scores
+    chunks.sort((a, b) => b.score - a.score);
+    chunks.splice(3);
 
     if (!data) return res.send({ output: null, chunks: [] });
 
-    // attach metadata to chunks
-    const chunks = data.chunks.map((chunk) => ({
-      ...chunk,
-      source: project.knowledgeBase?.documents?.[chunk.documentID]?.data,
-    }));
-
     if (!synthesis) return res.send({ output: null, chunks });
 
-    const answer = await answerSynthesis({ question, data, options: settings?.summarization });
+    const answer = await answerSynthesis({ question, data: { chunks }, options: settings?.summarization });
 
     if (!answer?.output) return res.send({ output: null, chunks });
 
