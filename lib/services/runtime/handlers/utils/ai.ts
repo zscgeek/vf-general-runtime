@@ -46,7 +46,7 @@ export const generateCompletion = async (prompt: string, params: BaseUtils.ai.AI
   const ML_GATEWAY_ENDPOINT = getMLGateWayEndpoint();
   if (!ML_GATEWAY_ENDPOINT) return null;
 
-  const { maxTokens, temperature, model } = params;
+  const { maxTokens, temperature, model, system } = params;
 
   return axios
     .post<{ result: string }>(`${ML_GATEWAY_ENDPOINT}/api/v1/generation/generative-response`, {
@@ -54,6 +54,7 @@ export const generateCompletion = async (prompt: string, params: BaseUtils.ai.AI
       maxTokens,
       temperature,
       model,
+      system,
     })
     .then(({ data: { result } }) => result)
     .catch(logError);
@@ -114,5 +115,5 @@ export const fetchPrompt = async (
   }
   if (!prompt) return { output: null };
 
-  return { prompt, output: await generateCompletion(prompt, params) };
+  return { prompt, output: await generateCompletion(prompt, { ...params, system }) };
 };
