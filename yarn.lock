@@ -2465,23 +2465,6 @@
     shallowequal "^1.1.0"
     typescript-fsa "3.0.0"
 
-"@voiceflow/common@8.1.5":
-  version "8.1.5"
-  resolved "https://registry.yarnpkg.com/@voiceflow/common/-/common-8.1.5.tgz#798481b96fb05f4e48a97537a808b8190ceb5102"
-  integrity sha512-tCMHPBEfNCcmvAVoe+WHv4anPcj+HngzPz5V819HcWyahhslL9cyd6C9l50iOTnvWljERMDzb2AABndZne0D1Q==
-  dependencies:
-    "@types/crypto-js" "^4.0.2"
-    "@types/shallowequal" "^1.1.1"
-    bson-objectid "^2.0.1"
-    crypto-js "^4.1.1"
-    cuid "^2.1.8"
-    dayjs "1.10.7"
-    lodash "^4.17.21"
-    murmurhash-wasm "^1.3.0"
-    number-to-words "^1.2.4"
-    shallowequal "^1.1.0"
-    typescript-fsa "3.0.0"
-
 "@voiceflow/common@8.2.0", "@voiceflow/common@^8.2.0":
   version "8.2.0"
   resolved "https://registry.yarnpkg.com/@voiceflow/common/-/common-8.2.0.tgz#ecfef04ebd4386b292bc11db40296c5f4ee67a40"
@@ -2664,13 +2647,6 @@
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/@voiceflow/prettier-config/-/prettier-config-1.2.1.tgz#906bc852bcd8b2586fa62e4635392a0bea1fdb59"
   integrity sha512-J7wnJCwRWSNX33Ji2eLeBxtwXplAKIk9/aOfrHVfKmYrLHqXvOcrl2/7xa37jqnuTl8vw3+UsfFo3sMDY6weTg==
-
-"@voiceflow/sdk-auth@1.44.2":
-  version "1.44.2"
-  resolved "https://registry.yarnpkg.com/@voiceflow/sdk-auth/-/sdk-auth-1.44.2.tgz#f188d528a7011682cc8076cdcc151e20d9212af2"
-  integrity sha512-gzN3oJDgtGKTFpE7zW+W04D9v548E8yIXgFJrrNdKEhXeO9FE78+vtm8pM78hBoqAoTqwMPmkcyQj/ROKTjvGQ==
-  dependencies:
-    "@voiceflow/common" "8.1.5"
 
 "@voiceflow/verror@1.1.3", "@voiceflow/verror@^1.1.3":
   version "1.1.3"
