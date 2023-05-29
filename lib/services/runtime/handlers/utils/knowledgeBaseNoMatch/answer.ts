@@ -38,7 +38,7 @@ export const answerSynthesis = async ({
       },
       {
         role: ChatCompletionRequestMessageRoleEnum.User,
-        content: `Answer the following question, if you don't know the answer say exactly "NOT_FOUND".\n\nQuestion:\n${question}`,
+        content: `Answer the following question using ONLY the provided context, if you don't know the answer say exactly "NOT_FOUND".\n\nQuestion:\n${question}`,
       },
     ];
 
