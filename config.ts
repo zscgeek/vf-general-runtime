@@ -43,7 +43,6 @@ const CONFIG: Config = {
   PROJECT_SOURCE: getOptionalProcessEnv('PROJECT_SOURCE'),
 
   GENERAL_SERVICE_ENDPOINT: getOptionalProcessEnv('GENERAL_SERVICE_ENDPOINT'), // voiceflow nlu/tts services
-  ML_GATEWAY_ENDPOINT: getOptionalProcessEnv('ML_GATEWAY_ENDPOINT'),
   KNOWLEDGE_BASE_LAMBDA_ENDPOINT: getOptionalProcessEnv('KNOWLEDGE_BASE_LAMBDA_ENDPOINT'),
 
   AUTH_API_SERVICE_HOST: getOptionalProcessEnv('AUTH_API_SERVICE_HOST'),
@@ -93,6 +92,15 @@ const CONFIG: Config = {
   ANALYTICS_WRITE_KEY: getOptionalProcessEnv('ANALYTICS_WRITE_KEY') || null,
 
   INGEST_V2_WEBHOOK_ENDPOINT: getOptionalProcessEnv('INGEST_V2_WEBHOOK_ENDPOINT') || null,
+
+  // OpenAI
+  AZURE_ENDPOINT: getOptionalProcessEnv('AZURE_ENDPOINT') || null,
+  AZURE_OPENAI_API_KEY: getOptionalProcessEnv('AZURE_OPENAI_API_KEY') || null,
+  AZURE_GPT3_DEPLOYMENTS: getOptionalProcessEnv('AZURE_GPT3_DEPLOYMENTS') || null,
+  // eslint-disable-next-line no-secrets/no-secrets -- it thinks this is a secret for some reason
+  AZURE_GPT35_DEPLOYMENTS: getOptionalProcessEnv('AZURE_GPT35_DEPLOYMENTS') || null,
+
+  OPENAI_API_KEY: getOptionalProcessEnv('OPENAI_API_KEY') || null,
 };
 
 export default CONFIG;

@@ -1,64 +1,11 @@
 import { BaseUtils } from '@voiceflow/base-types';
 import { replaceVariables, sanitizeVariables } from '@voiceflow/common';
-import axios from 'axios';
+import { ChatCompletionRequestMessageRoleEnum } from '@voiceflow/openai';
 
-import Config from '@/config';
-import log from '@/logger';
+import AI from '@/lib/clients/ai';
+import { Message } from '@/lib/clients/ai/types';
 
 import AIAssist, { AIAssistLog } from '../../../aiAssist';
-
-export interface Message {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-}
-
-const logError = (error: Error) => {
-  log.error(error);
-  return null;
-};
-
-const getMLGateWayEndpoint = () => {
-  if (!Config.ML_GATEWAY_ENDPOINT) {
-    log.error('ML_GATEWAY_ENDPOINT is not set');
-    return null;
-  }
-  return Config.ML_GATEWAY_ENDPOINT.split('/api')[0];
-};
-
-export const generateChat = async (messages: Message[], params: BaseUtils.ai.AIModelParams) => {
-  const ML_GATEWAY_ENDPOINT = getMLGateWayEndpoint();
-  if (!ML_GATEWAY_ENDPOINT) return null;
-
-  const { maxTokens, temperature, model } = params;
-
-  return axios
-    .post<{ result: string }>(`${ML_GATEWAY_ENDPOINT}/api/v1/generation/chat`, {
-      messages,
-      maxTokens,
-      temperature,
-      model,
-    })
-    .then(({ data: { result } }) => result)
-    .catch(logError);
-};
-
-export const generateCompletion = async (prompt: string, params: BaseUtils.ai.AIModelParams) => {
-  const ML_GATEWAY_ENDPOINT = getMLGateWayEndpoint();
-  if (!ML_GATEWAY_ENDPOINT) return null;
-
-  const { maxTokens, temperature, model, system } = params;
-
-  return axios
-    .post<{ result: string }>(`${ML_GATEWAY_ENDPOINT}/api/v1/generation/generative-response`, {
-      prompt,
-      maxTokens,
-      temperature,
-      model,
-      system,
-    })
-    .then(({ data: { result } }) => result)
-    .catch(logError);
-};
 
 export const getMemoryMessages = (variablesState: Record<string, unknown>) => [
   ...((variablesState?.[AIAssist.StorageKey] as AIAssistLog) || []),
@@ -74,6 +21,9 @@ export const fetchChat = async (
   params: BaseUtils.ai.AIModelParams & { messages: Message[] },
   variablesState: Record<string, unknown> = {}
 ): Promise<AIResponse> => {
+  const model = AI.get(params.model);
+  if (!model) return { output: null };
+
   const sanitizedVars = sanitizeVariables(variablesState);
   const messages = params.messages.map((message) => ({
     ...message,
@@ -81,19 +31,17 @@ export const fetchChat = async (
   }));
 
   const system = replaceVariables(params.system, sanitizedVars);
-  if (system) messages.unshift({ role: 'system', content: system });
+  if (system) messages.unshift({ role: ChatCompletionRequestMessageRoleEnum.System, content: system });
 
-  return { messages, output: await generateChat(messages, params) };
+  return { messages, output: await model.generateChatCompletion(messages, params) };
 };
 
 export const fetchPrompt = async (
   params: BaseUtils.ai.AIModelParams & { mode: BaseUtils.ai.PROMPT_MODE; prompt: string },
   variablesState: Record<string, unknown> = {}
 ): Promise<AIResponse> => {
-  if (!Config.ML_GATEWAY_ENDPOINT) {
-    log.error('ML_GATEWAY_ENDPOINT is not set, skipping generative node');
-    return { output: null };
-  }
+  const model = AI.get(params.model);
+  if (!model) return { output: null };
 
   const sanitizedVars = sanitizeVariables(variablesState);
 
@@ -102,18 +50,19 @@ export const fetchPrompt = async (
 
   if (params.mode === BaseUtils.ai.PROMPT_MODE.MEMORY) {
     const messages = getMemoryMessages(variablesState);
-    if (system) messages.unshift({ role: 'system', content: system });
+    if (system) messages.unshift({ role: ChatCompletionRequestMessageRoleEnum.System, content: system });
 
-    return { output: await generateChat(messages, params), messages };
+    return { output: await model.generateChatCompletion(messages, params), messages };
   }
   if (params.mode === BaseUtils.ai.PROMPT_MODE.MEMORY_PROMPT) {
     const messages = getMemoryMessages(variablesState);
-    if (system) messages.unshift({ role: 'system', content: system });
-    if (prompt) messages.push({ role: 'user', content: prompt });
+    if (system) messages.unshift({ role: ChatCompletionRequestMessageRoleEnum.System, content: system });
+    if (prompt) messages.push({ role: ChatCompletionRequestMessageRoleEnum.User, content: prompt });
 
-    return { messages, output: await generateChat(messages, params) };
+    return { output: await model.generateChatCompletion(messages, params), messages };
   }
+
   if (!prompt) return { output: null };
 
-  return { prompt, output: await generateCompletion(prompt, { ...params, system }) };
+  return { prompt, output: await model.generateCompletion(prompt, params) };
 };

@@ -2613,6 +2613,14 @@
   resolved "https://registry.yarnpkg.com/@voiceflow/nestjs-timeout/-/nestjs-timeout-1.1.2.tgz#94ace9e8fb24ac56e918054bae16e5f8a6e189af"
   integrity sha512-UwhEQ6FBmlB/prD2UAimiyOpjTbvXd4zvrRC+buIEJ5Kn3/BCxKYh0aL1TMn0YuVnjGeWQrbahNtegkhLaqbvQ==
 
+"@voiceflow/openai@^3.2.1":
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/@voiceflow/openai/-/openai-3.2.1.tgz#cdd9cd38c0184b87558dbf32873ea930b0670997"
+  integrity sha512-u7WFV1R3vn7/m/cTPYIIjMh2VxPMgr4upN4eO1DK6ElmrAQOYScz08nEJLPNevIOgSey4UB3EZucVTTQuVoLXg==
+  dependencies:
+    axios "^0.26.0"
+    form-data "^4.0.0"
+
 "@voiceflow/pino-pretty@4.4.0":
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/@voiceflow/pino-pretty/-/pino-pretty-4.4.0.tgz#dd27cf16d14fe0fb3899b459a09c2449f10bc8ef"
@@ -3224,6 +3232,13 @@ axios@^0.21.1:
   integrity sha512-87otirqUw3e8CzHTMO+/9kh/FSgXt/eVDvipijwDtEuwbkySWZ9SBm6VEubmJ/kLKEoLQV/POhxXFb66bfekfg==
   dependencies:
     follow-redirects "^1.14.0"
+
+axios@^0.26.0:
+  version "0.26.1"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.26.1.tgz#1ede41c51fcf51bbbd6fd43669caaa4f0495aaa9"
+  integrity sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==
+  dependencies:
+    follow-redirects "^1.14.8"
 
 axobject-query@^2.2.0:
   version "2.2.0"
@@ -5989,6 +6004,11 @@ follow-redirects@^1.14.0, follow-redirects@^1.14.4:
   version "1.14.9"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.9.tgz#dd4ea157de7bfaf9ea9b3fbd85aa16951f78d8d7"
   integrity sha512-MQDfihBQYMcyy5dhRDJUHcw7lb2Pv/TuE6xP1vyraLukNDHKbDxDNaOE3NbCAdKQApno+GPRyo1YAp89yCjK4w==
+
+follow-redirects@^1.14.8:
+  version "1.15.2"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.2.tgz#b460864144ba63f2681096f274c4e57026da2c13"
+  integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
 
 follow-redirects@^1.14.9:
   version "1.15.0"
