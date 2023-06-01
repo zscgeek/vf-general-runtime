@@ -1,26 +1,26 @@
 import { BaseUtils } from '@voiceflow/base-types';
 import { AIModelParams } from '@voiceflow/base-types/build/cjs/utils/ai';
-import { ChatCompletionRequestMessageRoleEnum } from '@voiceflow/openai';
 
 import log from '@/logger';
 
-import { Message } from '../types';
 import { GPTAIModel } from './utils';
 
 export class GPT3 extends GPTAIModel {
-  public modelName = BaseUtils.ai.GPT_MODEL.DaVinci_003;
+  public modelRef = BaseUtils.ai.GPT_MODEL.DaVinci_003;
 
-  static messagesToPrompt(messages: Message[]) {
+  protected gptModelName = 'text-davinci-003';
+
+  static messagesToPrompt(messages: BaseUtils.ai.Message[]) {
     if (messages.length === 1) {
       return `${messages[0].content.trim()}\n`;
     }
 
     const transcript = messages
       .map((message) => {
-        if (message.role === ChatCompletionRequestMessageRoleEnum.User) {
+        if (message.role === BaseUtils.ai.Role.USER) {
           return `user: ${message.content}\n`;
         }
-        if (message.role === ChatCompletionRequestMessageRoleEnum.Assistant) {
+        if (message.role === BaseUtils.ai.Role.ASSISTANT) {
           return `bot: ${message.content}\n`;
         }
         return `${message.content}\n\n`;
@@ -34,7 +34,7 @@ export class GPT3 extends GPTAIModel {
     const result = await this.client
       .createCompletion(
         {
-          model: this.modelName,
+          model: this.gptModelName,
           max_tokens: params.maxTokens,
           temperature: params.temperature,
           prompt,
@@ -50,7 +50,7 @@ export class GPT3 extends GPTAIModel {
   }
 
   // turn messages into a singular prompt
-  async generateChatCompletion(messages: Message[], params: AIModelParams) {
+  async generateChatCompletion(messages: BaseUtils.ai.Message[], params: AIModelParams) {
     return this.generateCompletion(GPT3.messagesToPrompt(messages), params);
   }
 }

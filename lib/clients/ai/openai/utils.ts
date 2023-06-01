@@ -1,15 +1,22 @@
-import { Configuration, OpenAIApi } from '@voiceflow/openai';
+import { BaseUtils } from '@voiceflow/base-types';
+import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from '@voiceflow/openai';
 
 import { Config } from '@/types';
 
 import { AIModel } from '../types';
 
 export abstract class GPTAIModel extends AIModel {
-  protected TIMEOUT = 20000;
+  protected abstract gptModelName: string;
 
   protected azureClient?: OpenAIApi;
 
   protected openAIClient?: OpenAIApi;
+
+  static RoleMapping = {
+    [BaseUtils.ai.Role.ASSISTANT]: ChatCompletionRequestMessageRoleEnum.Assistant,
+    [BaseUtils.ai.Role.SYSTEM]: ChatCompletionRequestMessageRoleEnum.System,
+    [BaseUtils.ai.Role.USER]: ChatCompletionRequestMessageRoleEnum.User,
+  };
 
   constructor(config: Partial<Config>) {
     super();
