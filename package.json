@@ -12,11 +12,11 @@
     }
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.4.3",
     "@aws-sdk/client-s3": "^3.179.0",
     "@opentelemetry/api-metrics": "0.26.0",
     "@types/workerpool": "^5.0.1",
     "@voiceflow/alexa-types": "2.13.23",
+    "@voiceflow/anthropic": "^0.4.3",
     "@voiceflow/api-sdk": "3.23.27",
     "@voiceflow/backend-utils": "4.8.3",
     "@voiceflow/base-types": "2.84.3",
@@ -166,7 +166,6 @@
     "local:e2e": "yarn kill:e2e && NODE_TLS_REJECT_UNAUTHORIZED=0 NODE_ENV=e2e yarn dev",
     "mesh:post": "exit 0",
     "mesh:pre": "exit 0",
-    "preinstall": "yarn config set ignore-engines true",
     "redoc": "redoc-cli serve backend/docs/openapi.yaml --ssr --watch",
     "start": "cross-env NODE_ENV=production yarn start:base",
     "start:base": "node --max-old-space-size=8192 build/start.js",
