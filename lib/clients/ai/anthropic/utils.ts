@@ -61,6 +61,6 @@ export abstract class AnthropicAIModel extends AIModel {
         return null;
       });
 
-    return result?.completion ?? null;
+    return result?.completion?.trim() ?? null;
   }
 }
