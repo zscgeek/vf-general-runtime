@@ -28,7 +28,7 @@ class InteractController extends AbstractController {
       { userID: string },
       { state?: State; action?: RuntimeRequest; request?: RuntimeRequest; config?: BaseRequest.RequestConfig },
       { authorization: string; versionID: string },
-      { locale?: string; logs: RuntimeLogs.LogLevel }
+      { locale?: string; logs: RuntimeLogs.LogLevel; persona?: string }
     >
   ): Promise<ResponseContext> {
     return this.services.interact.handler(req);

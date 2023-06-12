@@ -1,6 +1,7 @@
 import { BaseRequest, BaseTrace, RuntimeLogs } from '@voiceflow/base-types';
 
 import { RuntimeRequest } from '@/lib/services/runtime/types';
+import log from '@/logger';
 import { PartialContext, State, TurnBuilder } from '@/runtime';
 import { Context } from '@/types';
 
@@ -29,7 +30,7 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
   async handler(req: {
     params: { userID?: string };
     body: { state?: State; action?: RuntimeRequest; request?: RuntimeRequest; config?: BaseRequest.RequestConfig };
-    query: { locale?: string; logs?: RuntimeLogs.LogLevel };
+    query: { locale?: string; logs?: RuntimeLogs.LogLevel; persona?: string };
     headers: {
       authorization?: string;
       origin?: string;
@@ -58,7 +59,7 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
       // Internally the name request is still used
       body: { state, config = {}, action = null, request = null },
       params: { userID },
-      query: { locale, logs: maxLogLevel },
+      query: { locale, logs: maxLogLevel, persona },
       headers: { authorization, versionID, origin, sessionid, platform },
     } = req;
 
@@ -89,10 +90,28 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
 
     turn.addHandlers(speak, filter);
 
+    // Fill in the persona
+    // HACK: to maintain compatibility with existing behavior for variable states,
+    //       the initial variable values are injected here instead of in "initializeVariables" function
+    let personaBody;
+    try {
+      if (persona) {
+        const api = await this.services.dataAPI.get(authorization);
+        personaBody = await api.getVariableState(persona);
+        if (personaBody) {
+          context.state!.variables = {
+            ...context.state!.variables,
+            ...personaBody.variables,
+          };
+        }
+      }
+    } catch (err) {
+      log.warn(`Variable state ID ${persona} not found!`);
+    }
+
     if (config.selfDelegate) {
       return turn.resolve(turn.handle(context));
     }
-
     return turn.resolve(this.services.utils.autoDelegate(turn, context));
   }
 }
