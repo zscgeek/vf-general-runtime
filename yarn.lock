@@ -2406,10 +2406,10 @@
     jwt-decode "^3.1.2"
     superstruct "^0.10.12"
 
-"@voiceflow/backend-utils@4.8.3":
-  version "4.8.3"
-  resolved "https://registry.yarnpkg.com/@voiceflow/backend-utils/-/backend-utils-4.8.3.tgz#3ae979d156a466cbccd685c3a5d9f53a415f271e"
-  integrity sha512-6xAx2PrdCBf3SbLrCt5+9JRlBer2hFb1WnVQiuwnJlggFfU7m9xmGELJJ8mZEjXqa7eDQ06CvU3QZsu50BjEKw==
+"@voiceflow/backend-utils@4.8.5":
+  version "4.8.5"
+  resolved "https://registry.yarnpkg.com/@voiceflow/backend-utils/-/backend-utils-4.8.5.tgz#a2271c58af1a9fb261591cc2f61e286eb012e10f"
+  integrity sha512-twYgyOrCyRXPOM8vmJUS1Cps9IN2lEOaw/jP+QOzjdvyrBbhpa1zfNF672gu8yzUXKDFP9HwtA3nHcyHadS93w==
   dependencies:
     "@types/http-errors" "^1.8.2"
     "@voiceflow/logger" "1.6.1"

@@ -25,13 +25,13 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
 
   router.post(
     '/knowledge-base',
-    middlewares.rateLimit.consumeResource((req) => req.headers.authorization, 'knowledge-base'),
+    middlewares.llmLimit.consumeResource((req) => req.headers.authorization, 'knowledge-base'),
     controllers.test.testKnowledgeBase
   );
 
   router.post(
     '/completion',
-    middlewares.rateLimit.consumeResource((req) => req.headers.authorization, 'completion'),
+    middlewares.llmLimit.consumeResource((req) => req.headers.authorization, 'completion'),
     controllers.test.testCompletion
   );
 

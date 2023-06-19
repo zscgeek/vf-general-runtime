@@ -18,7 +18,7 @@
     "@voiceflow/alexa-types": "2.13.23",
     "@voiceflow/anthropic": "^0.4.3",
     "@voiceflow/api-sdk": "3.23.27",
-    "@voiceflow/backend-utils": "4.8.3",
+    "@voiceflow/backend-utils": "4.8.5",
     "@voiceflow/base-types": "2.84.3",
     "@voiceflow/body-parser": "^1.21.1",
     "@voiceflow/chat-types": "2.13.48",
