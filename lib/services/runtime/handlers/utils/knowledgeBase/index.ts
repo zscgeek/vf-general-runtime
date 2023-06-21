@@ -1,4 +1,4 @@
-import { BaseModels } from '@voiceflow/base-types';
+import { BaseModels, BaseUtils } from '@voiceflow/base-types';
 import axios from 'axios';
 
 import Config from '@/config';
@@ -9,8 +9,10 @@ import { Runtime } from '@/runtime';
 import { Output } from '../../../types';
 import { getMemoryMessages } from '../ai';
 import { generateOutput } from '../output';
-import { answerSynthesis } from './answer';
-import { questionSynthesis } from './question';
+import { answerSynthesis, promptAnswerSynthesis } from './answer';
+import { promptQuestionSynthesis, questionSynthesis } from './question';
+
+export { answerSynthesis, questionSynthesis };
 
 export interface KnowledegeBaseChunk {
   score: number;
@@ -27,20 +29,25 @@ export const fetchKnowledgeBase = async (
   question: string,
   settings?: BaseModels.Project.KnowledgeBaseSettings
 ): Promise<KnowledgeBaseResponse | null> => {
-  const { KNOWLEDGE_BASE_LAMBDA_ENDPOINT } = Config;
-  if (!KNOWLEDGE_BASE_LAMBDA_ENDPOINT) return null;
+  try {
+    const { KNOWLEDGE_BASE_LAMBDA_ENDPOINT } = Config;
+    if (!KNOWLEDGE_BASE_LAMBDA_ENDPOINT) return null;
 
-  const answerEndpoint = `${KNOWLEDGE_BASE_LAMBDA_ENDPOINT}/answer`;
+    const answerEndpoint = `${KNOWLEDGE_BASE_LAMBDA_ENDPOINT}/answer`;
 
-  const { data } = await axios.post<KnowledgeBaseResponse>(answerEndpoint, {
-    projectID,
-    question,
-    settings,
-  });
+    const { data } = await axios.post<KnowledgeBaseResponse>(answerEndpoint, {
+      projectID,
+      question,
+      settings,
+    });
 
-  if (!data?.chunks?.length) return null;
+    if (!data?.chunks?.length) return null;
 
-  return data;
+    return data;
+  } catch (err) {
+    log.error(`[fetchKnowledgeBase] ${log.vars({ err })}`);
+    return null;
+  }
 };
 
 export const knowledgeBaseNoMatch = async (runtime: Runtime): Promise<Output | null> => {
@@ -90,7 +97,42 @@ export const knowledgeBaseNoMatch = async (runtime: Runtime): Promise<Output | n
 
     return generateOutput(output, runtime.project);
   } catch (err) {
-    log.error(`[knowledgeBase] ${log.vars({ err })}`);
+    log.error(`[knowledge-base no match] ${log.vars({ err })}`);
+    return null;
+  }
+};
+
+export const promptSynthesis = async (
+  projectID: string,
+  params: BaseUtils.ai.AIContextParams & BaseUtils.ai.AIModelParams,
+  variables: Record<string, any>
+) => {
+  try {
+    const { prompt } = params;
+
+    const memory = getMemoryMessages(variables);
+
+    const query = await promptQuestionSynthesis({ prompt, variables, memory });
+
+    if (!query) return null;
+
+    const data = await fetchKnowledgeBase(projectID, query);
+
+    if (!data) return null;
+
+    const answer = await promptAnswerSynthesis({
+      prompt,
+      options: params,
+      data,
+      memory,
+      variables,
+    });
+
+    if (!answer?.output) return null;
+
+    return { ...answer, ...data, query };
+  } catch (err) {
+    log.error(`[knowledge-base prompt] ${log.vars({ err })}`);
     return null;
   }
 };
