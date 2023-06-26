@@ -13,7 +13,7 @@ export const answerSynthesis = async ({
   question,
   data,
   variables,
-  options: { model = BaseUtils.ai.GPT_MODEL.GPT_3_5_turbo, system = '', temperature, maxTokens } = {},
+  options: { model = BaseUtils.ai.GPT_MODEL.CLAUDE_V1, system = '', temperature, maxTokens } = {},
 }: {
   question: string;
   data: KnowledgeBaseResponse;
@@ -93,12 +93,7 @@ export const promptAnswerSynthesis = async ({
   prompt,
   memory,
   variables,
-  options: {
-    model = BaseUtils.ai.GPT_MODEL.GPT_3_5_turbo,
-    system = DEFAULT_SYNTHESIS_SYSTEM,
-    temperature,
-    maxTokens,
-  } = {},
+  options: { model = BaseUtils.ai.GPT_MODEL.CLAUDE_V1, system = DEFAULT_SYNTHESIS_SYSTEM, temperature, maxTokens } = {},
 }: {
   data: KnowledgeBaseResponse;
   prompt: string;
