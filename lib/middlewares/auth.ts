@@ -1,77 +1,80 @@
 import { BaseModels } from '@voiceflow/base-types';
 import VError from '@voiceflow/verror';
-import { NextFunction, Response } from 'express';
+import fetch from 'node-fetch';
 
-import { Request } from '@/types';
+import { Next, Request, Response } from '@/types';
 
+import { factory } from '../utils';
 import { AbstractMiddleware } from './utils';
 
-function formatAuthorizationToken(incomingAuthorizationToken: string) {
-  if (incomingAuthorizationToken.startsWith('ApiKey ')) {
-    return incomingAuthorizationToken;
-  }
-
-  if (incomingAuthorizationToken.startsWith('VF.')) {
-    return `ApiKey ${incomingAuthorizationToken}`;
-  }
-
-  if (!incomingAuthorizationToken.startsWith('Bearer ')) {
-    return `Bearer ${incomingAuthorizationToken}`;
-  }
-
-  return incomingAuthorizationToken;
-}
-
 class Auth extends AbstractMiddleware {
-  authServiceURI: string | null;
+  private client?: unknown;
 
-  constructor(services: AbstractMiddleware['services'], config: AbstractMiddleware['config']) {
-    super(services, config);
+  private getClient = async () => {
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const sdk = await import('@voiceflow/sdk-auth').catch(() => null);
+    if (!sdk) return undefined;
 
-    this.authServiceURI =
-      this.config.AUTH_API_SERVICE_HOST && this.config.AUTH_API_SERVICE_PORT_APP
-        ? new URL(
-            `${this.config.NODE_ENV === 'e2e' ? 'https' : 'http'}://${this.config.AUTH_API_SERVICE_HOST}:${
-              this.config.AUTH_API_SERVICE_PORT_APP
-            }`
-          ).href
-        : null;
+    if (!this.client) {
+      const baseURL =
+        this.config.AUTH_API_SERVICE_HOST && this.config.AUTH_API_SERVICE_PORT_APP
+          ? new URL(
+              `${this.config.NODE_ENV === 'e2e' ? 'https' : 'http'}://${this.config.AUTH_API_SERVICE_HOST}:${
+                this.config.AUTH_API_SERVICE_PORT_APP
+              }`
+            ).href
+          : null;
+
+      if (!baseURL) return undefined;
+
+      this.client = new sdk.AuthClient({
+        baseURL,
+        fetch,
+      });
+    }
+
+    return this.client as InstanceType<typeof sdk.AuthClient>;
+  };
+
+  @factory()
+  authorize(actions: `${string}:${string}`[]) {
+    return async (req: Request, res: Response, next: Next) => {
+      try {
+        const client = await this.getClient();
+        if (!client) return next();
+
+        // eslint-disable-next-line import/no-extraneous-dependencies
+        const sdk = await import('@voiceflow/sdk-auth/express').catch(() => null);
+        if (!sdk) return next();
+
+        return sdk?.createAuthGuard(client)(actions as any[])(req, res, next);
+      } catch (err) {
+        return next(new VError('Unauthorized', VError.HTTP_STATUS.UNAUTHORIZED));
+      }
+    };
   }
 
-  async verify(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async verifyIdentity(req: Request, _res: Response, next: Next): Promise<void> {
     try {
-      if (!this.authServiceURI) throw new Error();
-
+      const client = await this.getClient();
+      if (!client) return next();
       const authorization = req.headers.authorization || req.cookies.auth_vf || '';
 
-      const token = formatAuthorizationToken(authorization);
-      if (!token) throw new Error();
-
-      req.headers.authorization = authorization;
-
-      const identity = await this.services.axios
-        .get(`/v1alpha1/identity`, {
-          headers: { authorization: token },
-          baseURL: this.authServiceURI,
-        })
-        .then((res) => res.data);
-
+      const identity = await client.getIdentity(authorization);
       if (!identity?.identity?.id) throw new Error();
-    } catch (error) {
-      res.sendStatus(VError.HTTP_STATUS.UNAUTHORIZED);
-      return;
-    }
 
-    next();
+      return next();
+    } catch {
+      return next(new VError('Unauthorized', VError.HTTP_STATUS.UNAUTHORIZED));
+    }
   }
 
-  async verifyDMAPIKey(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async verifyDMAPIKey(req: Request, res: Response, next: Next): Promise<void> {
     if (!BaseModels.ApiKey.isDialogManagerAPIKey(req.headers.authorization)) {
-      res.sendStatus(VError.HTTP_STATUS.UNAUTHORIZED);
-      return;
+      return next(new VError('Unauthorized', VError.HTTP_STATUS.UNAUTHORIZED));
     }
 
-    await this.verify(req, res, next);
+    return this.verifyIdentity(req, res, next);
   }
 }
 
