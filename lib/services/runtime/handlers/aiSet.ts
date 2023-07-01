@@ -1,6 +1,7 @@
 import { BaseNode, BaseUtils } from '@voiceflow/base-types';
 import VError from '@voiceflow/verror';
 
+import { GPT4_ABLE_PLAN } from '@/lib/clients/ai/types';
 import { HandlerFactory } from '@/runtime';
 
 import { fetchPrompt } from './utils/ai';
@@ -37,6 +38,11 @@ const AISetHandler: HandlerFactory<BaseNode.AISet.Node> = () => ({
 
             variables.set(variable, response?.output);
             return response?.tokens ?? 0;
+          }
+
+          if (node.model === BaseUtils.ai.GPT_MODEL.GPT_4 && runtime.plan && !GPT4_ABLE_PLAN.has(runtime.plan)) {
+            variables.set(variable!, 'GPT-4 is only available on the Pro plan. Please upgrade to use this feature.');
+            return 0;
           }
 
           const response = await fetchPrompt({ ...node, prompt, mode }, variables.getState());
