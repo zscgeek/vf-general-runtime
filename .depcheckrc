@@ -22,6 +22,7 @@
     "lint-staged",
     "http-status",
     "nestjs-zod",
+    "supertest",
     "eslint-import-resolver-typescript"
   ]
 }
