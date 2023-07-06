@@ -14,6 +14,12 @@ class CreatorDataAPI<
 
   private prototype: boolean;
 
+  static isolateAPIKey(authorization: string) {
+    if (authorization.startsWith('ApiKey ')) return authorization.replace('ApiKey ', '');
+    if (authorization.startsWith('Bearer ')) return authorization.replace('Bearer ', '');
+    return authorization;
+  }
+
   constructor(
     {
       endpoint,
@@ -28,7 +34,9 @@ class CreatorDataAPI<
     },
     VFClient = Voiceflow
   ) {
-    this.client = new VFClient({ apiEndpoint: endpoint, clientKey }).generateClient({ authorization });
+    this.client = new VFClient({ apiEndpoint: endpoint, clientKey }).generateClient({
+      authorization: CreatorDataAPI.isolateAPIKey(authorization),
+    });
 
     this.prototype = prototype;
   }
@@ -46,7 +54,8 @@ class CreatorDataAPI<
 
   public getProject = async (ref: string) => {
     // reference could be either projectID or apiKey
-    const apiKeyID = extractAPIKeyID(ref);
+    const apiKeyID = extractAPIKeyID(CreatorDataAPI.isolateAPIKey(ref));
+
     if (apiKeyID) {
       return (await this.client.fetch.get<PJ>(`/api-keys/${apiKeyID}/project`)).data;
     }
