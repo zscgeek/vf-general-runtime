@@ -135,7 +135,6 @@ export const isVersionTag = (value: unknown): value is VersionTag =>
 export interface ContextData {
   api: CacheDataAPI;
   locale?: string;
-  persona?: string;
   config?: BaseRequest.RequestConfig;
   reqHeaders?: {
     origin?: string;

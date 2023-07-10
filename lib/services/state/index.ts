@@ -82,8 +82,9 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
       context.state.stack = [];
       context.state.storage = {};
 
-      if (context.data?.persona) {
-        const personaVariableState = await api.getVariableState(context.data?.persona).catch(() => null);
+      // Initialize variables to given persona variable state
+      if (context.request.payload?.persona) {
+        const personaVariableState = await api.getVariableState(context.request.payload.persona).catch(() => null);
 
         context.state!.variables = {
           ...context.state!.variables,
