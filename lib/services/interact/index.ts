@@ -1,7 +1,6 @@
 import { BaseRequest, BaseTrace, RuntimeLogs } from '@voiceflow/base-types';
 
 import { RuntimeRequest } from '@/lib/services/runtime/types';
-import log from '@/logger';
 import { PartialContext, State, TurnBuilder } from '@/runtime';
 import { Context } from '@/types';
 
@@ -71,6 +70,7 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
         locale,
         config,
         reqHeaders: { authorization, origin, sessionid, platform },
+        persona,
       },
       state,
       userID,
@@ -89,25 +89,6 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
     }
 
     turn.addHandlers(speak, filter);
-
-    // Fill in the persona
-    // HACK: to maintain compatibility with existing behavior for variable states,
-    //       the initial variable values are injected here instead of in "initializeVariables" function
-    let personaBody;
-    try {
-      if (persona) {
-        const api = await this.services.dataAPI.get(authorization);
-        personaBody = await api.getVariableState(persona);
-        if (personaBody) {
-          context.state!.variables = {
-            ...context.state!.variables,
-            ...personaBody.variables,
-          };
-        }
-      }
-    } catch (err) {
-      log.warn(`Variable state ID ${persona} not found!`);
-    }
 
     if (config.selfDelegate) {
       return turn.resolve(turn.handle(context));

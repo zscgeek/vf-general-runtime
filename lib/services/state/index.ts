@@ -74,9 +74,23 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
       throw new Error('context versionID not defined');
     }
 
+    // cache per interaction (save version call during request/response cycle)
+    const dataApi = await this.services.dataAPI.get(context.data?.reqHeaders?.authorization);
+    const api = new CacheDataAPI(dataApi);
+
     if (context.request && BaseRequest.isLaunchRequest(context.request) && context.state) {
       context.state.stack = [];
       context.state.storage = {};
+
+      if (context.data?.persona) {
+        const personaVariableState = await api.getVariableState(context.data?.persona).catch(() => null);
+
+        context.state!.variables = {
+          ...context.state!.variables,
+          ...personaVariableState?.variables,
+        };
+      }
+
       context.request = null;
     }
 
@@ -93,9 +107,6 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
       context.state!.stack = [];
     }
 
-    // cache per interaction (save version call during request/response cycle)
-    const dataApi = await this.services.dataAPI.get(context.data?.reqHeaders?.authorization);
-    const api = new CacheDataAPI(dataApi);
     const version = await api.getVersion(context.versionID!);
     const project = await api.getProject(version.projectID);
 
