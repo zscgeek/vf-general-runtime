@@ -24,19 +24,19 @@ export interface KnowledgeBaseResponse {
   chunks: KnowledegeBaseChunk[];
 }
 
+const { KL_RETRIEVER_SERVICE_HOST: host, KL_RETRIEVER_SERVICE_PORT: port } = Config;
+const scheme = process.env.NODE_ENV === 'e2e' ? 'https' : 'http';
+export const RETRIEVE_ENDPOINT = host && port ? new URL(`${scheme}://${host}:${port}/retrieve`).href : null;
+
 export const fetchKnowledgeBase = async (
   projectID: string,
   question: string,
   settings?: BaseModels.Project.KnowledgeBaseSettings
 ): Promise<KnowledgeBaseResponse | null> => {
   try {
-    const { KL_RETRIEVER_SERVICE_HOST: host, KL_RETRIEVER_SERVICE_PORT: port } = Config;
-    const scheme = process.env.NODE_ENV === 'e2e' ? 'https' : 'http';
-    const retrieveEndpoint = host && port ? new URL(`${scheme}://${host}:${port}/retrieve`).href : null;
+    if (!RETRIEVE_ENDPOINT) return null;
 
-    if (!retrieveEndpoint) return null;
-
-    const { data } = await axios.post<KnowledgeBaseResponse>(retrieveEndpoint, {
+    const { data } = await axios.post<KnowledgeBaseResponse>(RETRIEVE_ENDPOINT, {
       projectID,
       question,
       settings,
@@ -52,8 +52,8 @@ export const fetchKnowledgeBase = async (
 };
 
 export const knowledgeBaseNoMatch = async (runtime: Runtime): Promise<{ output: Output; tokens: number } | null> => {
-  if (!Config.KNOWLEDGE_BASE_LAMBDA_ENDPOINT) {
-    log.error('[knowledgeBase] KNOWLEDGE_BASE_LAMBDA_ENDPOINT is not set');
+  if (!RETRIEVE_ENDPOINT) {
+    log.error('[knowledgeBase] Knoweldge Base Retrieval URL is null');
     return null;
   }
 
