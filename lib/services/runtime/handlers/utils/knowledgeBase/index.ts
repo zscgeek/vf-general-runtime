@@ -30,12 +30,13 @@ export const fetchKnowledgeBase = async (
   settings?: BaseModels.Project.KnowledgeBaseSettings
 ): Promise<KnowledgeBaseResponse | null> => {
   try {
-    const { KNOWLEDGE_BASE_LAMBDA_ENDPOINT } = Config;
-    if (!KNOWLEDGE_BASE_LAMBDA_ENDPOINT) return null;
+    const { KL_RETRIEVER_SERVICE_HOST: host, KL_RETRIEVER_SERVICE_PORT: port } = Config;
+    const scheme = process.env.NODE_ENV === 'e2e' ? 'https' : 'http';
+    const retrieveEndpoint = host && port ? new URL(`${scheme}://${host}:${port}/retrieve`).href : null;
 
-    const answerEndpoint = `${KNOWLEDGE_BASE_LAMBDA_ENDPOINT}/answer`;
+    if (!retrieveEndpoint) return null;
 
-    const { data } = await axios.post<KnowledgeBaseResponse>(answerEndpoint, {
+    const { data } = await axios.post<KnowledgeBaseResponse>(retrieveEndpoint, {
       projectID,
       question,
       settings,
