@@ -9,8 +9,6 @@ describe('knowledgebase retrieval unit tests', () => {
   const { KL_RETRIEVER_SERVICE_HOST: host, KL_RETRIEVER_SERVICE_PORT: port } = Config;
   const scheme = process.env.NODE_ENV === 'e2e' ? 'https' : 'http';
 
-  afterEach(() => sinon.restore());
-
   describe('fetch knowledgebase', async () => {
     it('makes the correct api call', async () => {
       const projectID = 'foo';
@@ -20,8 +18,7 @@ describe('knowledgebase retrieval unit tests', () => {
       const expectedEndpoint = new URL(`${scheme}://${host}:${port}/retrieve`).href;
 
       fetchKnowledgeBase(projectID, question);
-      await expect(apiStub.calledOnceWith(expectedEndpoint, { projectID, question, settings: sinon.match.any })).to.be
-        .true;
+      expect(apiStub.calledOnceWith(expectedEndpoint, { projectID, question, settings: sinon.match.any })).to.eql(true);
     });
   });
 });
