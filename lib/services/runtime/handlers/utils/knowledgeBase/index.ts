@@ -24,7 +24,7 @@ export interface KnowledgeBaseResponse {
   chunks: KnowledegeBaseChunk[];
 }
 
-export const FLAGGED_WORSPACE_IDS = [18];
+export const FLAGGED_WORSPACE_IDS = [80627];
 
 const { KL_RETRIEVER_SERVICE_HOST: host, KL_RETRIEVER_SERVICE_PORT: port } = Config;
 const scheme = process.env.NODE_ENV === 'e2e' ? 'https' : 'http';

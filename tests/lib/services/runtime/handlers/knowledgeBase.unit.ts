@@ -4,7 +4,6 @@ import sinon from 'sinon';
 
 import {
   fetchKnowledgeBase,
-  FLAGGED_WORSPACE_IDS,
   KNOWLEDGE_BASE_LAMBDA_ENDPOINT,
   RETRIEVE_ENDPOINT,
 } from '@/lib/services/runtime/handlers/utils/knowledgeBase';
@@ -18,11 +17,11 @@ describe('knowledgebase retrieval unit tests', () => {
     it('calls new KB when appropriate', async () => {
       const projectID = 'foo';
       const question = 'bar';
-      const workspaceID = '123';
+      // below is the id for the Python KB Testing workspace created to test this feature
+      const flaggedWorkspaceID = '80627';
       const apiStub = sinon.stub(axios, 'post').resolves({ data: 'foo' });
-      FLAGGED_WORSPACE_IDS.includes = sinon.stub().returns(true);
 
-      fetchKnowledgeBase(projectID, workspaceID, question);
+      fetchKnowledgeBase(projectID, flaggedWorkspaceID, question);
       expect(
         apiStub.calledOnceWith(RETRIEVE_ENDPOINT as string, { projectID, question, settings: sinon.match.any })
       ).to.eql(true);
@@ -31,12 +30,11 @@ describe('knowledgebase retrieval unit tests', () => {
     it('calls old KB when appropriate', async () => {
       const projectID = 'foo';
       const question = 'bar';
-      const workspaceID = '123';
+      const nonFlaggedWorkspaceID = '123';
       const apiStub = sinon.stub(axios, 'post').resolves({ data: 'foo' });
-      FLAGGED_WORSPACE_IDS.includes = sinon.stub().returns(false);
       const expectedEndpoint = `${KNOWLEDGE_BASE_LAMBDA_ENDPOINT}/answer`;
 
-      fetchKnowledgeBase(projectID, workspaceID, question);
+      fetchKnowledgeBase(projectID, nonFlaggedWorkspaceID, question);
       expect(apiStub.calledOnceWith(expectedEndpoint, { projectID, question, settings: sinon.match.any })).to.eql(true);
     });
   });
