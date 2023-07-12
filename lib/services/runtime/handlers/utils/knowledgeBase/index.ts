@@ -31,6 +31,14 @@ const scheme = process.env.NODE_ENV === 'e2e' ? 'https' : 'http';
 export const RETRIEVE_ENDPOINT = host && port ? new URL(`${scheme}://${host}:${port}/retrieve`).href : null;
 export const { KNOWLEDGE_BASE_LAMBDA_ENDPOINT } = Config;
 
+export const getAnswerEndpoint = (workspaceID: string | undefined): string | null => {
+  if (workspaceID && FLAGGED_WORSPACE_IDS.includes(parseInt(workspaceID, 10))) {
+    return RETRIEVE_ENDPOINT;
+  }
+  if (!KNOWLEDGE_BASE_LAMBDA_ENDPOINT) return null;
+  return `${KNOWLEDGE_BASE_LAMBDA_ENDPOINT}/answer`;
+};
+
 export const fetchKnowledgeBase = async (
   projectID: string,
   workspaceID: string | undefined,
@@ -38,15 +46,9 @@ export const fetchKnowledgeBase = async (
   settings?: BaseModels.Project.KnowledgeBaseSettings
 ): Promise<KnowledgeBaseResponse | null> => {
   try {
-    let answerEndpoint;
+    const answerEndpoint = getAnswerEndpoint(workspaceID);
 
-    if (workspaceID && FLAGGED_WORSPACE_IDS.includes(parseInt(workspaceID, 10))) {
-      if (!RETRIEVE_ENDPOINT) return null;
-      answerEndpoint = RETRIEVE_ENDPOINT;
-    } else {
-      if (!KNOWLEDGE_BASE_LAMBDA_ENDPOINT) return null;
-      answerEndpoint = `${KNOWLEDGE_BASE_LAMBDA_ENDPOINT}/answer`;
-    }
+    if (!answerEndpoint) return null;
 
     const { data } = await axios.post<KnowledgeBaseResponse>(answerEndpoint, {
       projectID,
