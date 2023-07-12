@@ -34,7 +34,7 @@ describe('knowledgebase retrieval unit tests', () => {
       const apiStub = sinon.stub(axios, 'post').resolves({ data: 'foo' });
       const expectedEndpoint = `${KNOWLEDGE_BASE_LAMBDA_ENDPOINT}/answer`;
 
-      fetchKnowledgeBase(projectID, nonFlaggedWorkspaceID, question);
+      await fetchKnowledgeBase(projectID, nonFlaggedWorkspaceID, question);
       expect(apiStub.calledOnceWith(expectedEndpoint, { projectID, question, settings: sinon.match.any })).to.eql(true);
     });
   });
