@@ -34,8 +34,10 @@ const AIResponseHandler: HandlerFactory<VoiceNode.AIResponse.Node> = () => ({
 
     if (node.source === BaseUtils.ai.DATA_SOURCE.KNOWLEDGE_BASE) {
       const { prompt, mode } = node;
+
       const answer = await promptSynthesis(
         runtime.version!.projectID,
+        workspaceID,
         { ...runtime.project?.knowledgeBase?.settings?.summarization, prompt, mode },
         variables.getState()
       );

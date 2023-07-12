@@ -52,7 +52,7 @@ class TestController extends AbstractController {
 
     const { prompt } = req.body;
 
-    const answer = await promptSynthesis(project._id, { ...settings.summarization, prompt }, {});
+    const answer = await promptSynthesis(project._id, project.teamID, { ...settings.summarization, prompt }, {});
 
     if (!answer?.output) return { output: null };
 
@@ -76,7 +76,7 @@ class TestController extends AbstractController {
 
     const { question, synthesis = true } = req.body;
 
-    const data = await fetchKnowledgeBase(project._id, question, settings);
+    const data = await fetchKnowledgeBase(project._id, project.teamID, question, settings);
 
     if (!data) return { output: null, chunks: [] };
 

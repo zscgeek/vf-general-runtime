@@ -29,6 +29,7 @@ const AISetHandler: HandlerFactory<BaseNode.AISet.Node> = () => ({
           if (node.source === BaseUtils.ai.DATA_SOURCE.KNOWLEDGE_BASE) {
             const response = await promptSynthesis(
               runtime.version!.projectID,
+              workspaceID,
               {
                 ...runtime.project?.knowledgeBase?.settings?.summarization,
                 mode,
