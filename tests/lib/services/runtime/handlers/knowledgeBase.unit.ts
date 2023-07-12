@@ -21,7 +21,7 @@ describe('knowledgebase retrieval unit tests', () => {
       const flaggedWorkspaceID = '80627';
       const apiStub = sinon.stub(axios, 'post').resolves({ data: 'foo' });
 
-      fetchKnowledgeBase(projectID, flaggedWorkspaceID, question);
+      await fetchKnowledgeBase(projectID, flaggedWorkspaceID, question);
       expect(
         apiStub.calledOnceWith(RETRIEVE_ENDPOINT as string, { projectID, question, settings: sinon.match.any })
       ).to.eql(true);
