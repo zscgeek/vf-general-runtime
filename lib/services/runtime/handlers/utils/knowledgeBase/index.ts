@@ -20,6 +20,7 @@ export interface KnowledegeBaseChunk {
   documentID: string;
   content: string;
 }
+
 export interface KnowledgeBaseResponse {
   chunks: KnowledegeBaseChunk[];
 }
