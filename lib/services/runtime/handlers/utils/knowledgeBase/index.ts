@@ -20,20 +20,36 @@ export interface KnowledegeBaseChunk {
   documentID: string;
   content: string;
 }
+
 export interface KnowledgeBaseResponse {
   chunks: KnowledegeBaseChunk[];
 }
 
+export const FLAGGED_WORSPACE_IDS = [80627];
+
+const { KL_RETRIEVER_SERVICE_HOST: host, KL_RETRIEVER_SERVICE_PORT: port } = Config;
+const scheme = process.env.NODE_ENV === 'e2e' ? 'https' : 'http';
+export const RETRIEVE_ENDPOINT = host && port ? new URL(`${scheme}://${host}:${port}/retrieve`).href : null;
+export const { KNOWLEDGE_BASE_LAMBDA_ENDPOINT } = Config;
+
+export const getAnswerEndpoint = (workspaceID: string | undefined): string | null => {
+  if (workspaceID && FLAGGED_WORSPACE_IDS.includes(parseInt(workspaceID, 10))) {
+    return RETRIEVE_ENDPOINT;
+  }
+  if (!KNOWLEDGE_BASE_LAMBDA_ENDPOINT) return null;
+  return `${KNOWLEDGE_BASE_LAMBDA_ENDPOINT}/answer`;
+};
+
 export const fetchKnowledgeBase = async (
   projectID: string,
+  workspaceID: string | undefined,
   question: string,
   settings?: BaseModels.Project.KnowledgeBaseSettings
 ): Promise<KnowledgeBaseResponse | null> => {
   try {
-    const { KNOWLEDGE_BASE_LAMBDA_ENDPOINT } = Config;
-    if (!KNOWLEDGE_BASE_LAMBDA_ENDPOINT) return null;
+    const answerEndpoint = getAnswerEndpoint(workspaceID);
 
-    const answerEndpoint = `${KNOWLEDGE_BASE_LAMBDA_ENDPOINT}/answer`;
+    if (!answerEndpoint) return null;
 
     const { data } = await axios.post<KnowledgeBaseResponse>(answerEndpoint, {
       projectID,
@@ -51,8 +67,8 @@ export const fetchKnowledgeBase = async (
 };
 
 export const knowledgeBaseNoMatch = async (runtime: Runtime): Promise<{ output: Output; tokens: number } | null> => {
-  if (!Config.KNOWLEDGE_BASE_LAMBDA_ENDPOINT) {
-    log.error('[knowledgeBase] KNOWLEDGE_BASE_LAMBDA_ENDPOINT is not set');
+  if (!RETRIEVE_ENDPOINT || !KNOWLEDGE_BASE_LAMBDA_ENDPOINT) {
+    log.error('[knowledgeBase] one of RETRIEVE_ENDPOINT or KNOWLEDGE_BASE_LAMBDA_ENDPOINT is null');
     return null;
   }
 
@@ -73,6 +89,7 @@ export const knowledgeBaseNoMatch = async (runtime: Runtime): Promise<{ output: 
 
     const data = await fetchKnowledgeBase(
       runtime.project._id,
+      runtime.project.teamID,
       question.output,
       runtime.project?.knowledgeBase?.settings
     );
@@ -117,6 +134,7 @@ export const knowledgeBaseNoMatch = async (runtime: Runtime): Promise<{ output: 
 
 export const promptSynthesis = async (
   projectID: string,
+  workspaceID: string | undefined,
   params: BaseUtils.ai.AIContextParams & BaseUtils.ai.AIModelParams,
   variables: Record<string, any>
 ) => {
@@ -131,7 +149,7 @@ export const promptSynthesis = async (
 
     tokens += query.tokens ?? 0;
 
-    const data = await fetchKnowledgeBase(projectID, query.output);
+    const data = await fetchKnowledgeBase(projectID, workspaceID, query.output);
 
     if (!data) return null;
 
