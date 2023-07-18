@@ -1,6 +1,6 @@
 import { HandlerFactory } from '@/runtime';
 
-import { evaluateVariants } from './evaluateVariants/evaluateVariants';
+import { evaluateVariant } from './evaluateVariant/evaluateVariant';
 import { Channel, Language, ResponseNode } from './response.types';
 import { selectDiscriminator } from './selectDiscriminator/selectDiscriminator';
 import { translateVariants } from './translateVariants/translateVariants';
@@ -51,7 +51,7 @@ const ResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> = (_)
     // part a - Check all conditioned variants
     // part b - Randonly sample unconditioned variants
 
-    /* const traces = */ evaluateVariants(variantCollection);
+    /* const traces = */ evaluateVariant(variantCollection);
 
     // 5 - Add sequence of traces to the output
 

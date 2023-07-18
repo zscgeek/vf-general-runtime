@@ -1,4 +1,25 @@
+import { z } from 'nestjs-zod/z';
+
 // $TODO$ - Replace all of this with actual response type from Pedro's work
+
+const VariableReference = z.object({ variableID: z.string().uuid() }).strict();
+type VariableReference = z.infer<typeof VariableReference>;
+
+const EntityReference = z.object({ entityID: z.string().uuid() }).strict();
+type EntityReference = z.infer<typeof EntityReference>;
+
+export const MarkupSpan = z
+  .object({
+    attributes: z.record(z.union([z.null(), z.boolean(), z.number(), z.string()])),
+  })
+  .strict();
+export type MarkupSpan = z.infer<typeof MarkupSpan> & { text: Markup };
+
+export type Markup = Array<string | VariableReference | EntityReference | MarkupSpan>;
+export const Markup: z.ZodType<Markup> = z
+  .union([z.string(), VariableReference, EntityReference, MarkupSpan.extend({ text: z.lazy(() => Markup) })])
+  .array();
+
 export enum Language {
   ENGLISH_US = 'en-us',
 }
@@ -127,7 +148,7 @@ export interface MediaAttachment {
 
 export type ResolvedAttachment = CardAttachment | MediaAttachment;
 
-export interface ResolvedVariant {
+export interface BaseResolvedVariant {
   type: ResponseVariantType;
   speed: number;
   cardLayout: CardLayout;
@@ -135,6 +156,31 @@ export interface ResolvedVariant {
   attachmentOrder: string[];
   attachments: Record<string, ResolvedAttachment>;
 }
+
+export interface ResolvedTextVariant extends BaseResolvedVariant {
+  type: ResponseVariantType.TEXT;
+  text: Markup;
+}
+
+export interface ResolvedJSONVariant extends BaseResolvedVariant {
+  type: ResponseVariantType.JSON;
+  json: Markup;
+}
+
+export enum ResponseContext {
+  PROMPT = 'prompt',
+  MEMORY = 'memory',
+  KNOWLEDGE_BASE = 'knowledge_base',
+}
+
+export interface ResolvedPromptVariant extends BaseResolvedVariant {
+  type: ResponseVariantType.PROMPT;
+  turns: number;
+  context: ResponseContext;
+  promptID: string | null;
+}
+
+export type ResolvedVariant = ResolvedPromptVariant | ResolvedJSONVariant | ResolvedTextVariant;
 
 export interface ResolvedDiscriminator {
   language: Language;
