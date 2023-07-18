@@ -1,6 +1,10 @@
 import { HandlerFactory } from '@/runtime';
 
-import { ResponseNode } from './response.types';
+import { discriminatorSelector } from './discriminatorSelector/discriminatorSelector';
+import { evaluateVariants } from './evaluateVariants/evaluateVariants';
+import { Channel, Language, ResponseNode } from './response.types';
+import { translateVariants } from './translateVariants/translateVariants';
+import { VariantCollection } from './variantCollection/variantCollection';
 
 const ResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> = (_) => ({
   canHandle: (node) => {
@@ -12,15 +16,44 @@ const ResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> = (_)
     // $TODO$ - Update this with actual trace type enum when Pedro finishes compiler work
     runtime.trace.debug('__response__ - entered', 'response' as any);
 
-    // 1 - Choose list of variants by picking the right discriminator
+    const defaultLanguage = Language.ENGLISH_US;
+    const currChannel = Channel.DEFAULT;
+    const currLanguage = Language.ENGLISH_US;
 
-    // 2 - Wrap list of variants in Variant objects
+    // 1 - Select discriminator for current language and channel, or fallback to default channel/language
+    const { discriminator, language: actualLanguage } = discriminatorSelector(
+      {
+        currChannel,
+        currLanguage,
+        defaultLanguage, // $TODO$ - Default language should be based off of program information, not always EN_US
+      },
+      Object.values(node.data.response.responses)
+    );
 
-    // 3 - Construct sequence of traces by feeding variants into variant selector
+    // 2 - Translate the variants if necessary
+    if (currLanguage !== actualLanguage) {
+      discriminator.variants = translateVariants(
+        {
+          fromLang: currLanguage,
+          toLang: actualLanguage,
+        },
+        discriminator.variants
+      );
+    }
+
+    // 3 - Wrap list of variants in Variant objects
+    const variantCollection = new VariantCollection({
+      order: discriminator.variantOrder,
+      data: discriminator.variants,
+    });
+
+    // 4 - Construct sequence of traces by feeding variants into variant selector
     // part a - Check all conditioned variants
     // part b - Randonly sample unconditioned variants
 
-    // 4 - Add sequence of traces to the output
+    /* const traces = */ evaluateVariants(variantCollection);
+
+    // 5 - Add sequence of traces to the output
 
     return node.nextId ?? null;
   },
