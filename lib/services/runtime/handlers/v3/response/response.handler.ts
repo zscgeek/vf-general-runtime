@@ -4,6 +4,7 @@ import { evaluateVariant } from './evaluateVariant/evaluateVariant';
 import { Channel, Language, ResponseNode } from './response.types';
 import { selectDiscriminator } from './selectDiscriminator/selectDiscriminator';
 import { translateVariants } from './translateVariants/translateVariants';
+import { buildVariant } from './variant/variant';
 import { VariantCollection } from './variantCollection/variantCollection';
 
 const ResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> = (_) => ({
@@ -42,18 +43,18 @@ const ResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> = (_)
     }
 
     // 3 - Wrap list of variants in Variant objects
-    const variantCollection = new VariantCollection({
-      order: discriminator.variantOrder,
-      data: discriminator.variants,
-    });
+    const variants = discriminator.variantOrder.map((varID) => buildVariant(discriminator.variants[varID]));
 
-    // 4 - Construct sequence of traces by feeding variants into variant selector
+    // 4 - Construct a collection that independently tracks conditioned and unconditioned variants
+    const variantCollection = new VariantCollection(variants);
+
+    // 5 - Construct sequence of traces by feeding variants into variant selector
     // part a - Check all conditioned variants
     // part b - Randonly sample unconditioned variants
 
     /* const traces = */ evaluateVariant(variantCollection);
 
-    // 5 - Add sequence of traces to the output
+    // 6 - Add sequence of traces to the output
 
     return node.nextId ?? null;
   },

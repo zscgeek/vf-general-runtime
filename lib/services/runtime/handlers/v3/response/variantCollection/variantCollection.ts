@@ -1,60 +1,20 @@
-import VError from '@voiceflow/verror';
-
-import { Variant } from './variant/variant';
-import { VariantCollectionArgs } from './variantCollection.interface';
+import { Variant } from '../variant/variant.interface';
 
 export class VariantCollection {
-  private readonly conditionedVariants: Variant[];
+  public readonly conditionedVars: Variant[];
 
-  private readonly unconditionedVariants: Variant[];
+  public readonly unconditionedVars: Variant[];
 
-  constructor({ data, order }: VariantCollectionArgs) {
-    this.conditionedVariants = [];
-    this.unconditionedVariants = [];
+  constructor(variants: Variant[]) {
+    this.conditionedVars = [];
+    this.unconditionedVars = [];
 
-    order.forEach((varID) => {
-      const variant = data[varID];
-
-      if (variant.condition) {
-        this.conditionedVariants.push(new Variant(variant));
+    variants.forEach((vari) => {
+      if (vari.condition) {
+        this.conditionedVars.push(vari);
       } else {
-        this.unconditionedVariants.push(new Variant(variant));
+        this.unconditionedVars.push(vari);
       }
     });
-  }
-
-  private at(collection: Variant[], i: number) {
-    if (i < 0 || i >= collection.length) {
-      throw new VError('Access out-of-bounds in variant collection');
-    }
-    return collection[i];
-  }
-
-  /**
-   * Returns the number of conditioned variants
-   */
-  public get conditionedLength() {
-    return this.conditionedVariants.length;
-  }
-
-  /**
-   * Returns the number of unconditioned variants
-   */
-  public get unconditionedLength() {
-    return this.unconditionedVariants.length;
-  }
-
-  /**
-   * Retrieves the i-th unconditioned variant
-   */
-  public uncond(i: number) {
-    return this.at(this.unconditionedVariants, i);
-  }
-
-  /**
-   * Retrieves the i-th conditioned variant
-   */
-  public cond(i: number) {
-    return this.at(this.conditionedVariants, i);
   }
 }
