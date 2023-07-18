@@ -17,6 +17,8 @@ const ResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> = (_)
     // $TODO$ - Update this with actual trace type enum when Pedro finishes compiler work
     runtime.trace.debug('__response__ - entered', 'response' as any);
 
+    // $TODO$ - Replace this with the actual language and channel
+    // $TODO$ - Default language should be based off of program information, not always EN_US
     const defaultLanguage = Language.ENGLISH_US;
     const currChannel = Channel.DEFAULT;
     const currLanguage = Language.ENGLISH_US;
@@ -26,7 +28,7 @@ const ResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> = (_)
       {
         currChannel,
         currLanguage,
-        defaultLanguage, // $TODO$ - Default language should be based off of program information, not always EN_US
+        defaultLanguage,
       },
       Object.values(node.data.response.responses)
     );
@@ -49,12 +51,10 @@ const ResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> = (_)
     const variantCollection = new VariantCollection(variants);
 
     // 5 - Construct sequence of traces by feeding variants into variant selector
-    // part a - Check all conditioned variants
-    // part b - Randonly sample unconditioned variants
-
-    /* const traces = */ evaluateVariant(variantCollection);
+    const traces = evaluateVariant(variantCollection);
 
     // 6 - Add sequence of traces to the output
+    traces.forEach((trace) => runtime.trace.addTrace(trace));
 
     return node.nextId ?? null;
   },

@@ -1,7 +1,7 @@
 import { BaseTrace } from '@voiceflow/base-types';
 
+import { AttachmentCollection } from '../attachmentCollection/attachmentCollection';
 import { VariantCollection } from '../variantCollection/variantCollection';
-import { evaluateAttachments } from './evaluateAttachments/evaluateAttachments';
 import { evaluateCarousel } from './evaluateCarousel/evaluateCarousel';
 
 function selectUnconditioned(variants: VariantCollection) {
@@ -17,16 +17,19 @@ export const evaluateVariant = (variants: VariantCollection) => {
   // 1 - Select a variant
   const variant = selectConditioned(variants) ?? selectUnconditioned(variants);
 
-  // 2 - Output response trace
+  // 2 - Separate the card and non-card attachments
+  const attachmentCollection = new AttachmentCollection(variant.attachments);
+
+  // 3 - Output response trace
   const responseTrace = variant.trace;
 
-  // 3 - Output carousel trace
-  const carouselTrace = evaluateCarousel(variant);
+  // 4 - Output carousel trace
+  const carouselTrace = evaluateCarousel(variant.cardLayout, attachmentCollection.cardAttachments);
 
-  // 4 - Output non-carousel attachments as tarces
-  const attachmentTraces = evaluateAttachments(variant);
+  // 5 - Output non-carousel attachments as tarces
+  const attachmentTraces = attachmentCollection.mediaAttachments.map((attach) => attach.trace);
 
-  // 5 - Aggregate traces
+  // 6 - Aggregate traces
   const outputTraces: BaseTrace.BaseTraceFrame[] = [responseTrace];
   if (carouselTrace) outputTraces.push(carouselTrace);
   return [...outputTraces, ...attachmentTraces];
