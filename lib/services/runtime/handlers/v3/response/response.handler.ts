@@ -1,8 +1,8 @@
 import { HandlerFactory } from '@/runtime';
 
-import { discriminatorSelector } from './discriminatorSelector/discriminatorSelector';
 import { evaluateVariants } from './evaluateVariants/evaluateVariants';
 import { Channel, Language, ResponseNode } from './response.types';
+import { selectDiscriminator } from './selectDiscriminator/selectDiscriminator';
 import { translateVariants } from './translateVariants/translateVariants';
 import { VariantCollection } from './variantCollection/variantCollection';
 
@@ -21,7 +21,7 @@ const ResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> = (_)
     const currLanguage = Language.ENGLISH_US;
 
     // 1 - Select discriminator for current language and channel, or fallback to default channel/language
-    const { discriminator, language: actualLanguage } = discriminatorSelector(
+    const { discriminator, language: actualLanguage } = selectDiscriminator(
       {
         currChannel,
         currLanguage,

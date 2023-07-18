@@ -1,14 +1,14 @@
 import VError from '@voiceflow/verror';
 
 import { Channel, Language, ResolvedDiscriminator } from '../response.types';
-import { DiscriminatorContext, DiscriminatorSelectorReturn } from './discriminatorSelector.interface';
+import { DiscriminatorContext, DiscriminatorSelectorReturn } from './selectDiscriminator.interface';
 
 const discKey = (language: Language, channel: Channel) => `${language}-${channel}`;
 
 const preprocessDiscriminators = (discriminators: ResolvedDiscriminator[]) =>
   new Map<string, ResolvedDiscriminator>(discriminators.map((disc) => [discKey(disc.language, disc.channel), disc]));
 
-export function discriminatorSelector(
+export function selectDiscriminator(
   context: DiscriminatorContext,
   discriminators: ResolvedDiscriminator[]
 ): DiscriminatorSelectorReturn {
