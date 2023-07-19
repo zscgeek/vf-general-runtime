@@ -1,25 +1,23 @@
 import { BaseTrace } from '@voiceflow/base-types';
 
 import { ResolvedTextVariant } from '../response.types';
+import { VariableContext } from '../variableContext/variableContext';
 import { BaseVariant } from './base.variant';
-import { resolveMarkup } from './resolveMarkup/resolveMarkup';
 
 export class TextVariant extends BaseVariant<ResolvedTextVariant> {
-  constructor(rawVariant: ResolvedTextVariant) {
-    super(rawVariant);
+  constructor(rawVariant: ResolvedTextVariant, varContext: VariableContext) {
+    super(rawVariant, varContext);
   }
 
   get type() {
     return this.rawVariant.type;
   }
 
-  get trace(): BaseTrace.TextTrace {
+  get trace(): BaseTrace.V3.TextTrace {
     return {
       type: BaseTrace.TraceType.TEXT,
       payload: {
-        message: resolveMarkup(this.rawVariant.text),
-        // $TODO$ - Need to remove `slate`
-        slate: { id: 'dummy', content: [] },
+        content: this.varContext.resolveMarkup(this.rawVariant.text),
       },
     };
   }

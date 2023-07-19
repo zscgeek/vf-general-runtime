@@ -1,14 +1,15 @@
 import { BaseTrace } from '@voiceflow/base-types';
 
 import { MediaAttachment as RawMediaAttachment } from '../../response.types';
+import { VariableContext } from '../../variableContext/variableContext';
 import { BaseAttachment } from './base.attachment';
 
 export class MediaAttachment extends BaseAttachment {
-  constructor(protected readonly rawAttachment: RawMediaAttachment) {
-    super(rawAttachment);
+  constructor(protected readonly rawAttachment: RawMediaAttachment, varContext: VariableContext) {
+    super(rawAttachment, varContext);
   }
 
-  get trace(): BaseTrace.VideoTrace {
+  get trace(): BaseTrace.V3.VideoTrace {
     return {
       type: BaseTrace.TraceType.VIDEO,
       payload: {

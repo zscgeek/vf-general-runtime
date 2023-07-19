@@ -1,16 +1,17 @@
 import VError from '@voiceflow/verror';
 
 import { AttachmentType, ResolvedAttachment } from '../../response.types';
+import { VariableContext } from '../../variableContext/variableContext';
 import { BaseAttachment } from './base.attachment';
 import { CardAttachment } from './card.attachment';
 import { MediaAttachment } from './video.attachment';
 
-export function buildAttachment(rawCondition: ResolvedAttachment): BaseAttachment {
+export function buildAttachment(rawCondition: ResolvedAttachment, varContext: VariableContext): BaseAttachment {
   switch (rawCondition.type) {
     case AttachmentType.MEDIA:
-      return new MediaAttachment(rawCondition);
+      return new MediaAttachment(rawCondition, varContext);
     case AttachmentType.CARD:
-      return new CardAttachment(rawCondition);
+      return new CardAttachment(rawCondition, varContext);
     default:
       throw new VError('unknown attachment type encountered');
   }

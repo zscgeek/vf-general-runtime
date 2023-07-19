@@ -1,11 +1,12 @@
 import { BaseTrace } from '@voiceflow/base-types';
 
 import { ResolvedPromptVariant } from '../response.types';
+import { VariableContext } from '../variableContext/variableContext';
 import { BaseVariant } from './base.variant';
 
 export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
-  constructor(rawVariant: ResolvedPromptVariant) {
-    super(rawVariant);
+  constructor(rawVariant: ResolvedPromptVariant, varContext: VariableContext) {
+    super(rawVariant, varContext);
   }
 
   get type() {
