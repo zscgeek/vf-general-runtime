@@ -10,17 +10,11 @@ export class MediaAttachment extends BaseAttachment {
   }
 
   get trace(): BaseTrace.V3.VideoTrace | BaseTrace.V3.ImageTrace {
-    if (this.rawAttachment.media.datatype === MediaDatatype.IMAGE) {
-      return {
-        type: BaseTrace.TraceType.IMAGE,
-        payload: {
-          url: this.rawAttachment.media.url,
-        },
-      };
-    }
-
     return {
-      type: BaseTrace.TraceType.VIDEO,
+      type:
+        this.rawAttachment.media.datatype === MediaDatatype.IMAGE
+          ? BaseTrace.TraceType.IMAGE
+          : BaseTrace.TraceType.VIDEO,
       payload: {
         url: this.rawAttachment.media.url,
       },
