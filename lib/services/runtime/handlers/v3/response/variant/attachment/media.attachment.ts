@@ -1,6 +1,6 @@
 import { BaseTrace } from '@voiceflow/base-types';
 
-import { MediaAttachment as RawMediaAttachment } from '../../response.types';
+import { MediaAttachment as RawMediaAttachment, MediaDatatype } from '../../response.types';
 import { VariableContext } from '../../variableContext/variableContext';
 import { BaseAttachment } from './base.attachment';
 
@@ -9,7 +9,16 @@ export class MediaAttachment extends BaseAttachment {
     super(rawAttachment, varContext);
   }
 
-  get trace(): BaseTrace.V3.VideoTrace {
+  get trace(): BaseTrace.V3.VideoTrace | BaseTrace.V3.ImageTrace {
+    if (this.rawAttachment.media.datatype === MediaDatatype.IMAGE) {
+      return {
+        type: BaseTrace.TraceType.IMAGE,
+        payload: {
+          url: this.rawAttachment.media.url,
+        },
+      };
+    }
+
     return {
       type: BaseTrace.TraceType.VIDEO,
       payload: {

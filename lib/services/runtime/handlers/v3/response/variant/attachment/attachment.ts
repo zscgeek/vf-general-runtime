@@ -4,7 +4,7 @@ import { AttachmentType, ResolvedAttachment } from '../../response.types';
 import { VariableContext } from '../../variableContext/variableContext';
 import { BaseAttachment } from './base.attachment';
 import { CardAttachment } from './card.attachment';
-import { MediaAttachment } from './video.attachment';
+import { MediaAttachment } from './media.attachment';
 
 export function buildAttachment(rawCondition: ResolvedAttachment, varContext: VariableContext): BaseAttachment {
   switch (rawCondition.type) {

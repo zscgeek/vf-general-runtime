@@ -3,7 +3,7 @@ import VError from '@voiceflow/verror';
 import { AttachmentType } from '../response.types';
 import { BaseAttachment } from '../variant/attachment/base.attachment';
 import { CardAttachment } from '../variant/attachment/card.attachment';
-import { MediaAttachment } from '../variant/attachment/video.attachment';
+import { MediaAttachment } from '../variant/attachment/media.attachment';
 
 // $TODO$ - This code is duplicated. Need to abstract out or simplify.
 export class AttachmentCollection {
