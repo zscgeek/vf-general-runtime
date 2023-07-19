@@ -15,6 +15,11 @@ export class CardAttachment extends BaseAttachment {
   }
 
   get content() {
-    return this.rawAttachment.card;
+    const { title, description } = this.rawAttachment.card;
+    return {
+      ...this.rawAttachment.card,
+      title: this.varContext.resolve(title),
+      description: this.varContext.resolve(description),
+    };
   }
 }
