@@ -8,6 +8,10 @@ import { BaseCondition } from './condition/base.condition';
 import { buildCondition } from './condition/condition';
 
 export abstract class BaseVariant<Variant extends ResolvedVariant> {
+  private cachedCondition: BaseCondition | null = null;
+
+  private cachedAttachments: BaseAttachment[] | null = null;
+
   protected constructor(protected readonly rawVariant: Variant, protected readonly varContext: VariableContext) {}
 
   public abstract get trace(): BaseTrace.AnyTrace;
@@ -22,13 +26,19 @@ export abstract class BaseVariant<Variant extends ResolvedVariant> {
 
   public get condition(): BaseCondition | null {
     if (this.rawVariant.condition === null) return null;
-    return buildCondition(this.rawVariant.condition, this.varContext);
+    if (!this.cachedCondition) {
+      this.cachedCondition = buildCondition(this.rawVariant.condition, this.varContext);
+    }
+    return this.cachedCondition;
   }
 
   public get attachments(): BaseAttachment[] {
-    // $TODO$ - Convert to Attachment class
-    return this.rawVariant.attachmentOrder.map((id) =>
-      buildAttachment(this.rawVariant.attachments[id], this.varContext)
-    );
+    if (!this.cachedAttachments) {
+      this.cachedAttachments = this.rawVariant.attachmentOrder.map((id) =>
+        buildAttachment(this.rawVariant.attachments[id], this.varContext)
+      );
+    }
+
+    return this.cachedAttachments;
   }
 }
