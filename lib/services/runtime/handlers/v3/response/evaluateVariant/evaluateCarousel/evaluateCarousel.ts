@@ -16,29 +16,16 @@ function convertLayout(cardLayout: CardLayout): BaseNode.Carousel.CarouselLayout
 }
 
 const evaluateCard = (card: CardAttachment): BaseNode.Carousel.TraceCarouselCard => {
-  const { title, description, buttons, buttonOrder } = card.content;
+  const { id, title, description, buttons, imageUrl } = card.content;
   return {
-    id: 'asdf', // $TODO$ - Need good definition here for id
+    id, // $TODO$ - Is it reasonable to use the CMS resource ID? Previously this was defined using a frontend CUID
     title,
     description: {
       text: description,
-      slate: [],
+      slate: [], // $TODO$ - Can we remove `slate` altogether somehow?
     },
-    imageUrl: 'not-implemented', // $TODO$ - Need imageURL for this
-    buttons: buttonOrder.map((id) => {
-      const but = buttons[id];
-      return {
-        // $TODO$ - Need good values for buttons
-        name: but.label,
-        request: {
-          type: but.label,
-          payload: {
-            label: but.label,
-            actions: [],
-          },
-        },
-      };
-    }),
+    imageUrl,
+    buttons,
   };
 };
 

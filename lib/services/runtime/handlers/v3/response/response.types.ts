@@ -1,3 +1,4 @@
+import { BaseRequest } from '@voiceflow/base-types';
 import { z } from 'nestjs-zod/z';
 
 // $TODO$ - Replace all of this with actual response type from Pedro's work
@@ -123,29 +124,32 @@ export interface BaseAttachment {
   type: AttachmentType;
 }
 
-export interface CardAttachment {
-  type: AttachmentType.CARD;
-  card: {
-    title: string;
-    description: string;
-    buttonOrder: string[];
-    buttons: Record<string, { label: string }>;
-  };
-}
-
 export enum MediaDatatype {
   IMAGE = 'image',
   VIDEO = 'video',
 }
 
+export interface MediaResource {
+  name: string;
+  datatype: MediaDatatype;
+  isAsset: boolean;
+  url: Markup;
+}
+
+export interface CardAttachment {
+  type: AttachmentType.CARD;
+  card: {
+    id: string;
+    title: string;
+    description: string;
+    buttonOrder: string[];
+    buttons: Record<string, BaseRequest.GeneralRequestButton>;
+    media: MediaResource;
+  };
+}
 export interface MediaAttachment {
   type: AttachmentType.MEDIA;
-  media: {
-    name: string;
-    datatype: MediaDatatype;
-    isAsset: boolean;
-    url: string;
-  };
+  media: MediaResource;
 }
 
 export type ResolvedAttachment = CardAttachment | MediaAttachment;

@@ -1,5 +1,6 @@
 import { BaseTrace } from '@voiceflow/base-types';
 
+import { serializeResolvedMarkup } from '../../markupUtils/markupUtils';
 import { MediaAttachment as RawMediaAttachment, MediaDatatype } from '../../response.types';
 import { VariableContext } from '../../variableContext/variableContext';
 import { BaseAttachment } from './base.attachment';
@@ -16,7 +17,7 @@ export class MediaAttachment extends BaseAttachment {
           ? BaseTrace.TraceType.IMAGE
           : BaseTrace.TraceType.VIDEO,
       payload: {
-        url: this.rawAttachment.media.url,
+        url: serializeResolvedMarkup(this.varContext.resolveMarkup(this.rawAttachment.media.url)),
       },
     };
   }
