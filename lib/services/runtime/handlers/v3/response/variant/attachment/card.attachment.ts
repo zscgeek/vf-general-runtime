@@ -11,7 +11,7 @@ export class CardAttachment extends BaseAttachment {
     super(rawAttachment, varContext);
   }
 
-  get trace(): BaseTrace.V3.VideoTrace {
+  get trace(): BaseTrace.AnyTrace {
     throw new VError('card attachments have no corresponding trace');
   }
 
