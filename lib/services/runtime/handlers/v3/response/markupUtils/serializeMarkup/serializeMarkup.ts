@@ -1,5 +1,6 @@
 import { BaseMarkup as ResolvedMarkup } from '@voiceflow/base-types';
 
+import { ResolvedMarkupAttributes } from './serializeMarkup.interface';
 import { AttributeResolver } from './serializeMarkup.types';
 
 // $TODO$ - Implementation here is placeholder. In fact, serializing this on our end
