@@ -37,6 +37,12 @@ const _v1Handler = _V1Handler();
 
 export default (config: Config) => [
   ...StateHandlers(),
+
+  // BEGIN V3
+  V3.ResponseHandler(),
+  V3.ListenHandler(),
+  // END V3
+
   SpeakHandler(),
   ...GoToHandler(),
   ...InteractionHandler(),
@@ -63,9 +69,6 @@ export default (config: Config) => [
   CarouselHandler(),
   GoToNodeHandler(),
   ChannelActionHandler(),
-
-  V3.ResponseHandler(),
-  V3.ListenHandler(),
 
   /* add new handlers before NextHandler.
     Whenever there is a nextId in the step, next handler will be taken as the handler,
