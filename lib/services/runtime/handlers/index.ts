@@ -30,6 +30,7 @@ import SpeakHandler from './speak';
 import StateHandlers from './state';
 import StreamHandler from './stream';
 import TextHandler from './text';
+import { V3 } from './v3';
 import VisualHandler from './visual';
 
 const _v1Handler = _V1Handler();
@@ -62,6 +63,9 @@ export default (config: Config) => [
   CarouselHandler(),
   GoToNodeHandler(),
   ChannelActionHandler(),
+
+  V3.ResponseHandler(),
+  V3.ListenHandler(),
 
   /* add new handlers before NextHandler.
     Whenever there is a nextId in the step, next handler will be taken as the handler,

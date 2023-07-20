@@ -8,7 +8,7 @@ import { VariableContext } from './variableContext/variableContext';
 import { buildVariant } from './variant/variant';
 import { VariantCollection } from './variantCollection/variantCollection';
 
-const ResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> = (_) => ({
+const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> = (_) => ({
   canHandle: (node) => {
     // $TODO$ - Update this with actual trace type enum when Pedro finishes compiler work
     return (node.type as any) === 'response';
@@ -65,4 +65,4 @@ const ResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> = (_)
   },
 });
 
-export default () => ResponseHandler({});
+export const ResponseHandler = () => BaseResponseHandler({});
