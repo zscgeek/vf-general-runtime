@@ -24,7 +24,9 @@ export const evaluateVariant = (variants: VariantCollection) => {
   const responseTrace = variant.trace;
 
   // 4 - Output carousel trace
-  const carouselTrace = evaluateCarousel(variant.cardLayout, attachmentCollection.cardAttachments);
+  const carouselTrace = attachmentCollection.cardAttachments.length
+    ? evaluateCarousel(variant.cardLayout, attachmentCollection.cardAttachments)
+    : null;
 
   // 5 - Output non-carousel attachments as tarces
   const attachmentTraces = attachmentCollection.mediaAttachments.map((attach) => attach.trace);
