@@ -31,7 +31,7 @@ const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> =
         currLanguage,
         defaultLanguage,
       },
-      Object.values(node.data.response.responses)
+      Object.values(node.data.responses)
     );
 
     // 2 - Translate the variants if necessary
