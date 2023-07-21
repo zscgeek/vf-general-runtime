@@ -195,15 +195,11 @@ export interface ResolvedDiscriminator {
   variants: Record<string, ResolvedVariant>;
 }
 
-export interface ResolvedResponse {
-  responses: Record<string, ResolvedDiscriminator>;
-}
-
 export interface ResponseNode {
   id: string;
   type: 'response';
   data: {
-    response: ResolvedResponse;
+    responses: Record<string, ResolvedDiscriminator>;
   };
   nextId: string;
 }
