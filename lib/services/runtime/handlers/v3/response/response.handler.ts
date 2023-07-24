@@ -47,7 +47,7 @@ const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> =
 
     // 3 - Construct the variable context
     // $TODO$ - Need to identify the intents vs. entities then assign them property to the context
-    const varContext = new VariableContext(variables.getState(), {});
+    const varContext = new VariableContext(variables.getState());
 
     // 4 - Wrap list of variants in Variant objects
     const variants = discriminator.variantOrder.map((varID) => buildVariant(discriminator.variants[varID], varContext));

@@ -4,10 +4,7 @@ import { replaceVariables } from '@voiceflow/common/build/cjs/utils';
 import { EntityReference, Markup, MarkupNode, MarkupSpan, VariableReference } from '../response.types';
 
 export class VariableContext {
-  constructor(
-    private readonly variables: Record<string, unknown>,
-    private readonly entities: Record<string, unknown>
-  ) {}
+  constructor(private readonly variables: Record<string, unknown>) {}
 
   private isVariableReference(markupNode: MarkupNode): markupNode is VariableReference {
     return VariableReference.safeParse(markupNode).success;
@@ -26,13 +23,8 @@ export class VariableContext {
       return markupNode;
     }
 
-    if (this.isVariableReference(markupNode)) {
-      const variableValue = this.variables[markupNode.variableID];
-      return JSON.stringify(variableValue);
-    }
-
-    if (this.isEntityReference(markupNode)) {
-      const variableValue = this.entities[markupNode.entityID];
+    if (this.isVariableReference(markupNode) || this.isEntityReference(markupNode)) {
+      const variableValue = this.variables[markupNode.name];
       return JSON.stringify(variableValue);
     }
 
@@ -55,9 +47,6 @@ export class VariableContext {
   }
 
   public resolve(content: string) {
-    return replaceVariables(content, {
-      ...this.variables,
-      ...this.entities,
-    });
+    return replaceVariables(content, this.variables);
   }
 }

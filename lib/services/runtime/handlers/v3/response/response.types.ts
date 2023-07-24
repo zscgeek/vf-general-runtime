@@ -3,10 +3,10 @@ import { z } from 'nestjs-zod/z';
 
 // $TODO$ - Replace all of this with actual response type from Pedro's work
 
-export const VariableReference = z.object({ variableID: z.string().uuid() }).strict();
+export const VariableReference = z.object({ name: z.string(), variableID: z.string() }).strict();
 export type VariableReference = z.infer<typeof VariableReference>;
 
-export const EntityReference = z.object({ entityID: z.string().uuid() }).strict();
+export const EntityReference = z.object({ name: z.string(), entityID: z.string() }).strict();
 export type EntityReference = z.infer<typeof EntityReference>;
 
 export const MarkupSpan = z
