@@ -1,5 +1,6 @@
 import { BaseNode, BaseProject, BaseVersion, RuntimeLogs } from '@voiceflow/base-types';
 
+import { Channel, Language } from '@/lib/services/runtime/handlers/v3/response/response.types';
 import { State } from '@/runtime/lib/Runtime';
 
 export interface Context<
@@ -20,6 +21,10 @@ export interface Context<
   versionID: string;
   projectID: string;
   plan?: string;
+  channel: {
+    name: Channel;
+    language: Language;
+  };
   /** The most verbose logs to receive in runtime logging. */
   maxLogLevel: RuntimeLogs.LogLevel;
 }
@@ -30,7 +35,7 @@ export interface ContextHandler<C extends Context<any, any, any, any, any>> {
   handle: ContextHandle<C>;
 }
 
-type RequiredContextProperties = 'maxLogLevel';
+type RequiredContextProperties = 'maxLogLevel' | 'channel';
 
 // for request handlers that generate the runtime
 export type PartialContext<C extends Context<any, any, any, any, any>> = Omit<

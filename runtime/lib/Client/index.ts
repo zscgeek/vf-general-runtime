@@ -1,5 +1,6 @@
 import * as BaseTypes from '@voiceflow/base-types';
 
+import { Channel, Language } from '@/lib/services/runtime/handlers/v3/response/response.types';
 import { DataAPI as AnyDataAPI } from '@/runtime/lib/DataAPI';
 import { AbstractLifecycle } from '@/runtime/lib/Lifecycle';
 import Runtime, { Options as RuntimeOptions, State as RuntimeState } from '@/runtime/lib/Runtime';
@@ -18,6 +19,10 @@ export interface CreateRuntimeOptions<
   version?: Version;
   project?: Project;
   plan?: string;
+  channel: {
+    name: Channel;
+    language: Language;
+  };
 }
 
 class Controller<
@@ -47,6 +52,7 @@ class Controller<
     version,
     project,
     plan,
+    channel,
   }: CreateRuntimeOptions<Request, DataAPI, Services, Version, Project>): Runtime<Request, DataAPI, Services> {
     return new Runtime<Request, DataAPI, Services, Version, Project>({
       request,
@@ -57,6 +63,7 @@ class Controller<
       version,
       project,
       plan,
+      channel,
     });
   }
 }

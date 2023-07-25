@@ -1,7 +1,7 @@
 import { HandlerFactory } from '@/runtime';
 
 import { evaluateVariant } from './evaluateVariant/evaluateVariant';
-import { Channel, Language, ResponseNode } from './response.types';
+import { Language, ResponseNode } from './response.types';
 import { selectDiscriminator } from './selectDiscriminator/selectDiscriminator';
 import { translateVariants } from './translateVariants/translateVariants';
 import { VariableContext } from './variableContext/variableContext';
@@ -20,9 +20,10 @@ const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> =
 
     // $TODO$ - Replace this with the actual language and channel
     // $TODO$ - Default language should be based off of program information, not always EN_US
+    const channel = runtime.getChannel();
     const defaultLanguage = Language.ENGLISH_US;
-    const currChannel = Channel.DEFAULT;
-    const currLanguage = Language.ENGLISH_US;
+    const currChannel = channel.name;
+    const currLanguage = channel.language;
 
     // 1 - Select discriminator for current language and channel, or fallback to default channel/language
     const { discriminator, language: actualLanguage } = selectDiscriminator(

@@ -103,6 +103,7 @@ class RuntimeManager extends AbstractManager<{ utils: typeof utils }> implements
       version: context.version,
       project: context.project,
       plan: context.plan,
+      channel: context.channel,
     });
 
     runtime.debugLogging.refreshContext(context);

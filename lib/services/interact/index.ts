@@ -4,6 +4,7 @@ import { RuntimeRequest } from '@/lib/services/runtime/types';
 import { PartialContext, State, TurnBuilder } from '@/runtime';
 import { Context } from '@/types';
 
+import { Channel, Language } from '../runtime/handlers/v3/response/response.types';
 import { AbstractManager, injectServices } from '../utils';
 import autoDelegate from './autoDelegate';
 
@@ -28,7 +29,13 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
 
   async handler(req: {
     params: { userID?: string };
-    body: { state?: State; action?: RuntimeRequest; request?: RuntimeRequest; config?: BaseRequest.RequestConfig };
+    body: {
+      state?: State;
+      action?: RuntimeRequest;
+      request?: RuntimeRequest;
+      config?: BaseRequest.RequestConfig;
+      channel?: { language: Language; name: Channel };
+    };
     query: { locale?: string; logs?: RuntimeLogs.LogLevel };
     headers: {
       authorization?: string;
@@ -56,7 +63,13 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
     const {
       // `request` prop is deprecated, replaced with `action`
       // Internally the name request is still used
-      body: { state, config = {}, action = null, request = null },
+      body: {
+        state,
+        config = {},
+        action = null,
+        request = null,
+        channel = { name: Channel.DEFAULT, language: Language.ENGLISH_US },
+      },
       params: { userID },
       query: { locale, logs: maxLogLevel },
       headers: { authorization, versionID, origin, sessionid, platform },
@@ -71,6 +84,7 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
         config,
         reqHeaders: { authorization, origin, sessionid, platform },
       },
+      channel,
       state,
       userID,
       request: action ?? request,

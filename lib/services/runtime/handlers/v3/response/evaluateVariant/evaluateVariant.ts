@@ -4,8 +4,11 @@ import { AttachmentCollection } from '../attachmentCollection/attachmentCollecti
 import { VariantCollection } from '../variantCollection/variantCollection';
 import { evaluateCarousel } from './evaluateCarousel/evaluateCarousel';
 
+let counter = 0;
+
 function selectUnconditioned(variants: VariantCollection) {
-  const randomIndex = Math.floor(Math.random() * variants.unconditionedVars.length);
+  const randomIndex = counter;
+  counter = (counter + 1) % variants.unconditionedVars.length;
   return variants.unconditionedVars[randomIndex];
 }
 

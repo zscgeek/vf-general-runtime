@@ -1,5 +1,6 @@
 import * as BaseTypes from '@voiceflow/base-types';
 
+import { Channel, Language } from '@/lib/services/runtime/handlers/v3/response/response.types';
 import { FrameType } from '@/lib/services/runtime/types';
 import Handler from '@/runtime/lib/Handler';
 import Lifecycle, { AbstractLifecycle, Event, EventType } from '@/runtime/lib/Lifecycle';
@@ -44,6 +45,10 @@ export interface RuntimeOptions<
   version?: Version;
   project?: Project;
   plan?: string;
+  channel: {
+    name: Channel;
+    language: Language;
+  };
 }
 
 export enum Action {
@@ -97,6 +102,8 @@ class Runtime<
 
   public plan?: string;
 
+  private readonly channel: { name: Channel; language: Language };
+
   constructor({
     events,
     versionID,
@@ -106,6 +113,7 @@ class Runtime<
     state,
     options,
     plan,
+    channel,
   }: RuntimeOptions<Request, DataAPI, Services, Version, Project>) {
     super(events);
 
@@ -114,6 +122,7 @@ class Runtime<
     this.version = version;
     this.project = project;
     this.plan = plan;
+    this.channel = channel;
 
     const { services = {} as Services, handlers = [], api } = options;
 
@@ -153,6 +162,10 @@ class Runtime<
     this.outgoingApiLimiter = new OutgoingApiLimiter(this);
 
     this.debugLogging = new DebugLogging(this.trace);
+  }
+
+  getChannel() {
+    return this.channel;
   }
 
   getRequest(): Request | null {
