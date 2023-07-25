@@ -7,7 +7,7 @@ import { evaluateCarousel } from './evaluateCarousel/evaluateCarousel';
 let counter = 0;
 
 function selectUnconditioned(variants: VariantCollection) {
-  const randomIndex = counter;
+  const randomIndex = Math.min(counter, variants.unconditionedVars.length - 1);
   counter = (counter + 1) % variants.unconditionedVars.length;
   return variants.unconditionedVars[randomIndex];
 }
