@@ -42,7 +42,22 @@ export class GPT3_5 extends GPTAIModel {
         tokens: this.calculateTokenMultiplier(tokens),
       };
     } catch (error) {
-      log.warn(`GPT3.5 completion ${log.vars({ error: error?.response ?? error, messages, params })})}`);
+      const truncatedMessages = messages.slice(0, 10).map(({ content, ...rest }) => ({
+        ...rest,
+        content: content.substring(0, 256),
+      }));
+      const truncatedParams = {
+        ...params,
+        system: params.system?.substring(0, 512),
+      };
+      log.warn(
+        `GPT3.5 completion ${log.vars({
+          error: error?.message,
+          code: error?.code,
+          messages: truncatedMessages,
+          params: truncatedParams,
+        })})}`
+      );
 
       // if we fail on the azure instance due to rate limiting, retry with OpenAI API
       if (client === this.azureClient && error?.response?.status === 429 && this.openAIClient) {
