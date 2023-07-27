@@ -1,7 +1,11 @@
+import { BaseNode } from '@voiceflow/base-types';
+
 import { QuotaName } from '@/lib/services/billing';
 import log from '@/logger';
 import { HandlerFactory } from '@/runtime';
 
+import { addOutputTrace, getOutputTrace } from '../../../utils';
+import { generateOutput } from '../../utils/output';
 import { evaluateVariant } from './evaluateVariant/evaluateVariant';
 import { Channel, Language, ResponseNode } from './response.types';
 import { selectDiscriminator } from './selectDiscriminator/selectDiscriminator';
@@ -56,7 +60,21 @@ const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> =
     const aiBilling: AIBilling = {
       checkAITokensQuota: () => {
         const workspaceID = runtime.project?.teamID;
-        return runtime.services.billing.checkQuota(workspaceID, QuotaName.OPEN_API_TOKENS);
+        const isQuotaAvailable = runtime.services.billing.checkQuota(workspaceID, QuotaName.OPEN_API_TOKENS);
+
+        if (!isQuotaAvailable) {
+          runtime.trace.debug('prompt response failed: token quota exceeded', BaseNode.NodeType.AI_SET);
+          addOutputTrace(
+            runtime,
+            getOutputTrace({
+              output: generateOutput('prompt response failed: [token quota exceeded]', runtime.project),
+              version: runtime.version,
+              ai: true,
+            })
+          );
+        }
+
+        return isQuotaAvailable;
       },
       consumeAITokensQuota: (tokens: number) => {
         const workspaceID = runtime.project?.teamID;
