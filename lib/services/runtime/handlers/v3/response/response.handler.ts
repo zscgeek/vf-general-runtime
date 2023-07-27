@@ -58,9 +58,9 @@ const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> =
 
     // 4 - Wrap list of variants in Variant objects
     const aiBilling: AIBilling = {
-      checkAITokensQuota: () => {
+      checkAITokensQuota: async () => {
         const workspaceID = runtime.project?.teamID;
-        const isQuotaAvailable = runtime.services.billing.checkQuota(workspaceID, QuotaName.OPEN_API_TOKENS);
+        const isQuotaAvailable = await runtime.services.billing.checkQuota(workspaceID, QuotaName.OPEN_API_TOKENS);
 
         if (!isQuotaAvailable) {
           runtime.trace.debug('prompt response failed: token quota exceeded', BaseNode.NodeType.AI_SET);
