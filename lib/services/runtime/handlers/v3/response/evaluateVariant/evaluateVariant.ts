@@ -13,7 +13,7 @@ const selectConditioned = (variants: VariantCollection) => {
   return variants.conditionedVars.find((vari) => vari.condition!.evaluate());
 };
 
-export const evaluateVariant = (variants: VariantCollection) => {
+export const evaluateVariant = async (variants: VariantCollection) => {
   // 1 - Select a variant
   const variant = selectConditioned(variants) ?? selectUnconditioned(variants);
 
@@ -21,7 +21,7 @@ export const evaluateVariant = (variants: VariantCollection) => {
   const attachmentCollection = new AttachmentCollection(variant.attachments);
 
   // 3 - Output response trace
-  const responseTrace = variant.trace;
+  const responseTrace = await variant.trace();
 
   // 4 - Output carousel trace
   const carouselTrace = attachmentCollection.cardAttachments.length

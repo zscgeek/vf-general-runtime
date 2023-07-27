@@ -1,3 +1,5 @@
+import { QuotaName } from '@/lib/services/billing';
+import log from '@/logger';
 import { HandlerFactory } from '@/runtime';
 
 import { evaluateVariant } from './evaluateVariant/evaluateVariant';
@@ -5,6 +7,7 @@ import { Channel, Language, ResponseNode } from './response.types';
 import { selectDiscriminator } from './selectDiscriminator/selectDiscriminator';
 import { translateVariants } from './translateVariants/translateVariants';
 import { VariableContext } from './variableContext/variableContext';
+import { AIBilling } from './variant/prompt.variant';
 import { buildVariant } from './variant/variant';
 import { VariantCollection } from './variantCollection/variantCollection';
 
@@ -14,7 +17,7 @@ const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> =
     return (node.type as any) === 'response';
   },
 
-  handle: (node, runtime, variables) => {
+  handle: async (node, runtime, variables) => {
     // $TODO$ - Update this with actual trace type enum when Pedro finishes compiler work
     runtime.trace.debug('__response__ - entered', 'response' as any);
 
@@ -50,13 +53,29 @@ const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> =
     const varContext = new VariableContext(variables.getState());
 
     // 4 - Wrap list of variants in Variant objects
-    const variants = discriminator.variantOrder.map((varID) => buildVariant(discriminator.variants[varID], varContext));
+    const aiBilling: AIBilling = {
+      checkAITokensQuota: () => {
+        const workspaceID = runtime.project?.teamID;
+        return runtime.services.billing.checkQuota(workspaceID, QuotaName.OPEN_API_TOKENS);
+      },
+      consumeAITokensQuota: (tokens: number) => {
+        const workspaceID = runtime.project?.teamID;
+        return runtime.services.billing
+          .consumeQuota(workspaceID, QuotaName.OPEN_API_TOKENS, tokens)
+          .catch((err: Error) => {
+            log.warn(`Failed to charge tokens for workspaceID=${workspaceID}, error=${JSON.stringify(err)}`);
+          });
+      },
+    };
+    const variants = discriminator.variantOrder.map((varID) =>
+      buildVariant(discriminator.variants[varID], varContext, aiBilling)
+    );
 
     // 5 - Construct a collection that independently tracks conditioned and unconditioned variants
     const variantCollection = new VariantCollection(variants);
 
     // 6 - Construct sequence of traces by feeding variants into variant selector
-    const traces = evaluateVariant(variantCollection);
+    const traces = await evaluateVariant(variantCollection);
 
     // 7 - Add sequence of traces to the output
     traces.forEach((trace) => runtime.trace.addTrace(trace));

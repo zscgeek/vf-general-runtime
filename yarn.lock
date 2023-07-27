@@ -2578,7 +2578,7 @@
     rxjs "^7.2.0"
     zod "^3.11.6"
 
-"@voiceflow/exception@1.4.0":
+"@voiceflow/exception@1.4.0", "@voiceflow/exception@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@voiceflow/exception/-/exception-1.4.0.tgz#4c6dd6c7536e038581998dde1b43149da9622541"
   integrity sha512-G8zyssXIcL/bFnuuYkVBNbflu+Ut0cJulwfnOkdn5rvFmwEZ0xOFbxhcHAoTi18kCg49SkQ2PTWY9rDa2NZGsw==

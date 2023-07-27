@@ -14,7 +14,7 @@ export abstract class BaseVariant<Variant extends ResolvedVariant> {
 
   protected constructor(protected readonly rawVariant: Variant, protected readonly varContext: VariableContext) {}
 
-  public abstract get trace(): BaseTrace.AnyTrace;
+  public abstract trace(): BaseTrace.AnyTrace | Promise<BaseTrace.AnyTrace>;
 
   public get cardLayout() {
     return this.rawVariant.cardLayout;

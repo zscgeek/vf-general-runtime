@@ -13,7 +13,7 @@ export class TextVariant extends BaseVariant<ResolvedTextVariant> {
     return this.rawVariant.type;
   }
 
-  get trace(): BaseTrace.V3.TextTrace {
+  trace(): BaseTrace.V3.TextTrace {
     return {
       type: BaseTrace.TraceType.TEXT,
       payload: {

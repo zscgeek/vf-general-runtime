@@ -24,6 +24,7 @@
     "@voiceflow/chat-types": "2.13.48",
     "@voiceflow/common": "8.2.0",
     "@voiceflow/event-ingestion-service": "1.2.3",
+    "@voiceflow/exception": "^1.4.0",
     "@voiceflow/google-types": "2.19.23",
     "@voiceflow/logger": "^1.6.1",
     "@voiceflow/metrics": "1.4.1",

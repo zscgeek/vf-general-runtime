@@ -1,4 +1,4 @@
-import { BaseRequest } from '@voiceflow/base-types';
+import { BaseRequest, BaseUtils } from '@voiceflow/base-types';
 import { z } from 'nestjs-zod/z';
 
 // $TODO$ - Replace all of this with actual response type from Pedro's work
@@ -183,7 +183,15 @@ export interface ResolvedPromptVariant extends BaseResolvedVariant {
   type: ResponseVariantType.PROMPT;
   turns: number;
   context: ResponseContext;
-  promptID: string | null;
+  prompt: {
+    text: Markup;
+    persona: {
+      model: BaseUtils.ai.GPT_MODEL;
+      temperature: number | null;
+      maxLength: number | null;
+      systemPrompt: string | null;
+    };
+  };
 }
 
 export type ResolvedVariant = ResolvedPromptVariant | ResolvedJSONVariant | ResolvedTextVariant;
