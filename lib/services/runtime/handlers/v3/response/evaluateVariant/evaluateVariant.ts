@@ -32,7 +32,8 @@ export const evaluateVariant = async (variants: VariantCollection) => {
   const attachmentTraces = attachmentCollection.mediaAttachments.map((attach) => attach.trace);
 
   // 6 - Aggregate traces
-  const outputTraces: BaseTrace.BaseTraceFrame[] = [responseTrace];
+  const outputTraces: BaseTrace.BaseTraceFrame[] = [];
+  if (responseTrace) outputTraces.push(responseTrace);
   if (carouselTrace) outputTraces.push(carouselTrace);
   return [...outputTraces, ...attachmentTraces];
 };

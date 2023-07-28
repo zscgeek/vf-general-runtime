@@ -49,4 +49,8 @@ export class VariableContext {
   public resolve(content: string) {
     return replaceVariables(content, this.variables);
   }
+
+  public getVariableMap(): Record<string, unknown> {
+    return this.variables;
+  }
 }
