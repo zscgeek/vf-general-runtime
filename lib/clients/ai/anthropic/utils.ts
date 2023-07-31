@@ -59,7 +59,7 @@ export abstract class AnthropicAIModel extends AIModel {
       (message) => `${AnthropicAIModel.RoleMap[message.role]} ${message.content}`
     )}${AI_PROMPT}`;
 
-    let tokens = this.calculateTokenUsage(prompt);
+    const queryTokens = this.calculateTokenUsage(prompt);
 
     const result = await this.client
       .complete({
@@ -76,11 +76,13 @@ export abstract class AnthropicAIModel extends AIModel {
 
     const output = result?.completion?.trim() ?? null;
 
-    tokens += this.calculateTokenUsage(output ?? '');
+    const answerTokens = this.calculateTokenUsage(output ?? '');
 
     return {
       output,
-      tokens,
+      tokens: queryTokens + answerTokens,
+      queryTokens,
+      answerTokens,
     };
   }
 }
