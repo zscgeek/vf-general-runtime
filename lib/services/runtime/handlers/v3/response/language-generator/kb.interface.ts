@@ -9,7 +9,7 @@ export interface KnowledgeBaseSettings {
 
 export interface KnowledgeBaseConfig {
   documents: Record<string, BaseModels.Project.KnowledgeBaseDocument>;
-  projectID: string;
+  project: BaseModels.Project.Model<any, any>;
   kbStrategy: BaseModels.Project.KnowledgeBaseSettings;
 }
 

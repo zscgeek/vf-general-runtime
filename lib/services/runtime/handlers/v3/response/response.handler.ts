@@ -1,3 +1,5 @@
+import { InternalException } from '@voiceflow/exception';
+
 import { HandlerFactory } from '@/runtime';
 
 import { evaluateVariant } from './evaluateVariant/evaluateVariant';
@@ -53,10 +55,14 @@ const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> =
     const varContext = new VariableContext(variables.getState());
 
     // 4 - Wrap list of variants in Variant objects
+    if (!runtime.project) {
+      throw new InternalException({ message: 'runtime could not evaluate the project associated with the program' });
+    }
+
     const llmGeneration = new LLM();
     const knowledgeBase = new KnowledgeBase({
       documents: {}, // $TODO$ - Add actual documents here
-      projectID: runtime.project?._id ?? '', // $TODO$ - Need to handle the case where runtime.project._id is `null` here
+      project: runtime.project, // $TODO$ - Need to handle the case where runtime.project._id is `null` here
       kbStrategy: {} as any, // $TODO$ - Need to fill in proper settings here
     });
     const billedLLM = new BilledGenerator(runtime, llmGeneration);
