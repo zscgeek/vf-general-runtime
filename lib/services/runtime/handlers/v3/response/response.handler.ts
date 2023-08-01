@@ -61,9 +61,9 @@ const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> =
 
     const llmGeneration = new LLM();
     const knowledgeBase = new KnowledgeBase({
-      documents: {}, // $TODO$ - Add actual documents here
-      project: runtime.project, // $TODO$ - Need to handle the case where runtime.project._id is `null` here
-      kbStrategy: {} as any, // $TODO$ - Need to fill in proper settings here
+      documents: runtime.project.knowledgeBase?.documents ?? {},
+      projectID: runtime.project._id,
+      kbStrategy: runtime.project.knowledgeBase?.settings,
     });
     const billedLLM = new BilledGenerator(runtime, llmGeneration);
     const billedKB = new BilledGenerator(runtime, knowledgeBase);

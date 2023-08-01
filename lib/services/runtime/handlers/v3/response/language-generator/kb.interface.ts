@@ -1,21 +1,41 @@
 import { BaseModels, BaseUtils } from '@voiceflow/base-types';
 
+import { AIResponse } from '../../../utils/ai';
 import { LanguageGenerator } from './language-generator.interface';
 
 export interface KnowledgeBaseSettings {
   chatHistory: BaseUtils.ai.Message[];
-  variableMap: Record<string, any>;
 }
 
 export interface KnowledgeBaseConfig {
   documents: Record<string, BaseModels.Project.KnowledgeBaseDocument>;
-  project: BaseModels.Project.Model<any, any>;
-  kbStrategy: BaseModels.Project.KnowledgeBaseSettings;
+  projectID: string;
+  kbStrategy?: BaseModels.Project.KnowledgeBaseSettings;
 }
 
-export interface AnswerReturn {
+interface BaseAnswerReturn {
   tokens: number;
   output: string | null;
 }
+
+interface NullAnswerReturn extends BaseAnswerReturn {
+  tokens: number;
+  output: null;
+}
+
+interface ActualAnswerReturn extends BaseAnswerReturn {
+  tokens: number;
+  output: string;
+  documents: {
+    chunks: Array<{
+      score: number;
+      documentID: string;
+      documentData: BaseModels.Project.KnowledgeBaseData;
+    }>;
+    query: AIResponse | null;
+  };
+}
+
+export type AnswerReturn = ActualAnswerReturn | NullAnswerReturn;
 
 export type KnowledgeBaseGenerator = LanguageGenerator<KnowledgeBaseSettings>;

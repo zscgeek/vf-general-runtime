@@ -1,4 +1,5 @@
 import { BaseTrace, BaseUtils } from '@voiceflow/base-types';
+import { replaceVariables, sanitizeVariables } from '@voiceflow/common';
 import VError from '@voiceflow/verror';
 
 import { KnowledgeBaseGenerator } from '../language-generator/kb.interface';
@@ -44,7 +45,6 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
   private async resolveByKB(prompt: string, chatHistory: BaseUtils.ai.Message[]): Promise<BaseTrace.V3.TextTrace> {
     const { output } = await this.kbGenerator.generate(prompt, {
       chatHistory,
-      variableMap: this.varContext.getVariableMap(),
     });
 
     return {
@@ -63,7 +63,15 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
     const { text } = this.rawVariant.prompt;
     const resolvedPrompt = serializeResolvedMarkup(this.varContext.resolveMarkup(text));
     // $TODO$ - Add past turns of chat messages
-    const chatHistory: BaseUtils.ai.Message[] = [];
+    // $TODO$ - Need to convert this into Markup resolution
+    // $TODO$ - When turns is converted to Markup resolution, need to ensure previous is state backwards compatible
+    //          or annouce a disclaimer.
+    const variablesState = this.varContext.getVariableMap();
+    const sanitizedVars = sanitizeVariables(variablesState);
+    const chatHistory = ([] as BaseUtils.ai.Message[]).map((message) => ({
+      ...message,
+      content: replaceVariables(message.content, sanitizedVars),
+    }));
 
     if ([ResponseContext.MEMORY, ResponseContext.PROMPT].includes(this.rawVariant.context)) {
       return this.resolveByLLM(resolvedPrompt, chatHistory);

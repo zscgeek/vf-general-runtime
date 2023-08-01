@@ -117,7 +117,7 @@ export const knowledgeBaseNoMatch = async (runtime: Runtime): Promise<{ output: 
 
 export const promptSynthesis = async (
   projectID: string,
-  params: BaseUtils.ai.AIContextParams & BaseUtils.ai.AIModelParams,
+  params: Pick<BaseUtils.ai.AIContextParams, 'prompt'> & BaseUtils.ai.AIModelParams,
   variables: Record<string, any>
 ) => {
   try {
