@@ -2,8 +2,6 @@ import { BaseNode, BaseRequest, BaseText, BaseTrace, BaseVersion } from '@voicef
 import { VoiceflowConstants, VoiceflowNode } from '@voiceflow/voiceflow-types';
 import _ from 'lodash';
 
-import { QuotaName } from '@/lib/services/billing';
-import log from '@/logger';
 import { Runtime, Store } from '@/runtime';
 
 import { isPrompt, NoMatchCounterStorage, Output, StorageType } from '../types';
@@ -17,11 +15,12 @@ import {
   removeEmptyPrompts,
 } from '../utils';
 import { addNoReplyTimeoutIfExists } from './noReply';
+import { checkLLMTurnTimeout, checkTokens, consumeResources } from './utils/ai';
 import { generateNoMatch } from './utils/generativeNoMatch';
 import { knowledgeBaseNoMatch } from './utils/knowledgeBase';
 import { generateOutput } from './utils/output';
 
-export type NoMatchNode = BaseRequest.NodeButton & VoiceflowNode.Utils.NoMatchNode;
+export type NoMatchNode = BaseRequest.NodeButton & VoiceflowNode.Utils.NoMatchNode & { type: BaseNode.NodeType };
 
 export const utilsObj = {
   getOutputTrace,
@@ -71,15 +70,15 @@ const getOutput = async (
   }
 
   if (runtime.project?.aiAssistSettings?.aiPlayground) {
-    const workspaceID = runtime.project?.teamID;
-
-    if (!(await runtime.services.billing.checkQuota(workspaceID, QuotaName.OPEN_API_TOKENS))) {
-      runtime.trace.debug('token quota exceeded', BaseNode.NodeType.AI_SET);
+    if (!checkLLMTurnTimeout(runtime, node.type)) {
+      return { output: generateOutput('global no match [llm timeout]', runtime.project), ai: true };
+    }
+    if (!checkTokens(runtime, node.type)) {
       return { output: generateOutput('global no match [token quota exceeded]', runtime.project), ai: true };
     }
 
     // use knowledge base if it exists
-    let result: { output: Output; tokens: number } | null = null;
+    let result: { output: Output; tokens: number; time: number } | null = null;
     if (Object.values(runtime.project?.knowledgeBase?.documents || {}).length > 0) {
       result = await knowledgeBaseNoMatch(runtime);
     }
@@ -88,14 +87,7 @@ const getOutput = async (
       result = await generateNoMatch(runtime, globalNoMatch.prompt);
     }
 
-    if (typeof result?.tokens === 'number' && result.tokens > 0) {
-      await runtime.services.billing
-        .consumeQuota(workspaceID, QuotaName.OPEN_API_TOKENS, result.tokens)
-        .catch((err: Error) =>
-          log.error(`[No Match] Error consuming quota for workspace ${workspaceID}: ${log.vars({ err })}`)
-        );
-    }
-
+    await consumeResources('No Match', runtime, result);
     if (result?.output) return { output: result.output, ai: true, tokens: result.tokens };
   }
 

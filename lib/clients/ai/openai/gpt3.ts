@@ -31,6 +31,7 @@ export class GPT3 extends GPTAIModel {
   }
 
   async generateCompletion(prompt: string, params: AIModelParams) {
+    const startTime = Date.now();
     const result = await this.client
       .createCompletion(
         {
@@ -56,6 +57,7 @@ export class GPT3 extends GPTAIModel {
       tokens: this.calculateTokenMultiplier(tokens),
       queryTokens: this.calculateTokenMultiplier(queryTokens),
       answerTokens: this.calculateTokenMultiplier(answerTokens),
+      time: Date.now() - startTime,
     };
   }
 

@@ -20,6 +20,7 @@ export interface CompletionOutput {
   tokens: number;
   queryTokens: number;
   answerTokens: number;
+  time: number;
 }
 
 export const GPT4_ABLE_PLAN = new Set(['old_pro', 'old_team', 'pro', 'team', 'enterprise']);

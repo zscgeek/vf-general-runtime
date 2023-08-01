@@ -113,6 +113,7 @@ export enum TurnType {
   PREVIOUS_OUTPUT = 'lastOutput',
   STOP_ALL = 'stopAll',
   STOP_TYPES = 'stopTypes',
+  ELAPSED_AI_TIME = 'elapsedAITime',
 }
 
 export type Output = BaseText.SlateTextValue | string;

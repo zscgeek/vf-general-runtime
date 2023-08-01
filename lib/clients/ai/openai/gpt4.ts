@@ -26,6 +26,7 @@ export class GPT4 extends GPTAIModel {
   }
 
   async generateChatCompletion(messages: BaseUtils.ai.Message[], params: AIModelParams) {
+    const startTime = Date.now();
     const result = await this.client
       .createChatCompletion(
         {
@@ -51,6 +52,7 @@ export class GPT4 extends GPTAIModel {
       tokens: this.calculateTokenMultiplier(tokens),
       queryTokens: this.calculateTokenMultiplier(queryTokens),
       answerTokens: this.calculateTokenMultiplier(answerTokens),
+      time: Date.now() - startTime,
     };
   }
 }

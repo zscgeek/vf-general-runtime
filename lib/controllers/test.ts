@@ -56,15 +56,11 @@ class TestController extends AbstractController {
 
     if (!answer?.output) return { output: null };
 
-    if (typeof answer.tokens === 'number' && answer.tokens > 0) {
-      await this.services.billing
-        .consumeQuota(req.params.workspaceID, QuotaName.OPEN_API_TOKENS, answer.tokens)
-        .catch((err: Error) =>
-          log.warn(
-            `[KB Prompt Test] Error consuming quota for workspace ${req.params.workspaceID}: ${log.vars({ err })}`
-          )
-        );
-    }
+    await this.services.billing
+      .consumeQuota(req.params.workspaceID, QuotaName.OPEN_API_TOKENS, answer.tokens)
+      .catch((err: Error) =>
+        log.warn(`[KB Prompt Test] Error consuming quota for workspace ${req.params.workspaceID}: ${log.vars({ err })}`)
+      );
 
     return { output: answer.output };
   }
@@ -94,13 +90,11 @@ class TestController extends AbstractController {
 
     if (!answer?.output) return { output: null, chunks };
 
-    if (typeof answer.tokens === 'number' && answer.tokens > 0) {
-      await this.services.billing
-        .consumeQuota(req.params.workspaceID, QuotaName.OPEN_API_TOKENS, answer.tokens)
-        .catch((err: Error) =>
-          log.warn(`[KB Test] Error consuming quota for workspace ${req.params.workspaceID}: ${log.vars({ err })}`)
-        );
-    }
+    await this.services.billing
+      .consumeQuota(req.params.workspaceID, QuotaName.OPEN_API_TOKENS, answer?.tokens ?? 0)
+      .catch((err: Error) =>
+        log.warn(`[KB Test] Error consuming quota for workspace ${req.params.workspaceID}: ${log.vars({ err })}`)
+      );
 
     return { output: answer.output, chunks };
   }
@@ -115,15 +109,13 @@ class TestController extends AbstractController {
 
     const { output, tokens } = await fetchPrompt(req.body);
 
-    if (typeof tokens === 'number' && tokens > 0) {
-      await this.services.billing
-        .consumeQuota(req.params.workspaceID, QuotaName.OPEN_API_TOKENS, tokens)
-        .catch((err: Error) =>
-          log.warn(
-            `[Completion Test] Error consuming quota for workspace ${req.params.workspaceID}: ${log.vars({ err })}`
-          )
-        );
-    }
+    await this.services.billing
+      .consumeQuota(req.params.workspaceID, QuotaName.OPEN_API_TOKENS, tokens ?? 0)
+      .catch((err: Error) =>
+        log.warn(
+          `[Completion Test] Error consuming quota for workspace ${req.params.workspaceID}: ${log.vars({ err })}`
+        )
+      );
 
     return { output };
   }

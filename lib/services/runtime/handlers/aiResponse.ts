@@ -2,13 +2,18 @@ import { BaseNode, BaseUtils } from '@voiceflow/base-types';
 import { VoiceNode } from '@voiceflow/voice-types';
 
 import { GPT4_ABLE_PLAN } from '@/lib/clients/ai/types';
-import { QuotaName } from '@/lib/services/billing';
-import log from '@/logger';
 import { HandlerFactory } from '@/runtime';
 
 import { FrameType, Output } from '../types';
 import { addOutputTrace, getOutputTrace } from '../utils';
-import { AIResponse, fetchPrompt } from './utils/ai';
+import {
+  AIResponse,
+  checkLLMTurnTimeout,
+  checkTokens,
+  consumeResources,
+  EMPTY_AI_RESPONSE,
+  fetchPrompt,
+} from './utils/ai';
 import { promptSynthesis } from './utils/knowledgeBase';
 import { generateOutput } from './utils/output';
 import { getVersionDefaultVoice } from './utils/version';
@@ -19,16 +24,22 @@ const AIResponseHandler: HandlerFactory<VoiceNode.AIResponse.Node> = () => ({
     const nextID = node.nextId ?? null;
     const workspaceID = runtime.project?.teamID;
 
-    if (!(await runtime.services.billing.checkQuota(workspaceID, QuotaName.OPEN_API_TOKENS))) {
+    let checkError: string | null = null;
+    if (!checkLLMTurnTimeout(runtime, node.type)) {
+      checkError = '[llm turn timeout]';
+    } else if (!(await checkTokens(runtime, node.type))) {
+      checkError = '[token quota exceeded]';
+    }
+
+    if (checkError) {
       addOutputTrace(
         runtime,
         getOutputTrace({
-          output: generateOutput('[token quota exceeded]', runtime.project),
+          output: generateOutput(checkError, runtime.project),
           version: runtime.version,
           ai: true,
         })
       );
-      runtime.trace.debug('token quota exceeded', BaseNode.NodeType.AI_RESPONSE);
       return nextID;
     }
 
@@ -43,13 +54,7 @@ const AIResponseHandler: HandlerFactory<VoiceNode.AIResponse.Node> = () => ({
         runtime
       );
 
-      if (answer && typeof answer.tokens === 'number' && answer.tokens > 0) {
-        await runtime.services.billing
-          .consumeQuota(workspaceID, QuotaName.OPEN_API_TOKENS, answer.tokens)
-          .catch((err: Error) =>
-            log.error(`[AI Response KB] Error consuming quota for workspace ${workspaceID}: ${log.vars({ err })}`)
-          );
-      }
+      await consumeResources('AI Response', runtime, answer);
 
       const output = generateOutput(
         answer?.output || 'Unable to find relevant answer.',
@@ -74,20 +79,14 @@ const AIResponseHandler: HandlerFactory<VoiceNode.AIResponse.Node> = () => ({
     let response: AIResponse;
     if (node.model === BaseUtils.ai.GPT_MODEL.GPT_4 && runtime.plan && !GPT4_ABLE_PLAN.has(runtime.plan)) {
       response = {
+        ...EMPTY_AI_RESPONSE,
         output: 'GPT-4 is only available on the Pro plan. Please upgrade to use this feature.',
-        tokens: 0,
-        queryTokens: 0,
-        answerTokens: 0,
       };
     } else {
       response = await fetchPrompt(node, variables.getState());
     }
 
-    if (typeof response.tokens === 'number' && response.tokens > 0) {
-      await runtime.services.billing
-        .consumeQuota(workspaceID, QuotaName.OPEN_API_TOKENS, response.tokens)
-        .catch((err: Error) => log.error(`[AI Response] Error consuming quota: ${log.vars({ err })}`));
-    }
+    await consumeResources('AI Response', runtime, response);
 
     if (!response.output) return nextID;
 

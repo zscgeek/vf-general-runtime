@@ -66,7 +66,9 @@ export const fetchKnowledgeBase = async (
   }
 };
 
-export const knowledgeBaseNoMatch = async (runtime: Runtime): Promise<{ output: Output; tokens: number } | null> => {
+export const knowledgeBaseNoMatch = async (
+  runtime: Runtime
+): Promise<{ output: Output; tokens: number; time: number } | null> => {
   if (!RETRIEVE_ENDPOINT || !KNOWLEDGE_BASE_LAMBDA_ENDPOINT) {
     log.error('[knowledgeBase] one of RETRIEVE_ENDPOINT or KNOWLEDGE_BASE_LAMBDA_ENDPOINT is null');
     return null;
@@ -79,6 +81,7 @@ export const knowledgeBaseNoMatch = async (runtime: Runtime): Promise<{ output: 
 
   try {
     let tokens = 0;
+    let time = 0;
     // expiremental module, frame the question
     const memory = getMemoryMessages(runtime.variables.getState());
 
@@ -104,8 +107,8 @@ export const knowledgeBaseNoMatch = async (runtime: Runtime): Promise<{ output: 
     });
     if (!answer?.output) return null;
 
-    const answerTokens = answer.tokens ?? 0;
-    tokens += answerTokens;
+    tokens += answer.tokens ?? 0;
+    time += answer.time ?? 0;
 
     const documents = runtime.project?.knowledgeBase?.documents || {};
 
@@ -140,6 +143,7 @@ export const knowledgeBaseNoMatch = async (runtime: Runtime): Promise<{ output: 
     return {
       output: generateOutput(answer.output, runtime.project),
       tokens,
+      time,
     };
   } catch (err) {
     log.error(`[knowledge-base no match] ${log.vars({ err })}`);
@@ -206,9 +210,10 @@ export const promptSynthesis = async (
       } as any);
     }
 
-    const tokens = (query.tokens ?? 0) + (answer.tokens ?? 0);
+    const tokens = query.tokens + answer.tokens;
+    const time = query.time + answer.time;
 
-    return { ...answer, ...data, query, tokens };
+    return { ...answer, ...data, query, tokens, time };
   } catch (err) {
     log.error(`[knowledge-base prompt] ${log.vars({ err })}`);
     return null;

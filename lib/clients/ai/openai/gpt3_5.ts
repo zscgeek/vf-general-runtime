@@ -24,6 +24,7 @@ export class GPT3_5 extends GPTAIModel {
     client = this.client
   ): Promise<CompletionOutput | null> {
     try {
+      const startTime = Date.now();
       const result = await client.createChatCompletion(
         {
           model: this.gptModelName,
@@ -44,6 +45,7 @@ export class GPT3_5 extends GPTAIModel {
         tokens: this.calculateTokenMultiplier(tokens),
         queryTokens: this.calculateTokenMultiplier(queryTokens),
         answerTokens: this.calculateTokenMultiplier(answerTokens),
+        time: Date.now() - startTime,
       };
     } catch (error) {
       const truncatedMessages = messages.slice(0, 10).map(({ content, ...rest }) => ({

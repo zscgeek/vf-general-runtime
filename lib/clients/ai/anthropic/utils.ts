@@ -50,6 +50,7 @@ export abstract class AnthropicAIModel extends AIModel {
     messages: BaseUtils.ai.Message[],
     params: AIModelParams
   ): Promise<CompletionOutput | null> {
+    const startTime = Date.now();
     let topSystem = '';
     if (messages[0]?.role === BaseUtils.ai.Role.SYSTEM) {
       topSystem = messages.shift()!.content;
@@ -83,6 +84,7 @@ export abstract class AnthropicAIModel extends AIModel {
       tokens: queryTokens + answerTokens,
       queryTokens,
       answerTokens,
+      time: Date.now() - startTime,
     };
   }
 }

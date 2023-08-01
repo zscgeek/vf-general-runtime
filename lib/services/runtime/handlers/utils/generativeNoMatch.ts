@@ -4,7 +4,7 @@ import { GPT4_ABLE_PLAN } from '@/lib/clients/ai/types';
 import { Runtime } from '@/runtime';
 
 import { Output } from '../../types';
-import { fetchChat, getMemoryMessages } from './ai';
+import { EMPTY_AI_RESPONSE, fetchChat, getMemoryMessages } from './ai';
 import { generateOutput } from './output';
 
 // get current UTC time, default to 1 newline after
@@ -15,14 +15,14 @@ export const getCurrentTime = ({ newlines = 1 }: { newlines?: number } = {}) => 
 export const generateNoMatch = async (
   runtime: Runtime,
   context: BaseUtils.ai.AIModelParams
-): Promise<{ output: Output; tokens: number } | null> => {
+): Promise<{ output: Output; tokens: number; time: number } | null> => {
   if (context.model === BaseUtils.ai.GPT_MODEL.GPT_4 && runtime.plan && !GPT4_ABLE_PLAN.has(runtime.plan)) {
     return {
+      ...EMPTY_AI_RESPONSE,
       output: generateOutput(
         'GPT-4 is only available on the Pro plan. Please upgrade to use this feature.',
         runtime.project
       ),
-      tokens: 0,
     };
   }
 
@@ -51,6 +51,7 @@ export const generateNoMatch = async (
 
   return {
     output: generateOutput(response.output, runtime.project),
-    tokens: response.tokens ?? 0,
+    tokens: response.tokens,
+    time: response.time,
   };
 };
