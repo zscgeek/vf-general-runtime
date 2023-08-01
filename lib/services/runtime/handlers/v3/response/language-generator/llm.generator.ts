@@ -2,9 +2,9 @@ import { BaseUtils } from '@voiceflow/base-types';
 
 import AI from '@/lib/clients/ai';
 
-import { LLMGenerationSettings } from './llm-generation.interface';
+import { GenerateReturn, LLMGenerator, LLMSettings } from './llm.interface';
 
-export class LLMGeneration {
+export class LLM implements LLMGenerator {
   private buildConversationHistory(prompt: string, system: string, messages: BaseUtils.ai.Message[]) {
     if (system.length) {
       messages.unshift({
@@ -23,12 +23,12 @@ export class LLMGeneration {
     return messages;
   }
 
-  public async generate(prompt: string, settings: LLMGenerationSettings) {
+  public async generate(prompt: string, settings: LLMSettings): Promise<GenerateReturn> {
     const { model: modelName, temperature, maxTokens, system = '', chatHistory } = settings;
 
     const model = AI.get(modelName);
 
-    if (!model) return { output: null };
+    if (!model) return { output: null, tokens: 0 };
 
     const conversationHistory = this.buildConversationHistory(prompt, system, chatHistory);
 

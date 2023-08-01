@@ -1,17 +1,13 @@
-import { BaseNode } from '@voiceflow/base-types';
-
-import { QuotaName } from '@/lib/services/billing';
-import log from '@/logger';
 import { HandlerFactory } from '@/runtime';
 
-import { addOutputTrace, getOutputTrace } from '../../../utils';
-import { generateOutput } from '../../utils/output';
 import { evaluateVariant } from './evaluateVariant/evaluateVariant';
+import { BilledGenerator } from './language-generator/billed.generator';
+import { KnowledgeBase } from './language-generator/kb.generator';
+import { LLM } from './language-generator/llm.generator';
 import { Channel, Language, ResponseNode } from './response.types';
 import { selectDiscriminator } from './selectDiscriminator/selectDiscriminator';
 import { translateVariants } from './translateVariants/translateVariants';
 import { VariableContext } from './variableContext/variableContext';
-import { AIBilling } from './variant/prompt.variant';
 import { buildVariant } from './variant/variant';
 import { VariantCollection } from './variantCollection/variantCollection';
 
@@ -57,36 +53,17 @@ const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> =
     const varContext = new VariableContext(variables.getState());
 
     // 4 - Wrap list of variants in Variant objects
-    const aiBilling: AIBilling = {
-      checkAITokensQuota: async () => {
-        const workspaceID = runtime.project?.teamID;
-        const isQuotaAvailable = await runtime.services.billing.checkQuota(workspaceID, QuotaName.OPEN_API_TOKENS);
+    const llmGeneration = new LLM();
+    const knowledgeBase = new KnowledgeBase({
+      documents: {}, // $TODO$ - Add actual documents here
+      projectID: runtime.project?._id ?? '', // $TODO$ - Need to handle the case where runtime.project._id is `null` here
+      kbStrategy: {} as any, // $TODO$ - Need to fill in proper settings here
+    });
+    const billedLLM = new BilledGenerator(runtime, llmGeneration);
+    const billedKB = new BilledGenerator(runtime, knowledgeBase);
 
-        if (!isQuotaAvailable) {
-          runtime.trace.debug('prompt response failed: token quota exceeded', BaseNode.NodeType.AI_SET);
-          addOutputTrace(
-            runtime,
-            getOutputTrace({
-              output: generateOutput('prompt response failed: [token quota exceeded]', runtime.project),
-              version: runtime.version,
-              ai: true,
-            })
-          );
-        }
-
-        return isQuotaAvailable;
-      },
-      consumeAITokensQuota: (tokens: number) => {
-        const workspaceID = runtime.project?.teamID;
-        return runtime.services.billing
-          .consumeQuota(workspaceID, QuotaName.OPEN_API_TOKENS, tokens)
-          .catch((err: Error) => {
-            log.warn(`Failed to charge tokens for workspaceID=${workspaceID}, error=${JSON.stringify(err)}`);
-          });
-      },
-    };
     const variants = discriminator.variantOrder.map((varID) =>
-      buildVariant(discriminator.variants[varID], varContext, aiBilling)
+      buildVariant(discriminator.variants[varID], varContext, billedLLM, billedKB)
     );
 
     // 5 - Construct a collection that independently tracks conditioned and unconditioned variants
