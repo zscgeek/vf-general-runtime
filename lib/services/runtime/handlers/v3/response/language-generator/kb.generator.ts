@@ -2,7 +2,13 @@ import { BaseUtils } from '@voiceflow/base-types';
 import dedent from 'dedent';
 
 import { fetchKnowledgeBase, KnowledegeBaseChunk } from '../../../utils/knowledgeBase';
-import { AnswerReturn, KnowledgeBaseConfig, KnowledgeBaseGenerator, KnowledgeBaseSettings } from './kb.interface';
+import {
+  AnswerReturn,
+  KnowledgeBaseConfig,
+  KnowledgeBaseErrorCode,
+  KnowledgeBaseGenerator,
+  KnowledgeBaseSettings,
+} from './kb.interface';
 import { PromptQuestionSynthesisOptions } from './kb.types';
 import { LLM } from './llm.generator';
 
@@ -108,6 +114,9 @@ export class KnowledgeBase implements KnowledgeBaseGenerator {
       return {
         tokens: 0,
         output: null,
+        error: {
+          code: KnowledgeBaseErrorCode.FailedQuestionSynthesis,
+        },
       };
     }
 
@@ -117,6 +126,9 @@ export class KnowledgeBase implements KnowledgeBaseGenerator {
       return {
         tokens: 0,
         output: null,
+        error: {
+          code: KnowledgeBaseErrorCode.FailedKnowledgeRetrieval,
+        },
       };
     }
 
@@ -126,6 +138,9 @@ export class KnowledgeBase implements KnowledgeBaseGenerator {
       return {
         tokens: 0,
         output: null,
+        error: {
+          code: KnowledgeBaseErrorCode.FailedAnswerSynthesis,
+        },
       };
     }
 

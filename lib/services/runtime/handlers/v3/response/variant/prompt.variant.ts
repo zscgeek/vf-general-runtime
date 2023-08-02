@@ -2,7 +2,7 @@ import { BaseTrace, BaseUtils } from '@voiceflow/base-types';
 import { replaceVariables, sanitizeVariables } from '@voiceflow/common';
 import VError from '@voiceflow/verror';
 
-import { KnowledgeBaseGenerator } from '../language-generator/kb.interface';
+import { KnowledgeBaseErrorCode, KnowledgeBaseGenerator } from '../language-generator/kb.interface';
 import { LLMGenerator } from '../language-generator/llm.interface';
 import { serializeResolvedMarkup } from '../markupUtils/markupUtils';
 import { ResolvedPromptVariant, ResponseContext } from '../response.types';
@@ -42,24 +42,55 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
     };
   }
 
-  private async resolveByKB(prompt: string, chatHistory: BaseUtils.ai.Message[]): Promise<BaseTrace.V3.TextTrace> {
-    const { output } = await this.kbGenerator.generate(prompt, {
+  private async resolveByKB(
+    prompt: string,
+    chatHistory: BaseUtils.ai.Message[]
+  ): Promise<BaseTrace.V3.TextTrace | BaseTrace.DebugTrace> {
+    const { output, error } = await this.kbGenerator.generate(prompt, {
       chatHistory,
     });
 
-    return {
-      type: BaseTrace.TraceType.TEXT,
-      payload: {
-        content: output ? [output] : [],
-      },
-    };
+    switch (error?.code) {
+      case KnowledgeBaseErrorCode.FailedQuestionSynthesis:
+        return {
+          type: BaseTrace.TraceType.DEBUG,
+          payload: {
+            message: this.toKnowledgeBaseError('Failed to parse the knowledge base query'),
+          },
+        };
+      case KnowledgeBaseErrorCode.FailedKnowledgeRetrieval:
+        return {
+          type: BaseTrace.TraceType.DEBUG,
+          payload: {
+            message: this.toKnowledgeBaseError('Failed to retrieve documents from the knowledge base to answer query'),
+          },
+        };
+      case KnowledgeBaseErrorCode.FailedAnswerSynthesis:
+        return {
+          type: BaseTrace.TraceType.DEBUG,
+          payload: {
+            message: this.toKnowledgeBaseError('Failed to generate an answer to the query'),
+          },
+        };
+      default:
+        return {
+          type: BaseTrace.TraceType.TEXT,
+          payload: {
+            content: output ? [output] : [],
+          },
+        };
+    }
+  }
+
+  private toKnowledgeBaseError(message: string) {
+    return `[Knowledge Base Error]: ${message}`;
   }
 
   get type() {
     return this.rawVariant.type;
   }
 
-  async trace(): Promise<BaseTrace.V3.TextTrace | null> {
+  async trace(): Promise<BaseTrace.V3.TextTrace | BaseTrace.DebugTrace> {
     const { text } = this.rawVariant.prompt;
     const resolvedPrompt = serializeResolvedMarkup(this.varContext.resolveMarkup(text));
     // $TODO$ - Add past turns of chat messages

@@ -18,9 +18,18 @@ interface BaseAnswerReturn {
   output: string | null;
 }
 
+export enum KnowledgeBaseErrorCode {
+  FailedQuestionSynthesis = 'failed-question-synthesis',
+  FailedKnowledgeRetrieval = 'failed-knowledge-retrieval',
+  FailedAnswerSynthesis = 'failed-answer-synthesis',
+}
+
 interface NullAnswerReturn extends BaseAnswerReturn {
   tokens: number;
   output: null;
+  error: {
+    code: KnowledgeBaseErrorCode;
+  };
 }
 
 interface ActualAnswerReturn extends BaseAnswerReturn {

@@ -33,7 +33,7 @@ export const evaluateVariant = async (variants: VariantCollection) => {
 
   // 6 - Aggregate traces
   const outputTraces: BaseTrace.BaseTraceFrame[] = [];
-  if (responseTrace) outputTraces.push(responseTrace);
+  if (responseTrace) outputTraces.concat(Array.isArray(responseTrace) ? responseTrace : [responseTrace]);
   if (carouselTrace) outputTraces.push(carouselTrace);
   return [...outputTraces, ...attachmentTraces];
 };
