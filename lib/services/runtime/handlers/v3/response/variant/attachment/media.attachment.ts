@@ -14,8 +14,8 @@ export class MediaAttachment extends BaseAttachment<RawMediaAttachment> {
     return {
       type:
         this.rawAttachment.media.datatype === MediaDatatype.IMAGE
-          ? BaseTrace.TraceType.IMAGE
-          : BaseTrace.TraceType.VIDEO,
+          ? BaseTrace.TraceType.V3_IMAGE
+          : BaseTrace.TraceType.V3_VIDEO,
       payload: {
         url: serializeResolvedMarkup(this.varContext.resolveMarkup(this.rawAttachment.media.url)),
       },

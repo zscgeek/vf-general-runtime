@@ -1,6 +1,9 @@
 import { BaseTrace, BaseUtils } from '@voiceflow/base-types';
 import { replaceVariables, sanitizeVariables } from '@voiceflow/common';
 import VError from '@voiceflow/verror';
+import { match } from 'ts-pattern';
+
+import { ArrayOrElement } from '@/lib/utils/typeUtils';
 
 import { KnowledgeBaseErrorCode } from '../language-generator/kb.interface';
 import { LanguageGenerator } from '../language-generator/language-generator';
@@ -34,7 +37,7 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
     });
 
     return {
-      type: BaseTrace.TraceType.TEXT,
+      type: BaseTrace.TraceType.V3_TEXT,
       payload: {
         content: output ? [output] : [],
       },
@@ -44,41 +47,55 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
   private async resolveByKB(
     prompt: string,
     chatHistory: BaseUtils.ai.Message[]
-  ): Promise<BaseTrace.V3.TextTrace | BaseTrace.DebugTrace> {
-    const { output, error } = await this.langGen.knowledgeBase.generate(prompt, {
+  ): Promise<ArrayOrElement<BaseTrace.V3.TextTrace | BaseTrace.V3.DebugTrace>> {
+    const genResult = await this.langGen.knowledgeBase.generate(prompt, {
       chatHistory,
     });
 
-    switch (error?.code) {
-      case KnowledgeBaseErrorCode.FailedQuestionSynthesis:
-        return {
-          type: BaseTrace.TraceType.DEBUG,
-          payload: {
-            message: this.toKnowledgeBaseError('Failed to parse the knowledge base query'),
+    if (genResult.output === null) {
+      const message = match(genResult.error.code)
+        .with(KnowledgeBaseErrorCode.FailedQuestionSynthesis, () =>
+          this.toKnowledgeBaseError('Failed to parse the knowledge base query')
+        )
+        .with(KnowledgeBaseErrorCode.FailedKnowledgeRetrieval, () =>
+          this.toKnowledgeBaseError('Failed to retrieve documents from the knowledge base to answer query')
+        )
+        .with(KnowledgeBaseErrorCode.FailedAnswerSynthesis, () =>
+          this.toKnowledgeBaseError('Failed to generate an answer to the query')
+        )
+        .otherwise(() => this.toKnowledgeBaseError('Encountered an unknown error'));
+
+      return {
+        type: BaseTrace.TraceType.V3_DEBUG,
+        payload: {
+          code: BaseTrace.V3.Debug.DebugCode.KnowledgeBase,
+          level: BaseTrace.V3.Debug.DebugInfoLevel.Error,
+          details: {
+            message,
           },
-        };
-      case KnowledgeBaseErrorCode.FailedKnowledgeRetrieval:
-        return {
-          type: BaseTrace.TraceType.DEBUG,
-          payload: {
-            message: this.toKnowledgeBaseError('Failed to retrieve documents from the knowledge base to answer query'),
-          },
-        };
-      case KnowledgeBaseErrorCode.FailedAnswerSynthesis:
-        return {
-          type: BaseTrace.TraceType.DEBUG,
-          payload: {
-            message: this.toKnowledgeBaseError('Failed to generate an answer to the query'),
-          },
-        };
-      default:
-        return {
-          type: BaseTrace.TraceType.TEXT,
-          payload: {
-            content: output ? [output] : [],
-          },
-        };
+        },
+      };
     }
+
+    const { documents, output } = genResult;
+    return [
+      {
+        type: BaseTrace.TraceType.V3_DEBUG,
+        payload: {
+          code: BaseTrace.V3.Debug.DebugCode.KnowledgeBase,
+          level: BaseTrace.V3.Debug.DebugInfoLevel.Info,
+          details: {
+            ...documents,
+          },
+        },
+      },
+      {
+        type: BaseTrace.TraceType.V3_TEXT,
+        payload: {
+          content: output ? [output] : [],
+        },
+      },
+    ];
   }
 
   private toKnowledgeBaseError(message: string) {
@@ -89,7 +106,7 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
     return this.rawVariant.type;
   }
 
-  async trace(): Promise<BaseTrace.V3.TextTrace | BaseTrace.DebugTrace> {
+  async trace(): Promise<ArrayOrElement<BaseTrace.V3.TextTrace | BaseTrace.V3.DebugTrace>> {
     const { text } = this.rawVariant.prompt;
     const resolvedPrompt = serializeResolvedMarkup(this.varContext.resolveMarkup(text));
     // $TODO$ - Add past turns of chat messages

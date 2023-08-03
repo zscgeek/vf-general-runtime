@@ -40,7 +40,10 @@ export async function evaluateVariant(variants: Variant[]): Promise<Array<BaseTr
 
   // 6 - Aggregate traces
   const outputTraces: BaseTrace.BaseTraceFrame[] = [];
-  if (responseTrace) outputTraces.push(responseTrace);
+  if (responseTrace) {
+    const responseTraceList = Array.isArray(responseTrace) ? responseTrace : [responseTrace];
+    responseTraceList.forEach((trace) => outputTraces.push(trace));
+  }
   if (carouselTrace) outputTraces.push(carouselTrace);
   return [...outputTraces, ...attachmentTraces];
 }

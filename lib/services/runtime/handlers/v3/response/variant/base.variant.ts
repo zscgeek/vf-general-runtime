@@ -1,4 +1,5 @@
 import { BaseTrace } from '@/../libs/packages/base-types/build/cjs';
+import { ArrayOrElement } from '@/lib/utils/typeUtils';
 
 import { ResolvedVariant } from '../response.types';
 import { VariableContext } from '../variableContext/variableContext';
@@ -14,7 +15,7 @@ export abstract class BaseVariant<Variant extends ResolvedVariant> {
 
   protected constructor(protected readonly rawVariant: Variant, protected readonly varContext: VariableContext) {}
 
-  public abstract trace(): (BaseTrace.AnyTrace | null) | Promise<BaseTrace.AnyTrace | null>;
+  public abstract trace(): ArrayOrElement<BaseTrace.AnyTrace> | Promise<ArrayOrElement<BaseTrace.AnyTrace>> | null;
 
   public get cardLayout() {
     return this.rawVariant.cardLayout;

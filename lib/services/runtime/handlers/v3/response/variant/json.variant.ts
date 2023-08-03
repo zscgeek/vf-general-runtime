@@ -16,7 +16,7 @@ export class JSONVariant extends BaseVariant<ResolvedJSONVariant> {
 
   trace(): BaseTrace.V3.JSONTrace {
     return {
-      type: BaseTrace.TraceType.JSON,
+      type: BaseTrace.TraceType.V3_JSON,
       payload: {
         json: JSON.parse(serializeResolvedMarkup(this.varContext.resolveMarkup(this.rawVariant.json))),
       },

@@ -5,14 +5,14 @@ import { Runtime } from '@/runtime';
 import { BaseLanguageGenerator } from './base.generator';
 import { BilledGenerator } from './billed.generator';
 import { KnowledgeBase } from './kb.generator';
-import { KnowledgeBaseSettings } from './kb.interface';
+import { AnswerReturn, KnowledgeBaseSettings } from './kb.interface';
 import { LLM } from './llm.generator';
 import { LLMSettings } from './llm.interface';
 
 export class LanguageGenerator {
   public readonly llm: BaseLanguageGenerator<LLMSettings>;
 
-  public readonly knowledgeBase: BaseLanguageGenerator<KnowledgeBaseSettings>;
+  public readonly knowledgeBase: BaseLanguageGenerator<KnowledgeBaseSettings, AnswerReturn>;
 
   constructor(runtime: Runtime) {
     this.llm = new BilledGenerator(runtime, new LLM());

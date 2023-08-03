@@ -15,7 +15,7 @@ export class TextVariant extends BaseVariant<ResolvedTextVariant> {
 
   trace(): BaseTrace.V3.TextTrace {
     return {
-      type: BaseTrace.TraceType.TEXT,
+      type: BaseTrace.TraceType.V3_TEXT,
       payload: {
         content: this.varContext.resolveMarkup(this.rawVariant.text),
       },
