@@ -1,5 +1,4 @@
 import { BaseTrace, BaseUtils } from '@voiceflow/base-types';
-import { replaceVariables, sanitizeVariables } from '@voiceflow/common';
 import VError from '@voiceflow/verror';
 import { match } from 'ts-pattern';
 
@@ -16,12 +15,13 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
   constructor(
     rawVariant: ResolvedPromptVariant,
     varContext: VariableContext,
-    private readonly langGen: LanguageGenerator
+    private readonly langGen: LanguageGenerator,
+    private readonly chatHistory: BaseUtils.ai.Message[] = []
   ) {
     super(rawVariant, varContext);
   }
 
-  private async resolveByLLM(prompt: string, chatHistory: BaseUtils.ai.Message[]): Promise<BaseTrace.V3.TextTrace> {
+  private async resolveByLLM(prompt: string): Promise<BaseTrace.V3.TextTrace> {
     const {
       persona: { model: modelName, temperature, maxLength, systemPrompt },
     } = this.rawVariant.prompt;
@@ -33,7 +33,7 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
       ...(temperature && { temperature }),
       ...(maxLength && { maxTokens: maxLength }),
       ...(systemPrompt && { prompt: resolvedSystem }),
-      chatHistory,
+      chatHistory: this.chatHistory,
     });
 
     return {
@@ -44,12 +44,9 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
     };
   }
 
-  private async resolveByKB(
-    prompt: string,
-    chatHistory: BaseUtils.ai.Message[]
-  ): Promise<ArrayOrElement<BaseTrace.V3.TextTrace | BaseTrace.V3.DebugTrace>> {
+  private async resolveByKB(prompt: string): Promise<ArrayOrElement<BaseTrace.V3.TextTrace | BaseTrace.V3.DebugTrace>> {
     const genResult = await this.langGen.knowledgeBase.generate(prompt, {
-      chatHistory,
+      chatHistory: this.chatHistory,
     });
 
     if (genResult.output === null) {
@@ -109,22 +106,12 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
   async trace(): Promise<ArrayOrElement<BaseTrace.V3.TextTrace | BaseTrace.V3.DebugTrace>> {
     const { text } = this.rawVariant.prompt;
     const resolvedPrompt = serializeResolvedMarkup(this.varContext.resolveMarkup(text));
-    // $TODO$ - Add past turns of chat messages
-    // $TODO$ - Need to convert this into Markup resolution
-    // $TODO$ - When turns is converted to Markup resolution, need to ensure previous is state backwards compatible
-    //          or annouce a disclaimer.
-    const variablesState = this.varContext.getVariableMap();
-    const sanitizedVars = sanitizeVariables(variablesState);
-    const chatHistory = ([] as BaseUtils.ai.Message[]).map((message) => ({
-      ...message,
-      content: replaceVariables(message.content, sanitizedVars),
-    }));
 
     if ([ResponseContext.MEMORY, ResponseContext.PROMPT].includes(this.rawVariant.context)) {
-      return this.resolveByLLM(resolvedPrompt, chatHistory);
+      return this.resolveByLLM(resolvedPrompt);
     }
     if (this.rawVariant.context === ResponseContext.KNOWLEDGE_BASE) {
-      return this.resolveByKB(resolvedPrompt, chatHistory);
+      return this.resolveByKB(resolvedPrompt);
     }
     throw new VError('prompt variant has an invalid NLP context type');
   }

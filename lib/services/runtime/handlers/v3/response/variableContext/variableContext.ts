@@ -1,9 +1,12 @@
 import { BaseMarkup as ResolvedMarkup } from '@voiceflow/base-types';
+import { sanitizeVariables } from '@voiceflow/common';
 
 import { EntityReference, Markup, MarkupNode, MarkupSpan, VariableReference } from '../response.types';
 
 export class VariableContext {
-  constructor(private readonly variables: Record<string, unknown>) {}
+  constructor(private readonly variables: Record<string, unknown>) {
+    this.variables = sanitizeVariables(this.variables);
+  }
 
   private isVariableReference(markupNode: MarkupNode): markupNode is VariableReference {
     return VariableReference.safeParse(markupNode).success;

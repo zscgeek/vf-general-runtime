@@ -1,5 +1,6 @@
 import { HandlerFactory } from '@/runtime';
 
+import { getMemoryMessages } from '../../utils/ai';
 import { evaluateVariant } from './evaluateVariant/evaluateVariant';
 import { LanguageGenerator } from './language-generator/language-generator';
 import { Channel, Language, ResponseNode } from './response.types';
@@ -52,8 +53,9 @@ const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> =
     // 4 - Wrap list of variants in Variant objects
     const langGen = new LanguageGenerator(runtime);
 
+    const chatHistory = getMemoryMessages(runtime.variables.getState());
     const variants = discriminator.variantOrder.map((varID) =>
-      buildVariant(discriminator.variants[varID], varContext, langGen)
+      buildVariant(discriminator.variants[varID], varContext, langGen, chatHistory)
     );
 
     // 6 - Construct sequence of traces by feeding variants into variant selector

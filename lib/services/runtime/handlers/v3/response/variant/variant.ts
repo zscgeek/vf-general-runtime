@@ -1,3 +1,4 @@
+import { BaseUtils } from '@voiceflow/base-types';
 import VError from '@voiceflow/verror';
 
 import { LanguageGenerator } from '../language-generator/language-generator';
@@ -11,7 +12,8 @@ import { Variant } from './variant.interface';
 export function buildVariant(
   rawVariant: ResolvedVariant,
   varContext: VariableContext,
-  langGen: LanguageGenerator
+  langGen: LanguageGenerator,
+  chatHistory: BaseUtils.ai.Message[]
 ): Variant {
   switch (rawVariant.type) {
     case ResponseVariantType.TEXT:
@@ -19,7 +21,7 @@ export function buildVariant(
     case ResponseVariantType.JSON:
       return new JSONVariant(rawVariant, varContext);
     case ResponseVariantType.PROMPT:
-      return new PromptVariant(rawVariant, varContext, langGen);
+      return new PromptVariant(rawVariant, varContext, langGen, chatHistory);
     default:
       throw new VError('unknown variant type encountered');
   }
