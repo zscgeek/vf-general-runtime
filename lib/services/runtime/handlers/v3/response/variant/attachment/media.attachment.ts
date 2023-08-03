@@ -5,6 +5,9 @@ import { MediaAttachment as RawMediaAttachment, MediaDatatype } from '../../resp
 import { VariableContext } from '../../variableContext/variableContext';
 import { BaseAttachment } from './base.attachment';
 
+BaseTrace.TraceType.IMAGE = 'image';
+BaseTrace.TraceType.VIDEO = 'video';
+
 export class MediaAttachment extends BaseAttachment {
   constructor(protected readonly rawAttachment: RawMediaAttachment, varContext: VariableContext) {
     super(rawAttachment, varContext);

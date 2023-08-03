@@ -25,7 +25,7 @@ export abstract class BaseVariant<Variant extends ResolvedVariant> {
   }
 
   public get condition(): BaseCondition | null {
-    if (this.rawVariant.condition === null) return null;
+    if (this.rawVariant.condition == null) return null;
     if (!this.cachedCondition) {
       this.cachedCondition = buildCondition(this.rawVariant.condition, this.varContext);
     }
@@ -34,8 +34,8 @@ export abstract class BaseVariant<Variant extends ResolvedVariant> {
 
   public get attachments(): BaseAttachment[] {
     if (!this.cachedAttachments) {
-      this.cachedAttachments = this.rawVariant.attachmentOrder.map((id) =>
-        buildAttachment(this.rawVariant.attachments[id], this.varContext)
+      this.cachedAttachments = this.rawVariant.attachments.map((attachment) =>
+        buildAttachment(attachment, this.varContext)
       );
     }
 

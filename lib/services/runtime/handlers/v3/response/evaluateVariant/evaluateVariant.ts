@@ -21,7 +21,7 @@ export const evaluateVariant = (variants: VariantCollection) => {
   const variant = selectConditioned(variants) ?? selectUnconditioned(variants);
 
   // 2 - Separate the card and non-card attachments
-  const attachmentCollection = new AttachmentCollection(variant.attachments);
+  const attachmentCollection =  new AttachmentCollection(variant.attachments);
 
   // 3 - Output response trace
   const responseTrace = variant.trace;

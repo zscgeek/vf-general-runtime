@@ -142,8 +142,7 @@ export interface CardAttachment {
     id: string;
     title: string;
     description: string;
-    buttonOrder: string[];
-    buttons: Record<string, BaseRequest.GeneralRequestButton>;
+    buttons: BaseRequest.GeneralRequestButton[];
     media: MediaResource;
   };
 }
@@ -155,12 +154,13 @@ export interface MediaAttachment {
 export type ResolvedAttachment = CardAttachment | MediaAttachment;
 
 export interface BaseResolvedVariant {
+  language: Language;
+  channel: Channel;
   type: ResponseVariantType;
   speed: number;
   cardLayout: CardLayout;
   condition: ResolvedCondition | null;
-  attachmentOrder: string[];
-  attachments: Record<string, ResolvedAttachment>;
+  attachments: ResolvedAttachment[];
 }
 
 export interface ResolvedTextVariant extends BaseResolvedVariant {
@@ -188,18 +188,11 @@ export interface ResolvedPromptVariant extends BaseResolvedVariant {
 
 export type ResolvedVariant = ResolvedPromptVariant | ResolvedJSONVariant | ResolvedTextVariant;
 
-export interface ResolvedDiscriminator {
-  language: Language;
-  channel: Channel;
-  variantOrder: string[];
-  variants: Record<string, ResolvedVariant>;
-}
-
 export interface ResponseNode {
   id: string;
   type: 'response';
   data: {
-    responses: Record<string, ResolvedDiscriminator>;
+    variants: ResolvedVariant[];
   };
   nextId: string;
 }
