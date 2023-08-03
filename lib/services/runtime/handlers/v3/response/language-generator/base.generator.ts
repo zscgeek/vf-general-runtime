@@ -1,8 +1,8 @@
-import { LanguageGeneratorReturn } from './base.interface';
+import { BaseLanguageGeneratorReturn } from './base.interface';
 
 export abstract class BaseLanguageGenerator<
   Settings extends Record<string, any>,
-  GeneratorReturn extends LanguageGeneratorReturn = LanguageGeneratorReturn
+  GeneratorReturn extends BaseLanguageGeneratorReturn = BaseLanguageGeneratorReturn
 > {
   public abstract generate(prompt: string, settings: Settings): Promise<GeneratorReturn> | GeneratorReturn;
 }

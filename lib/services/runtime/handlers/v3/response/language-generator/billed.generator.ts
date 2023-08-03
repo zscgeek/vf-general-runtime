@@ -8,10 +8,17 @@ import { Runtime } from '@/runtime';
 
 import { generateOutput } from '../../../utils/output';
 import { BaseLanguageGenerator } from './base.generator';
+import { BaseLanguageGeneratorReturn } from './base.interface';
 import { AIBillingEvents } from './billed.interface';
 
-export class BilledGenerator<T extends Record<string, any>> extends BaseLanguageGenerator<T> {
-  constructor(private readonly runtime: Runtime, private readonly origGenerator: BaseLanguageGenerator<T>) {
+export class BilledGenerator<
+  Settings extends Record<string, any>,
+  Return extends BaseLanguageGeneratorReturn
+> extends BaseLanguageGenerator<Settings, Return> {
+  constructor(
+    private readonly runtime: Runtime,
+    private readonly origGenerator: BaseLanguageGenerator<Settings, Return>
+  ) {
     super();
   }
 
@@ -43,7 +50,7 @@ export class BilledGenerator<T extends Record<string, any>> extends BaseLanguage
       });
   }
 
-  public async generate(prompt: string, settings: T) {
+  public async generate(prompt: string, settings: Settings): Promise<Return> {
     if (!(await this.checkTokensQuota())) {
       throw new InternalException({
         message: 'token quota exceeded, could not resolved prompt-type response',

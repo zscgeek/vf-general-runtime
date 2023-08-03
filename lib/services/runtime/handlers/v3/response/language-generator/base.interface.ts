@@ -1,4 +1,4 @@
-export interface LanguageGeneratorReturn {
+export interface BaseLanguageGeneratorReturn {
   tokens: number;
   output: string | null;
   error?: {
