@@ -2,17 +2,12 @@ import { BaseUtils } from '@voiceflow/base-types';
 import dedent from 'dedent';
 
 import { fetchKnowledgeBase, KnowledegeBaseChunk } from '../../../utils/knowledgeBase';
-import {
-  AnswerReturn,
-  KnowledgeBaseConfig,
-  KnowledgeBaseErrorCode,
-  KnowledgeBaseGenerator,
-  KnowledgeBaseSettings,
-} from './kb.interface';
+import { BaseLanguageGenerator } from './base.generator';
+import { AnswerReturn, KnowledgeBaseConfig, KnowledgeBaseErrorCode, KnowledgeBaseSettings } from './kb.interface';
 import { PromptQuestionSynthesisOptions } from './kb.types';
 import { LLM } from './llm.generator';
 
-export class KnowledgeBase implements KnowledgeBaseGenerator {
+export class KnowledgeBase implements BaseLanguageGenerator<KnowledgeBaseSettings> {
   private readonly llmGenerator: LLM;
 
   private static readonly DEFAULT_SYNTHESIS_SYSTEM: string =

@@ -1,11 +1,7 @@
-import { InternalException } from '@voiceflow/exception';
-
 import { HandlerFactory } from '@/runtime';
 
 import { evaluateVariant } from './evaluateVariant/evaluateVariant';
-import { BilledGenerator } from './language-generator/billed.generator';
-import { KnowledgeBase } from './language-generator/kb.generator';
-import { LLM } from './language-generator/llm.generator';
+import { LanguageGeneratorService } from './language-generator/language-generator';
 import { Channel, Language, ResponseNode } from './response.types';
 import { selectDiscriminator } from './selectDiscriminator/selectDiscriminator';
 import { translateVariants } from './translateVariants/translateVariants';
@@ -54,21 +50,10 @@ const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> =
     const varContext = new VariableContext(variables.getState());
 
     // 4 - Wrap list of variants in Variant objects
-    if (!runtime.project) {
-      throw new InternalException({ message: 'runtime could not evaluate the project associated with the program' });
-    }
-
-    const llmGeneration = new LLM();
-    const knowledgeBase = new KnowledgeBase({
-      documents: runtime.project.knowledgeBase?.documents ?? {},
-      projectID: runtime.project._id,
-      kbStrategy: runtime.project.knowledgeBase?.settings,
-    });
-    const billedLLM = new BilledGenerator(runtime, llmGeneration);
-    const billedKB = new BilledGenerator(runtime, knowledgeBase);
+    const langGenServiec = new LanguageGeneratorService(runtime);
 
     const variants = discriminator.variantOrder.map((varID) =>
-      buildVariant(discriminator.variants[varID], varContext, billedLLM, billedKB)
+      buildVariant(discriminator.variants[varID], varContext, langGenServiec)
     );
 
     // 6 - Construct sequence of traces by feeding variants into variant selector

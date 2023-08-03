@@ -1,7 +1,6 @@
 import { BaseModels, BaseUtils } from '@voiceflow/base-types';
 
 import { AIResponse } from '../../../utils/ai';
-import { LanguageGenerator } from './language-generator.interface';
 
 export interface KnowledgeBaseSettings {
   chatHistory: BaseUtils.ai.Message[];
@@ -46,5 +45,3 @@ interface ActualAnswerReturn extends BaseAnswerReturn {
 }
 
 export type AnswerReturn = ActualAnswerReturn | NullAnswerReturn;
-
-export type KnowledgeBaseGenerator = LanguageGenerator<KnowledgeBaseSettings>;

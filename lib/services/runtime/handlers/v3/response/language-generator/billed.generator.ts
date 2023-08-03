@@ -7,11 +7,13 @@ import log from '@/logger';
 import { Runtime } from '@/runtime';
 
 import { generateOutput } from '../../../utils/output';
+import { BaseLanguageGenerator } from './base.generator';
 import { AIBillingEvents } from './billed.interface';
-import { LanguageGenerator } from './language-generator.interface';
 
-export class BilledGenerator<T extends Record<string, any>> implements LanguageGenerator<T> {
-  constructor(private readonly runtime: Runtime, private readonly origGenerator: LanguageGenerator<T>) {}
+export class BilledGenerator<T extends Record<string, any>> extends BaseLanguageGenerator<T> {
+  constructor(private readonly runtime: Runtime, private readonly origGenerator: BaseLanguageGenerator<T>) {
+    super();
+  }
 
   private async checkTokensQuota() {
     const workspaceID = this.runtime.project?.teamID;

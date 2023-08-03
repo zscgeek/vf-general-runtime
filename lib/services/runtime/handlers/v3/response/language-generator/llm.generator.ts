@@ -2,9 +2,10 @@ import { BaseUtils } from '@voiceflow/base-types';
 
 import AI from '@/lib/clients/ai';
 
-import { GenerateReturn, LLMGenerator, LLMSettings } from './llm.interface';
+import { BaseLanguageGenerator } from './base.generator';
+import { GenerateReturn, LLMSettings } from './llm.interface';
 
-export class LLM implements LLMGenerator {
+export class LLM implements BaseLanguageGenerator<LLMSettings> {
   private buildConversationHistory(prompt: string, system: string, messages: BaseUtils.ai.Message[]) {
     if (system.length) {
       messages.unshift({
