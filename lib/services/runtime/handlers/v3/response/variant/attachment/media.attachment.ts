@@ -5,7 +5,7 @@ import { MediaAttachment as RawMediaAttachment, MediaDatatype } from '../../resp
 import { VariableContext } from '../../variableContext/variableContext';
 import { BaseAttachment } from './base.attachment';
 
-export class MediaAttachment extends BaseAttachment {
+export class MediaAttachment extends BaseAttachment<RawMediaAttachment> {
   constructor(protected readonly rawAttachment: RawMediaAttachment, varContext: VariableContext) {
     super(rawAttachment, varContext);
   }

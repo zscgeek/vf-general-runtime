@@ -1,15 +1,12 @@
 import { BaseTrace } from '@voiceflow/base-types';
 
-import { AttachmentType, ResolvedAttachment } from '../../response.types';
+import { ResolvedAttachment } from '../../response.types';
 import { VariableContext } from '../../variableContext/variableContext';
 
-export abstract class BaseAttachment {
-  protected constructor(
-    protected readonly rawAttachment: ResolvedAttachment,
-    protected readonly varContext: VariableContext
-  ) {}
+export abstract class BaseAttachment<Attachment extends ResolvedAttachment = ResolvedAttachment> {
+  protected constructor(protected readonly rawAttachment: Attachment, protected readonly varContext: VariableContext) {}
 
-  public get type(): AttachmentType {
+  public get type(): typeof this.rawAttachment['type'] {
     return this.rawAttachment.type;
   }
 

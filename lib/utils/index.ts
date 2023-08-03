@@ -4,10 +4,10 @@ import Ajv from 'ajv';
 import log from '@/logger';
 import { AnyClass } from '@/types';
 
-import { ControllerMap } from './controllers';
-import { AbstractController } from './controllers/utils';
-import { MiddlewareMap } from './middlewares';
-import { AbstractMiddleware } from './middlewares/utils';
+import { ControllerMap } from '../controllers';
+import { AbstractController } from '../controllers/utils';
+import { MiddlewareMap } from '../middlewares';
+import { AbstractMiddleware } from '../middlewares/utils';
 
 type Validations = Record<string, Validator.ValidationChain>;
 

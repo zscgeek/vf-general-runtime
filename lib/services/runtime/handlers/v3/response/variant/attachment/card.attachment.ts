@@ -6,7 +6,7 @@ import { CardAttachment as RawCardAttachment } from '../../response.types';
 import { VariableContext } from '../../variableContext/variableContext';
 import { BaseAttachment } from './base.attachment';
 
-export class CardAttachment extends BaseAttachment {
+export class CardAttachment extends BaseAttachment<RawCardAttachment> {
   constructor(protected readonly rawAttachment: RawCardAttachment, varContext: VariableContext) {
     super(rawAttachment, varContext);
   }

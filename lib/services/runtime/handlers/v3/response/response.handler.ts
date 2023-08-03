@@ -11,7 +11,6 @@ import { selectDiscriminator } from './selectDiscriminator/selectDiscriminator';
 import { translateVariants } from './translateVariants/translateVariants';
 import { VariableContext } from './variableContext/variableContext';
 import { buildVariant } from './variant/variant';
-import { VariantCollection } from './variantCollection/variantCollection';
 
 const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> = (_) => ({
   canHandle: (node) => {
@@ -72,11 +71,8 @@ const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> =
       buildVariant(discriminator.variants[varID], varContext, billedLLM, billedKB)
     );
 
-    // 5 - Construct a collection that independently tracks conditioned and unconditioned variants
-    const variantCollection = new VariantCollection(variants);
-
     // 6 - Construct sequence of traces by feeding variants into variant selector
-    const traces = await evaluateVariant(variantCollection);
+    const traces = await evaluateVariant(variants);
 
     // 7 - Add sequence of traces to the output
     traces.forEach((trace) => runtime.trace.addTrace(trace));

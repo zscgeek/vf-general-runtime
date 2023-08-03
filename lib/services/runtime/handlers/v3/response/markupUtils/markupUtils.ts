@@ -1,1 +1,1 @@
-export { serializeResolvedMarkup } from './serializeMarkup/serializeMarkup';
+export { serializeResolvedMarkup } from './serializeResolvedMarkup/serializeResolvedMarkup';

@@ -3,14 +3,14 @@ import { BaseTrace } from '@/../libs/packages/base-types/build/cjs';
 import { ResolvedVariant } from '../response.types';
 import { VariableContext } from '../variableContext/variableContext';
 import { buildAttachment } from './attachment/attachment';
-import { BaseAttachment } from './attachment/base.attachment';
-import { BaseCondition } from './condition/base.condition';
+import { Attachment } from './attachment/attachment.interface';
 import { buildCondition } from './condition/condition';
+import { Condition } from './condition/condition.interface';
 
 export abstract class BaseVariant<Variant extends ResolvedVariant> {
-  private cachedCondition: BaseCondition | null = null;
+  private cachedCondition: Condition | null = null;
 
-  private cachedAttachments: BaseAttachment[] | null = null;
+  private cachedAttachments: Attachment[] | null = null;
 
   protected constructor(protected readonly rawVariant: Variant, protected readonly varContext: VariableContext) {}
 
@@ -24,7 +24,7 @@ export abstract class BaseVariant<Variant extends ResolvedVariant> {
     return this.rawVariant.type;
   }
 
-  public get condition(): BaseCondition | null {
+  public get condition(): Condition | null {
     if (this.rawVariant.condition === null) return null;
     if (!this.cachedCondition) {
       this.cachedCondition = buildCondition(this.rawVariant.condition, this.varContext);
@@ -32,7 +32,7 @@ export abstract class BaseVariant<Variant extends ResolvedVariant> {
     return this.cachedCondition;
   }
 
-  public get attachments(): BaseAttachment[] {
+  public get attachments(): Attachment[] {
     if (!this.cachedAttachments) {
       this.cachedAttachments = this.rawVariant.attachmentOrder.map((id) =>
         buildAttachment(this.rawVariant.attachments[id], this.varContext)

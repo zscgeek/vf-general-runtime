@@ -1,8 +1,8 @@
 import { BaseNode, BaseTrace } from '@voiceflow/base-types';
 import VError from '@voiceflow/verror';
 
-import { CardLayout } from '../../response.types';
-import { CardAttachment } from '../../variant/attachment/card.attachment';
+import { AttachmentType, CardLayout } from '../../response.types';
+import { Attachment } from '../../variant/attachment/attachment.interface';
 
 function convertLayout(cardLayout: CardLayout): BaseNode.Carousel.CarouselLayout {
   switch (cardLayout) {
@@ -15,7 +15,11 @@ function convertLayout(cardLayout: CardLayout): BaseNode.Carousel.CarouselLayout
   }
 }
 
-const evaluateCard = (card: CardAttachment): BaseNode.Carousel.TraceCarouselCard => {
+const evaluateCard = (card: Attachment): BaseNode.Carousel.TraceCarouselCard => {
+  if (card.type !== AttachmentType.CARD) {
+    throw new Error('carousel expected card attachment but received a non-card attachment');
+  }
+
   const { id, title, description, buttons, imageUrl } = card.content;
   return {
     id, // $TODO$ - Is it reasonable to use the CMS resource ID? Previously this was defined using a frontend CUID
@@ -29,7 +33,7 @@ const evaluateCard = (card: CardAttachment): BaseNode.Carousel.TraceCarouselCard
   };
 };
 
-export const evaluateCarousel = (cardLayout: CardLayout, cards: CardAttachment[]): BaseTrace.Carousel => ({
+export const evaluateCarousel = (cardLayout: CardLayout, cards: Attachment[]): BaseTrace.Carousel => ({
   type: BaseTrace.TraceType.CAROUSEL,
   payload: {
     cards: cards.map(evaluateCard),

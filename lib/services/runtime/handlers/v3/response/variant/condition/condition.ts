@@ -2,12 +2,12 @@ import VError from '@voiceflow/verror';
 
 import { ConditionType, ResolvedCondition } from '../../response.types';
 import { VariableContext } from '../../variableContext/variableContext';
-import { BaseCondition } from './base.condition';
+import { Condition } from './condition.interface';
 import { ExpressionCondition } from './expression.condition';
 import { PromptCondition } from './prompt.condition';
 import { ScriptCondition } from './script.condition';
 
-export function buildCondition(rawCondition: ResolvedCondition, varContext: VariableContext): BaseCondition {
+export function buildCondition(rawCondition: ResolvedCondition, varContext: VariableContext): Condition {
   switch (rawCondition.type) {
     case ConditionType.PROMPT:
       return new PromptCondition(rawCondition, varContext);
