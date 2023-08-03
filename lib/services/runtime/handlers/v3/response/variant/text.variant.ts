@@ -13,12 +13,16 @@ export class TextVariant extends BaseVariant<ResolvedTextVariant> {
     return this.rawVariant.type;
   }
 
-  trace(): BaseTrace.V3.TextTrace {
-    return {
-      type: BaseTrace.TraceType.V3_TEXT,
-      payload: {
-        content: this.varContext.resolveMarkup(this.rawVariant.text),
-      },
-    };
+  trace(): BaseTrace.V3.TextTrace | null {
+    const resolvedMarkup = this.varContext.resolveMarkup(this.rawVariant.text);
+
+    return resolvedMarkup.length
+      ? {
+          type: BaseTrace.TraceType.V3_TEXT,
+          payload: {
+            content: resolvedMarkup,
+          },
+        }
+      : null;
   }
 }
