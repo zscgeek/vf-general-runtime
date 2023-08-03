@@ -1,5 +1,4 @@
 import { BaseMarkup as ResolvedMarkup } from '@voiceflow/base-types';
-import { replaceVariables } from '@voiceflow/common/build/cjs/utils';
 
 import { EntityReference, Markup, MarkupNode, MarkupSpan, VariableReference } from '../response.types';
 
@@ -44,10 +43,6 @@ export class VariableContext {
 
   public resolveMarkup(markup: Markup) {
     return this.resolveMarkupCollection(markup);
-  }
-
-  public resolve(content: string) {
-    return replaceVariables(content, this.variables);
   }
 
   public getVariableMap(): Record<string, unknown> {

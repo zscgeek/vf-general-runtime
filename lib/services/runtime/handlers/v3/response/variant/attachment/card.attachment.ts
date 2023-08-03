@@ -27,8 +27,8 @@ export class CardAttachment extends BaseAttachment<RawCardAttachment> {
     return {
       id,
       buttons: buttonOrder.map((id) => buttons[id]),
-      title: this.varContext.resolve(title),
-      description: this.varContext.resolve(description),
+      title,
+      description,
       imageUrl: serializeResolvedMarkup(this.varContext.resolveMarkup(url)),
     };
   }
