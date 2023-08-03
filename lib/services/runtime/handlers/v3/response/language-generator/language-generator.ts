@@ -9,7 +9,7 @@ import { KnowledgeBaseSettings } from './kb.interface';
 import { LLM } from './llm.generator';
 import { LLMSettings } from './llm.interface';
 
-export class LanguageGeneratorService {
+export class LanguageGenerator {
   public readonly llm: BaseLanguageGenerator<LLMSettings>;
 
   public readonly knowledgeBase: BaseLanguageGenerator<KnowledgeBaseSettings>;

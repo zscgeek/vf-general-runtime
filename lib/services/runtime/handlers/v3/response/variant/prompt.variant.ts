@@ -3,7 +3,7 @@ import { replaceVariables, sanitizeVariables } from '@voiceflow/common';
 import VError from '@voiceflow/verror';
 
 import { KnowledgeBaseErrorCode } from '../language-generator/kb.interface';
-import { LanguageGeneratorService } from '../language-generator/language-generator';
+import { LanguageGenerator } from '../language-generator/language-generator';
 import { serializeResolvedMarkup } from '../markupUtils/markupUtils';
 import { ResolvedPromptVariant, ResponseContext } from '../response.types';
 import { VariableContext } from '../variableContext/variableContext';
@@ -13,7 +13,7 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
   constructor(
     rawVariant: ResolvedPromptVariant,
     varContext: VariableContext,
-    private readonly langGenService: LanguageGeneratorService
+    private readonly langGen: LanguageGenerator
   ) {
     super(rawVariant, varContext);
   }
@@ -25,7 +25,7 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
 
     const resolvedSystem = systemPrompt ? serializeResolvedMarkup(this.varContext.resolveMarkup([systemPrompt])) : null;
 
-    const { output } = await this.langGenService.llm.generate(prompt, {
+    const { output } = await this.langGen.llm.generate(prompt, {
       ...(modelName && { model: modelName }),
       ...(temperature && { temperature }),
       ...(maxLength && { maxTokens: maxLength }),
@@ -45,7 +45,7 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
     prompt: string,
     chatHistory: BaseUtils.ai.Message[]
   ): Promise<BaseTrace.V3.TextTrace | BaseTrace.DebugTrace> {
-    const { output, error } = await this.langGenService.knowledgeBase.generate(prompt, {
+    const { output, error } = await this.langGen.knowledgeBase.generate(prompt, {
       chatHistory,
     });
 

@@ -1,7 +1,7 @@
 import { HandlerFactory } from '@/runtime';
 
 import { evaluateVariant } from './evaluateVariant/evaluateVariant';
-import { LanguageGeneratorService } from './language-generator/language-generator';
+import { LanguageGenerator } from './language-generator/language-generator';
 import { Channel, Language, ResponseNode } from './response.types';
 import { selectDiscriminator } from './selectDiscriminator/selectDiscriminator';
 import { translateVariants } from './translateVariants/translateVariants';
@@ -50,10 +50,10 @@ const BaseResponseHandler: HandlerFactory<ResponseNode, Record<string, never>> =
     const varContext = new VariableContext(variables.getState());
 
     // 4 - Wrap list of variants in Variant objects
-    const langGenServiec = new LanguageGeneratorService(runtime);
+    const langGen = new LanguageGenerator(runtime);
 
     const variants = discriminator.variantOrder.map((varID) =>
-      buildVariant(discriminator.variants[varID], varContext, langGenServiec)
+      buildVariant(discriminator.variants[varID], varContext, langGen)
     );
 
     // 6 - Construct sequence of traces by feeding variants into variant selector
