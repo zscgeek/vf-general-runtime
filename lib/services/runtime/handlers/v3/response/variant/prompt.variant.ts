@@ -19,6 +19,69 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
     private readonly chatHistory: BaseUtils.ai.Message[] = []
   ) {
     super(rawVariant, varContext);
+    this.chatHistory = this.truncateChatHistory(this.chatHistory, this.rawVariant.turns);
+  }
+
+  /**
+   * Linearly scan through the `chatHistory` and group the messages into the turns they
+   * belong to.
+   *
+   * For example, suppose we have `chatHistory` with the following messages:
+   * [
+   *    { role: 'assistant', content: 0 },
+   *    { role: 'user', content: 0 },
+   *    { role: 'assistant', content: 0 },
+   *    { role: 'user', content: 0 },
+   *    { role: 'assistant', content: 0 },
+   *    { role: 'assistant', content: 0 },
+   *    { role: 'assistant', content: 0 },
+   *    { role: 'user', content: 0 },
+   *    { role: 'assistant', content: 0 },
+   * ]
+   *
+   * Then, this would become:
+   * [
+   *    // Turn 0
+   *    [
+   *      { role: 'assistant', content: 0 },
+   *    ],
+   *    // Turn 1
+   *    [
+   *      { role: 'user', content: 0 },
+   *      { role: 'assistant', content: 0 },
+   *    ],
+   *    // Turn 2
+   *    [
+   *      { role: 'user', content: 0 },
+   *      { role: 'assistant', content: 0 },
+   *      { role: 'assistant', content: 0 },
+   *      { role: 'assistant', content: 0 },
+   *    ],
+   *    // Turn 3
+   *    [
+   *      { role: 'user', content: 0 },
+   *      { role: 'assistant', content: 0 },
+   *    ]
+   * ]
+   */
+  private truncateChatHistory(chatHistory: BaseUtils.ai.Message[], maxTurns: number) {
+    const messagesByTurn: BaseUtils.ai.Message[][] = [[]];
+    let inBotMessages = false;
+
+    chatHistory.forEach((message) => {
+      if (inBotMessages && message.role === BaseUtils.ai.Role.USER) {
+        inBotMessages = false;
+        messagesByTurn.push([]);
+      } else if (!inBotMessages && message.role === BaseUtils.ai.Role.ASSISTANT) {
+        inBotMessages = true;
+      } else if (message.role !== BaseUtils.ai.Role.SYSTEM) {
+        throw new Error('prompt variant received an unexpected message from the previous chat history');
+      }
+
+      messagesByTurn[messagesByTurn.length - 1].push(message);
+    });
+
+    return messagesByTurn.slice(messagesByTurn.length - maxTurns).flat();
   }
 
   private async resolveByLLM(prompt: string): Promise<BaseTrace.V3.TextTrace> {

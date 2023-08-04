@@ -127,7 +127,7 @@ export class KnowledgeBase implements BaseLanguageGenerator<KnowledgeBaseSetting
       };
     }
 
-    const generatedAnswer = await this.promptAnswerSynthesis(prompt, chatHistory, kbResult.chunks);
+    const generatedAnswer = await this.promptAnswerSynthesis(prompt, chatHistory, kbResult.chunks, {});
 
     if (!generatedAnswer.output) {
       return {
