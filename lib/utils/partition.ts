@@ -3,17 +3,22 @@ export class Partition<Key extends string, Value> {
 
   private readonly groupNames: Set<Key> = new Set();
 
-  constructor(items: Value[], getGroupName: (val: Value) => Key) {
+  constructor(items: Value[], groupNames: Key[], getGroupName: (val: Value) => Key) {
+    groupNames.forEach((name) => {
+      this.partitionGroups.set(name, []);
+      this.groupNames.add(name);
+    });
+
     items.forEach((item) => {
       const groupName = getGroupName(item);
+      if (!this.groupNames.has(groupName)) {
+        throw new Error('received an item with a group name that was not specified in `groupNames`');
+      }
       if (!this.partitionGroups.has(groupName)) {
         this.partitionGroups.set(groupName, []);
         this.groupNames.add(groupName);
       }
-      const group = this.partitionGroups.get(groupName);
-      if (!group) {
-        throw new Error('`getGroup` returned a group name that was not specified in `groupNames`');
-      }
+      const group = this.partitionGroups.get(groupName)!;
       group.push(item);
     });
   }

@@ -18,7 +18,7 @@ const selectConditioned = (variants: Partition<VariantGroup, Variant>) => {
 
 export async function evaluateVariant(variants: Variant[]): Promise<Array<BaseTrace.BaseTraceFrame>> {
   // 0 - Sort variants into conditioned and unconditioned
-  const variantCollection = new Partition<VariantGroup, Variant>(variants, (val) =>
+  const variantCollection = new Partition<VariantGroup, Variant>(variants, Object.values(VariantGroup), (val) =>
     val.condition ? VariantGroup.Conditioned : VariantGroup.Unconditioned
   );
 
@@ -26,7 +26,11 @@ export async function evaluateVariant(variants: Variant[]): Promise<Array<BaseTr
   const variant = selectConditioned(variantCollection) ?? selectUnconditioned(variantCollection);
 
   // 2 - Separate the card and non-card attachments
-  const attachmentCollection = new Partition(variant.attachments, (attach) => attach.type);
+  const attachmentCollection = new Partition(
+    variant.attachments,
+    Object.values(AttachmentType),
+    (attach) => attach.type
+  );
 
   // 3 - Output response trace
   const responseTrace = await variant.trace();
