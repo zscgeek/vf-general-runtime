@@ -21,6 +21,13 @@ export abstract class GPTAIModel extends AIModel {
   constructor(config: Partial<Config>) {
     super();
 
+    // prioritize openai until azure latency spikes are figured out
+    if (config.OPENAI_API_KEY) {
+      this.openAIClient = new OpenAIApi(new Configuration({ apiKey: config.OPENAI_API_KEY }));
+
+      return;
+    }
+
     if (config.AZURE_ENDPOINT && config.AZURE_OPENAI_API_KEY && config.AZURE_GPT35_DEPLOYMENTS) {
       // remove trailing slash
       const endpoint = config.AZURE_ENDPOINT.replace(/\/$/, '');
@@ -34,12 +41,6 @@ export abstract class GPTAIModel extends AIModel {
           },
         })
       );
-      return;
-    }
-
-    if (config.OPENAI_API_KEY) {
-      this.openAIClient = new OpenAIApi(new Configuration({ apiKey: config.OPENAI_API_KEY }));
-
       return;
     }
 
