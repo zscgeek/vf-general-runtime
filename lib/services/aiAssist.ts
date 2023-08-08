@@ -70,7 +70,7 @@ import { AbstractManager } from './utils';
  * ```
  */
 class AIAssist extends AbstractManager implements ContextHandler {
-  private static readonly MAX_STOREABLE_TURNS = 10;
+  private static readonly MAX_STOREABLE_TURNS = 15;
 
   private static readonly MSGS_PER_TURN = 2; // 1 record for user input + 1 record for assistant output
 

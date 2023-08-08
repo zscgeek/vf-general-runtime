@@ -1,4 +1,5 @@
 import { BaseTrace, BaseUtils } from '@voiceflow/base-types';
+import { InternalException } from '@voiceflow/exception';
 import VError from '@voiceflow/verror';
 import { match } from 'ts-pattern';
 
@@ -84,18 +85,28 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
     return messagesByTurn.slice(messagesByTurn.length - maxTurns).flat();
   }
 
-  private async resolveByLLM(prompt: string): Promise<BaseTrace.V3.TextTrace> {
+  private getLocalPersona(): BaseUtils.ai.AIModelParams | null {
+    if (!this.rawVariant.prompt) return null;
+
     const {
-      persona: { model: modelName, temperature, maxLength, systemPrompt },
+      persona: { model, temperature, maxLength, systemPrompt },
     } = this.rawVariant.prompt;
 
     const resolvedSystem = systemPrompt ? serializeResolvedMarkup(this.varContext.resolveMarkup([systemPrompt])) : null;
 
-    const { output } = await this.langGen.llm.generate(prompt, {
-      ...(modelName && { model: modelName }),
+    return {
+      ...(model && { model }),
       ...(temperature && { temperature }),
       ...(maxLength && { maxTokens: maxLength }),
       ...(systemPrompt && { prompt: resolvedSystem }),
+    };
+  }
+
+  private async resolveByLLM(prompt: string): Promise<BaseTrace.V3.TextTrace> {
+    const persona = this.getLocalPersona();
+
+    const { output } = await this.langGen.llm.generate(prompt, {
+      ...persona,
       chatHistory: this.chatHistory,
     });
 
@@ -108,8 +119,10 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
   }
 
   private async resolveByKB(prompt: string): Promise<ArrayOrElement<BaseTrace.V3.TextTrace | BaseTrace.V3.DebugTrace>> {
+    const persona = this.getLocalPersona();
     const genResult = await this.langGen.knowledgeBase.generate(prompt, {
       chatHistory: this.chatHistory,
+      ...(persona && { persona }),
     });
 
     if (genResult.output === null) {
@@ -167,6 +180,12 @@ export class PromptVariant extends BaseVariant<ResolvedPromptVariant> {
   }
 
   async trace(): Promise<ArrayOrElement<BaseTrace.V3.TextTrace | BaseTrace.V3.DebugTrace>> {
+    if (!this.rawVariant.prompt?.text) {
+      throw new InternalException({
+        message: 'prompt-type variant is missing a prompt and so it could not be resolved',
+      });
+    }
+
     const { text } = this.rawVariant.prompt;
     const resolvedPrompt = serializeResolvedMarkup(this.varContext.resolveMarkup(text));
 

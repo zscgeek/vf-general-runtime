@@ -25,7 +25,7 @@ export class LLM implements BaseLanguageGenerator<LLMSettings> {
   }
 
   public async generate(prompt: string, settings: LLMSettings): Promise<GenerateReturn> {
-    const { model: modelName, temperature, maxTokens, system = '', chatHistory } = settings;
+    const { model: modelName, temperature, maxTokens, system = '', chatHistory = [] } = settings;
 
     const model = AI.get(modelName);
 

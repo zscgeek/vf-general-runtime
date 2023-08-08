@@ -191,7 +191,7 @@ export interface ResolvedPromptVariant extends BaseResolvedVariant {
       maxLength: number | null;
       systemPrompt: string | null;
     };
-  };
+  } | null;
 }
 
 export type ResolvedVariant = ResolvedPromptVariant | ResolvedJSONVariant | ResolvedTextVariant;

@@ -4,6 +4,7 @@ import { AIResponse } from '../../../utils/ai';
 
 export interface KnowledgeBaseSettings {
   chatHistory: BaseUtils.ai.Message[];
+  persona?: BaseUtils.ai.AIModelParams;
 }
 
 export interface KnowledgeBaseConfig {

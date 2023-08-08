@@ -48,7 +48,6 @@ export class KnowledgeBase implements BaseLanguageGenerator<KnowledgeBaseSetting
       system,
       temperature,
       maxTokens,
-      chatHistory: [],
     });
   }
 
@@ -98,11 +97,10 @@ export class KnowledgeBase implements BaseLanguageGenerator<KnowledgeBaseSetting
       system,
       temperature,
       maxTokens,
-      chatHistory: [],
     });
   }
 
-  public async generate(prompt: string, { chatHistory }: KnowledgeBaseSettings): Promise<AnswerReturn> {
+  public async generate(prompt: string, { chatHistory, persona }: KnowledgeBaseSettings): Promise<AnswerReturn> {
     const generatedQuestion = await this.promptQuestionSynthesis(prompt, chatHistory);
 
     if (!generatedQuestion.output) {
@@ -127,7 +125,8 @@ export class KnowledgeBase implements BaseLanguageGenerator<KnowledgeBaseSetting
       };
     }
 
-    const generatedAnswer = await this.promptAnswerSynthesis(prompt, chatHistory, kbResult.chunks, {});
+    const kbPersona = persona ?? this.knowledgeBaseConfig.kbStrategy?.summarization;
+    const generatedAnswer = await this.promptAnswerSynthesis(prompt, chatHistory, kbResult.chunks, kbPersona);
 
     if (!generatedAnswer.output) {
       return {
