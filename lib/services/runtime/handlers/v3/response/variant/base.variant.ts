@@ -13,7 +13,7 @@ export abstract class BaseVariant<Variant extends ResolvedVariant> {
 
   private cachedAttachments: Attachment[] | null = null;
 
-  protected constructor(protected readonly rawVariant: Variant, protected readonly varContext: VariableContext) {}
+  public constructor(protected readonly rawVariant: Variant, protected readonly varContext: VariableContext) {}
 
   public abstract trace(): ArrayOrElement<BaseTrace.AnyTrace> | Promise<ArrayOrElement<BaseTrace.AnyTrace>> | null;
 
