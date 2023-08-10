@@ -31,8 +31,9 @@ class ExpressMiddleware {
     //   origin: false,
     //   credentials: true,
     // };
-
+    // TODO: Enabled all cors for testing
     app.use(cors());
+
     app.use(helmet());
 
     app.use(compression());
