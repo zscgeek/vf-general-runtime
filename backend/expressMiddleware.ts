@@ -27,12 +27,12 @@ class ExpressMiddleware {
     }
 
     // Reflect requested object for effectively a wildcard CORS setting
-    const corsOptions = {
-      origin: true,
-      credentials: true,
-    };
+    // const corsOptions = {
+    //   origin: false,
+    //   credentials: true,
+    // };
 
-    app.use(cors(corsOptions));
+    app.use(cors());
     app.use(helmet());
 
     app.use(compression());
