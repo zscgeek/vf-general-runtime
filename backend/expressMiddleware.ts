@@ -3,7 +3,7 @@ import VError from '@voiceflow/verror';
 import compression from 'compression';
 import timeout from 'connect-timeout';
 import cookieParser from 'cookie-parser';
-// import cors from 'cors';
+import cors from 'cors';
 import * as Express from 'express';
 import helmet from 'helmet';
 import _isObject from 'lodash/isObject';
@@ -27,17 +27,12 @@ class ExpressMiddleware {
     }
 
     // Reflect requested object for effectively a wildcard CORS setting
-    // const corsOptions = {
-    //   origin: false,
-    //   credentials: true,
-    // };
-    // TODO: Enabled all cors for testing
-    app.use((_, res, next) => {
-      res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      next();
-    });
+    const corsOptions = {
+      origin: true,
+      credentials: true,
+    };
+
+    app.use(cors(corsOptions));
 
     app.use(helmet());
 
