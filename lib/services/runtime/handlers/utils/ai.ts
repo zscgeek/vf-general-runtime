@@ -2,7 +2,7 @@ import { BaseNode, BaseUtils } from '@voiceflow/base-types';
 import { replaceVariables, sanitizeVariables } from '@voiceflow/common';
 
 import AI from '@/lib/clients/ai';
-import { CompletionOptions } from '@/lib/clients/ai/types';
+import { AIModel, CompletionOptions } from '@/lib/clients/ai/types';
 import { QuotaName } from '@/lib/services/billing';
 import log from '@/logger';
 import { Runtime } from '@/runtime';
@@ -102,9 +102,14 @@ export const fetchPrompt = async (
 export const consumeResources = async (
   reference: string,
   runtime: Runtime,
+  model: AIModel | null,
   resources: { tokens?: number; queryTokens?: number; answerTokens?: number } | null
 ) => {
   const { tokens = 0, queryTokens = 0, answerTokens = 0 } = resources ?? {};
+  const multiplier = model?.tokenMultiplier ?? 1;
+  const baseTokens = multiplier === 0 ? 0 : Math.ceil(tokens / multiplier);
+  const baseQueryTokens = multiplier === 0 ? 0 : Math.ceil(queryTokens / multiplier);
+  const baseAnswerTokens = multiplier === 0 ? 0 : Math.ceil(answerTokens / multiplier);
 
   const workspaceID = runtime.project?.teamID;
 
@@ -117,7 +122,11 @@ export const consumeResources = async (
   }
 
   runtime.trace.debug(
-    `__${reference}__ \`tokens: {total: ${tokens}, query: ${queryTokens}, answer: ${answerTokens}}\``
+    `__${reference}__
+    <br /> Model: \`${model?.modelRef}\`
+    <br /> Token Multiplier: \`${multiplier}x\`
+    <br /> Token Consumption: \`{total: ${baseTokens}, query: ${baseQueryTokens}, answer: ${baseAnswerTokens}}\`
+    <br /> Post-Multiplier Token Consumption: \`{total: ${tokens}, query: ${queryTokens}, answer: ${answerTokens}}\``
   );
 };
 

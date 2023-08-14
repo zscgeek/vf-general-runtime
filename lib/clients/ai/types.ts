@@ -7,6 +7,10 @@ export abstract class AIModel {
 
   protected TOKEN_MULTIPLIER = 1;
 
+  get tokenMultiplier() {
+    return this.TOKEN_MULTIPLIER;
+  }
+
   abstract generateCompletion(
     prompt: string,
     params: BaseUtils.ai.AIModelParams,
