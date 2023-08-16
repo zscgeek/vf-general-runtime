@@ -75,7 +75,13 @@ export const answerSynthesis = async ({
       If you don't know the answer say exactly "NOT_FOUND".\n\nQ: ${question}\nA: `;
 
     response = await fetchPrompt({ ...options, prompt, mode: BaseUtils.ai.PROMPT_MODE.PROMPT }, variables);
-  } else if ([BaseUtils.ai.GPT_MODEL.CLAUDE_INSTANT_V1, BaseUtils.ai.GPT_MODEL.CLAUDE_V1].includes(model)) {
+  } else if (
+    [
+      BaseUtils.ai.GPT_MODEL.CLAUDE_INSTANT_V1,
+      BaseUtils.ai.GPT_MODEL.CLAUDE_V1,
+      BaseUtils.ai.GPT_MODEL.CLAUDE_V2,
+    ].includes(model)
+  ) {
     const prompt = dedent`
       <information>
         ${context}
@@ -83,7 +89,7 @@ export const answerSynthesis = async ({
 
       If the question is not relevant to the provided <information>, print("NOT_FOUND") and return.
       Otherwise, you may - very concisely - answer the user using only the relevant <information>.
-      
+
       <question>${question}</question>`;
 
     response = await fetchPrompt({ ...options, prompt, mode: BaseUtils.ai.PROMPT_MODE.PROMPT }, variables);
