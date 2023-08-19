@@ -5,14 +5,13 @@ import { GPT4_ABLE_PLAN } from '@/lib/clients/ai/types';
 import { HandlerFactory } from '@/runtime';
 
 import { checkTokens, consumeResources, fetchPrompt } from './utils/ai';
-import { promptSynthesis } from './utils/knowledgeBase';
+import { knowledgeBaseInteract } from './utils/knowledgeBase';
 
 const AISetHandler: HandlerFactory<BaseNode.AISet.Node> = () => ({
   canHandle: (node) => node.type === BaseNode.NodeType.AI_SET,
   // eslint-disable-next-line sonarjs/cognitive-complexity
   handle: async (node, runtime, variables) => {
     const nextID = node.nextId ?? null;
-    const workspaceID = runtime.project?.teamID;
     const generativeModel = AI.get(node.model);
     const kbModel = AI.get(runtime.project?.knowledgeBase?.settings?.summarization.model);
 
@@ -33,19 +32,13 @@ const AISetHandler: HandlerFactory<BaseNode.AISet.Node> = () => ({
             if (!variable) return emptyResult;
 
             if (node.source === BaseUtils.ai.DATA_SOURCE.KNOWLEDGE_BASE) {
-              const response = await promptSynthesis(
-                runtime.version!.projectID,
-                workspaceID,
-                {
-                  ...runtime.project?.knowledgeBase?.settings?.summarization,
-                  mode,
-                  prompt,
-                },
-                variables.getState(),
-                runtime
-              );
+              const response = await knowledgeBaseInteract(runtime, {
+                ...runtime.project?.knowledgeBase?.settings?.summarization,
+                mode: BaseUtils.ai.PROMPT_MODE.PROMPT,
+                prompt,
+              });
 
-              variables.set(variable, response?.output);
+              variables.set(variable, response?.output || 0);
               const tokens = response?.tokens ?? 0;
               const queryTokens = response?.queryTokens ?? 0;
               const answerTokens = response?.answerTokens ?? 0;

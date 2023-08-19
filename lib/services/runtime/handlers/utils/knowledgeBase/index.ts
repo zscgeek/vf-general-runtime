@@ -9,8 +9,8 @@ import { Runtime } from '@/runtime';
 import { Output } from '../../../types';
 import { getMemoryMessages } from '../ai';
 import { generateOutput } from '../output';
-import { answerSynthesis, promptAnswerSynthesis } from './answer';
-import { promptQuestionSynthesis, questionSynthesis } from './question';
+import { answerSynthesis } from './answer';
+import { questionSynthesis } from './question';
 import { CloudEnv } from './types';
 
 export { answerSynthesis, questionSynthesis };
@@ -74,6 +74,42 @@ export const fetchKnowledgeBase = async (
   }
 };
 
+export const knowledgeBaseInteract = async (
+  runtime: Runtime,
+  params: BaseUtils.ai.AIContextParams & BaseUtils.ai.AIModelParams
+) => {
+  const { prompt } = params;
+
+  const memory: BaseUtils.ai.Message[] = [];
+
+  // only do question synthesis if mode is memory or memory_prompt
+  if ([BaseUtils.ai.PROMPT_MODE.MEMORY_PROMPT, BaseUtils.ai.PROMPT_MODE.MEMORY].includes(params.mode)) {
+    memory.push(...getMemoryMessages(runtime.variables.getState()));
+  }
+
+  const query = await questionSynthesis(prompt, memory);
+  if (!query?.output) return null;
+
+  const data = await fetchKnowledgeBase(runtime.project!._id, runtime.project?.teamID, query.output);
+  if (!data) return null;
+
+  // if there is no memory, query is just the same as prompt
+  const answer = await answerSynthesis({
+    question: query.output,
+    options: params,
+    data,
+  });
+
+  if (!answer?.output) return null;
+
+  const tokens = (query.tokens ?? 0) + (answer.tokens ?? 0);
+
+  const queryTokens = query.queryTokens + answer.queryTokens;
+  const answerTokens = query.answerTokens + answer.answerTokens;
+
+  return { ...answer, ...data, query, tokens, queryTokens, answerTokens };
+};
+
 export const knowledgeBaseNoMatch = async (
   runtime: Runtime
 ): Promise<{ output?: Output; tokens: number; queryTokens: number; answerTokens: number } | null> => {
@@ -88,32 +124,14 @@ export const knowledgeBaseNoMatch = async (
   if (!input) return null;
 
   try {
-    // expiremental module, frame the question
-    const memory = getMemoryMessages(runtime.variables.getState());
-
-    const question = await questionSynthesis(input, memory);
-    if (!question?.output) return null;
-
-    const data = await fetchKnowledgeBase(
-      runtime.project._id,
-      runtime.project.teamID,
-      question.output,
-      runtime.project?.knowledgeBase?.settings
-    );
-    if (!data) return null;
-
-    const answer = await answerSynthesis({
-      question: question.output,
-      data,
-      options: runtime.project?.knowledgeBase?.settings?.summarization,
-      variables: runtime.variables.getState(),
+    const answer = await knowledgeBaseInteract(runtime, {
+      mode: BaseUtils.ai.PROMPT_MODE.MEMORY,
+      prompt: input,
     });
 
     if (!answer) return null;
 
-    const queryTokens = question.queryTokens + answer.queryTokens;
-    const answerTokens = question.answerTokens + answer.answerTokens;
-    const tokens = queryTokens + answerTokens;
+    const { tokens, queryTokens, answerTokens, chunks, query } = answer;
 
     // KB NOT_FOUND still uses tokens
     if (!answer.output) return { tokens, queryTokens, answerTokens };
@@ -124,14 +142,14 @@ export const knowledgeBaseNoMatch = async (
     runtime.trace.addTrace({
       type: 'knowledgeBase',
       payload: {
-        chunks: data.chunks.map(({ score, documentID }) => ({
+        chunks: chunks.map(({ score, documentID }) => ({
           score,
           documentID,
           documentData: documents[documentID]?.data,
         })),
         query: {
-          messages: question.messages,
-          output: question.output,
+          messages: query.messages,
+          output: query.output,
         },
       },
     } as any);
@@ -144,64 +162,6 @@ export const knowledgeBaseNoMatch = async (
     };
   } catch (err) {
     log.error(`[knowledge-base no match] ${log.vars({ err })}`);
-    return null;
-  }
-};
-
-export const promptSynthesis = async (
-  projectID: string,
-  workspaceID: string | undefined,
-  params: BaseUtils.ai.AIContextParams & BaseUtils.ai.AIModelParams,
-  variables: Record<string, any>,
-  runtime?: Runtime
-) => {
-  try {
-    const { prompt } = params;
-
-    const memory = getMemoryMessages(variables);
-
-    const query = await promptQuestionSynthesis({ prompt, variables, memory });
-    if (!query || !query.output) return null;
-
-    const data = await fetchKnowledgeBase(projectID, workspaceID, query.output);
-
-    if (!data) return null;
-
-    const answer = await promptAnswerSynthesis({
-      prompt,
-      options: params,
-      data,
-      memory,
-      variables,
-    });
-
-    if (!answer?.output) return null;
-
-    if (runtime) {
-      runtime.trace.addTrace({
-        type: 'knowledgeBase',
-        payload: {
-          chunks: data.chunks.map(({ score, documentID }) => ({
-            score,
-            documentID,
-            documentData: runtime.project?.knowledgeBase?.documents[documentID]?.data,
-          })),
-          query: {
-            messages: query.messages,
-            output: query.output,
-          },
-        },
-      } as any);
-    }
-
-    const tokens = (query.tokens ?? 0) + (answer.tokens ?? 0);
-
-    const queryTokens = query.queryTokens + answer.queryTokens;
-    const answerTokens = query.answerTokens + answer.answerTokens;
-
-    return { ...answer, ...data, query, tokens, queryTokens, answerTokens };
-  } catch (err) {
-    log.error(`[knowledge-base prompt] ${log.vars({ err })}`);
     return null;
   }
 };

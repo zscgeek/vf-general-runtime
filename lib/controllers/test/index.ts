@@ -5,7 +5,7 @@ import _merge from 'lodash/merge';
 
 import AI from '@/lib/clients/ai';
 import { getAPIBlockHandlerOptions } from '@/lib/services/runtime/handlers/api';
-import { fetchKnowledgeBase, promptSynthesis } from '@/lib/services/runtime/handlers/utils/knowledgeBase';
+import { fetchKnowledgeBase } from '@/lib/services/runtime/handlers/utils/knowledgeBase';
 import { answerSynthesis } from '@/lib/services/runtime/handlers/utils/knowledgeBase/answer';
 import log from '@/logger';
 import { callAPI } from '@/runtime/lib/Handlers/api/utils';
@@ -56,6 +56,7 @@ class TestController extends AbstractController {
     }
   }
 
+  // TODO: delete after transition to KB no match
   async testKnowledgeBasePrompt(req: Request) {
     const api = await this.services.dataAPI.get(req.headers.authorization);
 
@@ -63,11 +64,21 @@ class TestController extends AbstractController {
     const project = await api.getProject(req.body.projectID || req.headers.authorization);
     const settings = _merge({}, project.knowledgeBase?.settings, req.body.settings);
 
-    const { prompt } = req.body;
+    const { prompt: question } = req.body;
 
-    const answer = await promptSynthesis(project._id, project.teamID, { ...settings.summarization, prompt }, {});
+    const data = await fetchKnowledgeBase(project._id, project.teamID, question, settings);
 
-    if (!answer?.output) return { output: null };
+    if (!data) return { output: null, chunks: [] };
+
+    // attach metadata to chunks
+    const chunks = data.chunks.map((chunk) => ({
+      ...chunk,
+      source: project.knowledgeBase?.documents?.[chunk.documentID]?.data,
+    }));
+
+    const answer = await answerSynthesis({ question, data, options: settings?.summarization });
+
+    if (!answer?.output) return { output: null, chunks };
 
     if (typeof answer.tokens === 'number' && answer.tokens > 0) {
       await this.services.billing

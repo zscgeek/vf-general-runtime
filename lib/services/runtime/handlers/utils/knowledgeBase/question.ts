@@ -1,12 +1,11 @@
 import { BaseUtils } from '@voiceflow/base-types';
-import dedent from 'dedent';
 
 import { AIResponse, EMPTY_AI_RESPONSE, fetchChat } from '../ai';
 
 const DEFAULT_QUESTION_SYNTHESIS_RETRY_DELAY_MS = 1500;
 const DEFAULT_QUESTION_SYNTHESIS_RETRIES = 2;
 
-export const questionSynthesis = async (question: string, memory: BaseUtils.ai.Message[]): Promise<AIResponse> => {
+export const questionSynthesis = async (question: string, memory: BaseUtils.ai.Message[] = []): Promise<AIResponse> => {
   if (memory.length > 1) {
     const contextMessages: BaseUtils.ai.Message[] = [...memory];
 
@@ -43,49 +42,4 @@ export const questionSynthesis = async (question: string, memory: BaseUtils.ai.M
     ...EMPTY_AI_RESPONSE,
     output: question,
   };
-};
-
-export const promptQuestionSynthesis = async ({
-  prompt,
-  memory,
-  variables,
-  options: { model = BaseUtils.ai.GPT_MODEL.GPT_3_5_turbo, system = '', temperature, maxTokens } = {},
-}: {
-  prompt: string;
-  memory: BaseUtils.ai.Message[];
-  variables?: Record<string, any>;
-  options?: Partial<BaseUtils.ai.AIModelParams>;
-}): Promise<AIResponse> => {
-  const options = { model, system, temperature, maxTokens };
-
-  let content: string;
-
-  if (memory.length) {
-    const history = memory.map((turn) => `${turn.role}: ${turn.content}`).join('\n');
-    content = dedent`
-    <Conversation_History>
-      ${history}
-    </Conversation_History>
-
-    <Instructions>${prompt}</Instructions>
-
-    Using <Conversation_History> as context, you are searching a text knowledge base to fulfill <Instructions>. Write a sentence to search against.`;
-  } else {
-    content = dedent`
-    <Instructions>${prompt}</Instructions>
-
-    You can search a text knowledge base to fulfill <Instructions>. Write a sentence to search against.`;
-  }
-
-  const questionMessages: BaseUtils.ai.Message[] = [
-    {
-      role: BaseUtils.ai.Role.USER,
-      content,
-    },
-  ];
-
-  return fetchChat({ ...options, messages: questionMessages }, variables, {
-    retries: DEFAULT_QUESTION_SYNTHESIS_RETRIES,
-    retryDelay: DEFAULT_QUESTION_SYNTHESIS_RETRY_DELAY_MS,
-  });
 };

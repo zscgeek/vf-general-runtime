@@ -40,6 +40,7 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
     controllers.test.testKnowledgeBase
   );
 
+  // TODO: delete after transition to KB no match
   router.post(
     '/:workspaceID/knowledge-base-prompt',
     middlewares.auth.authorize(['workspace:READ']),

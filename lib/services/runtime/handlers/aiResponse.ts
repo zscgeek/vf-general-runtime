@@ -8,7 +8,7 @@ import { HandlerFactory } from '@/runtime';
 import { FrameType, Output } from '../types';
 import { addOutputTrace, getOutputTrace } from '../utils';
 import { AIResponse, checkTokens, consumeResources, fetchPrompt } from './utils/ai';
-import { promptSynthesis } from './utils/knowledgeBase';
+import { knowledgeBaseInteract } from './utils/knowledgeBase';
 import { generateOutput } from './utils/output';
 import { getVersionDefaultVoice } from './utils/version';
 
@@ -16,7 +16,8 @@ const AIResponseHandler: HandlerFactory<VoiceNode.AIResponse.Node> = () => ({
   canHandle: (node) => node.type === BaseNode.NodeType.AI_RESPONSE,
   handle: async (node, runtime, variables) => {
     const nextID = node.nextId ?? null;
-    const workspaceID = runtime.project?.teamID;
+    const elseID = node.elseId ?? null;
+
     const generativeModel = AI.get(node.model);
     const kbModel = AI.get(runtime.project?.knowledgeBase?.settings?.summarization.model);
 
@@ -33,20 +34,20 @@ const AIResponseHandler: HandlerFactory<VoiceNode.AIResponse.Node> = () => ({
     }
 
     if (node.source === BaseUtils.ai.DATA_SOURCE.KNOWLEDGE_BASE) {
-      const { prompt, mode } = node;
+      const { prompt } = node;
 
-      const answer = await promptSynthesis(
-        runtime.version!.projectID,
-        workspaceID,
-        { ...runtime.project?.knowledgeBase?.settings?.summarization, prompt, mode },
-        variables.getState(),
-        runtime
-      );
+      const answer = await knowledgeBaseInteract(runtime, {
+        ...runtime.project?.knowledgeBase?.settings?.summarization,
+        prompt,
+        mode: BaseUtils.ai.PROMPT_MODE.PROMPT,
+      });
 
       await consumeResources('AI Response KB', runtime, kbModel, answer);
 
+      if (!answer?.output) return elseID;
+
       const output = generateOutput(
-        answer?.output || 'Unable to find relevant answer.',
+        answer.output,
         runtime.project,
         node.voice ?? getVersionDefaultVoice(runtime.version)
       );
