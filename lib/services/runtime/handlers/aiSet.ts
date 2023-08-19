@@ -38,7 +38,7 @@ const AISetHandler: HandlerFactory<BaseNode.AISet.Node> = () => ({
                 prompt,
               });
 
-              variables.set(variable, response?.output || 0);
+              variables.set(variable, response?.output ?? '[not found]');
               const tokens = response?.tokens ?? 0;
               const queryTokens = response?.queryTokens ?? 0;
               const answerTokens = response?.answerTokens ?? 0;
