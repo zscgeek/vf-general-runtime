@@ -127,7 +127,7 @@ class TestController extends AbstractController {
 
     const answer = await answerSynthesis({ question, data, options: settings?.summarization });
 
-    if (!answer?.output) return { output: '[not found]', chunks };
+    if (!answer?.output) return { output: BaseUtils.ai.KNOWLEDGE_BASE_NOT_FOUND, chunks };
 
     // do this async to not block the response
     if (typeof answer.tokens === 'number' && answer.tokens > 0) {

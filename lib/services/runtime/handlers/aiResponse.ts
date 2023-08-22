@@ -1,4 +1,5 @@
 import { BaseNode, BaseUtils } from '@voiceflow/base-types';
+import { Utils } from '@voiceflow/common';
 import { VoiceNode } from '@voiceflow/voice-types';
 
 import AI from '@/lib/clients/ai';
@@ -16,7 +17,6 @@ const AIResponseHandler: HandlerFactory<VoiceNode.AIResponse.Node> = () => ({
   canHandle: (node) => node.type === BaseNode.NodeType.AI_RESPONSE,
   handle: async (node, runtime, variables) => {
     const nextID = node.nextId ?? null;
-    const elseID = node.elseId ?? null;
 
     const generativeModel = AI.get(node.model);
     const kbModel = AI.get(runtime.project?.knowledgeBase?.settings?.summarization.model);
@@ -44,10 +44,12 @@ const AIResponseHandler: HandlerFactory<VoiceNode.AIResponse.Node> = () => ({
 
       await consumeResources('AI Response KB', runtime, kbModel, answer);
 
-      if (!answer?.output) return elseID;
+      // first versions of AI response KB didn't have elseId
+      // checking for the property is required to not break existing flows
+      if (!answer?.output && Utils.object.hasProperty(node, 'elseId')) return node.elseId ?? null;
 
       const output = generateOutput(
-        answer.output,
+        answer?.output || 'Unable to find relevant answer.',
         runtime.project,
         node.voice ?? getVersionDefaultVoice(runtime.version)
       );
