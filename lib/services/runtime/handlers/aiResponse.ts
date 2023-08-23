@@ -54,6 +54,20 @@ const AIResponseHandler: HandlerFactory<VoiceNode.AIResponse.Node> = () => ({
         node.voice ?? getVersionDefaultVoice(runtime.version)
       );
 
+      runtime.trace.addTrace({
+        type: 'knowledgeBase',
+        payload: {
+          chunks: answer?.chunks.map(({ score, documentID }) => ({
+            score,
+            documentID,
+            documentData: runtime.project?.knowledgeBase?.documents?.[documentID]?.data,
+          })),
+          query: {
+            output: answer?.query.output,
+          },
+        },
+      } as any);
+
       addOutputTrace(
         runtime,
         getOutputTrace({
