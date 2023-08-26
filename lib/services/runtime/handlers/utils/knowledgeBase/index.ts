@@ -100,7 +100,7 @@ export const knowledgeBaseInteract = async (
     data,
   });
 
-  if (!answer?.output) return null;
+  if (!answer) return null;
 
   const tokens = (query.tokens ?? 0) + (answer.tokens ?? 0);
 

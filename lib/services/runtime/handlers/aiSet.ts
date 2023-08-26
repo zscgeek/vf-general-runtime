@@ -38,7 +38,7 @@ const AISetHandler: HandlerFactory<BaseNode.AISet.Node> = () => ({
                 prompt,
               });
 
-              variables.set(variable, response?.output ?? BaseUtils.ai.KNOWLEDGE_BASE_NOT_FOUND);
+              variables.set(variable, response?.output || BaseUtils.ai.KNOWLEDGE_BASE_NOT_FOUND);
               const tokens = response?.tokens ?? 0;
               const queryTokens = response?.queryTokens ?? 0;
               const answerTokens = response?.answerTokens ?? 0;
