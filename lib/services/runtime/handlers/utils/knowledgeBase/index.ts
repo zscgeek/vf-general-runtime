@@ -1,4 +1,5 @@
 import { BaseModels, BaseUtils } from '@voiceflow/base-types';
+import { replaceVariables, sanitizeVariables } from '@voiceflow/common';
 import axios from 'axios';
 
 import Config from '@/config';
@@ -7,7 +8,7 @@ import log from '@/logger';
 import { Runtime } from '@/runtime';
 
 import { Output } from '../../../types';
-import { getMemoryMessages } from '../ai';
+import { EMPTY_AI_RESPONSE, getMemoryMessages } from '../ai';
 import { generateOutput } from '../output';
 import { answerSynthesis } from './answer';
 import { questionSynthesis } from './question';
@@ -81,14 +82,20 @@ export const knowledgeBaseInteract = async (
   const { prompt } = params;
 
   const memory: BaseUtils.ai.Message[] = [];
-
+  let query;
   // only do question synthesis if mode is memory or memory_prompt
   if ([BaseUtils.ai.PROMPT_MODE.MEMORY_PROMPT, BaseUtils.ai.PROMPT_MODE.MEMORY].includes(params.mode)) {
     memory.push(...getMemoryMessages(runtime.variables.getState()));
+    query = await questionSynthesis(prompt, memory);
+    if (!query?.output) return null;
+  } else {
+    // replace the variables
+    const sanitizedVars = sanitizeVariables(runtime.variables.getState());
+    query = {
+      ...EMPTY_AI_RESPONSE,
+      output: replaceVariables(prompt, sanitizedVars),
+    };
   }
-
-  const query = await questionSynthesis(prompt, memory);
-  if (!query?.output) return null;
 
   const data = await fetchKnowledgeBase(runtime.project!._id, runtime.project?.teamID, query.output);
   if (!data) return null;

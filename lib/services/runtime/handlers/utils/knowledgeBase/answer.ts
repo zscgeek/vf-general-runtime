@@ -87,11 +87,10 @@ export const answerSynthesis = async ({
         ${context}
       </information>
 
-      If the question is not relevant to the provided <information>, print("NOT_FOUND") and return.
-      Otherwise, you may - very concisely - answer the user using only the relevant <information>.
+      <question>${question}</question>
 
-      <question>${question}</question>`;
-
+      If the question is not relevant to the provided <information>, print("NOT_FOUND").
+      Otherwise, you may - very concisely - answer the user using only the relevant <information>.`;
     response = await fetchPrompt({ ...options, prompt, mode: BaseUtils.ai.PROMPT_MODE.PROMPT }, variables);
   }
 
