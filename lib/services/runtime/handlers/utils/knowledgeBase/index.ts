@@ -82,7 +82,7 @@ export const knowledgeBaseInteract = async (
   const { prompt } = params;
 
   const memory: BaseUtils.ai.Message[] = [];
-  let query;
+  let query: typeof EMPTY_AI_RESPONSE;
   // only do question synthesis if mode is memory or memory_prompt
   if ([BaseUtils.ai.PROMPT_MODE.MEMORY_PROMPT, BaseUtils.ai.PROMPT_MODE.MEMORY].includes(params.mode)) {
     memory.push(...getMemoryMessages(runtime.variables.getState()));
@@ -97,12 +97,12 @@ export const knowledgeBaseInteract = async (
     };
   }
 
-  const data = await fetchKnowledgeBase(runtime.project!._id, runtime.project?.teamID, query.output);
+  const data = await fetchKnowledgeBase(runtime.project!._id, runtime.project?.teamID, query.output!);
   if (!data) return null;
 
   // if there is no memory, query is just the same as prompt
   const answer = await answerSynthesis({
-    question: query.output,
+    question: query.output!,
     options: params,
     data,
   });
