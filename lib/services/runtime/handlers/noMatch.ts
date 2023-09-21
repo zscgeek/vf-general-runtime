@@ -80,7 +80,7 @@ const getOutput = async (
     if (Object.values(runtime.project?.knowledgeBase?.documents || {}).length > 0) {
       result = await knowledgeBaseNoMatch(runtime);
       const model = AI.get(runtime.project?.knowledgeBase?.settings?.summarization.model);
-      await consumeResources('KB No Match', runtime, model, result);
+      await consumeResources('KB Fallback', runtime, model, result);
     }
 
     // hit global no match if KB wasn't successful
