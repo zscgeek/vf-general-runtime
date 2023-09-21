@@ -83,7 +83,12 @@ const AISetHandler: HandlerFactory<BaseNode.AISet.Node> = () => ({
 
     const model = node.source === BaseUtils.ai.DATA_SOURCE.KNOWLEDGE_BASE ? kbModel : generativeModel;
 
-    await consumeResources('AI Set', runtime, model, { ...totals });
+    await consumeResources(
+      node.source === BaseUtils.ai.DATA_SOURCE.KNOWLEDGE_BASE ? 'AI Set KB' : 'AI Set',
+      runtime,
+      model,
+      { ...totals }
+    );
 
     return nextID;
   },
