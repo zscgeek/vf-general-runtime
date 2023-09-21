@@ -3,9 +3,9 @@ import { BaseUtils } from '@voiceflow/base-types';
 export abstract class AIModel {
   public abstract modelRef: BaseUtils.ai.GPT_MODEL;
 
-  protected TIMEOUT = 30000;
-
   protected TOKEN_MULTIPLIER = 1;
+
+  constructor(protected readonly TIMEOUT: number) {}
 
   get tokenMultiplier() {
     return this.TOKEN_MULTIPLIER;
