@@ -3,16 +3,15 @@ import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from '
 
 import { Config } from '@/types';
 
-import { ContentModerationClient } from '../../contentModeration';
 import { AIModel } from '../types';
 import { isAzureBasedGPTConfig, isOpenAIGPTConfig } from './gpt.interface';
 
 export abstract class GPTAIModel extends AIModel {
   protected abstract gptModelName: string;
 
-  protected openAIClient?: OpenAIApi;
-
   protected azureClient?: OpenAIApi;
+
+  protected openAIClient?: OpenAIApi;
 
   static RoleMapping = {
     [BaseUtils.ai.Role.ASSISTANT]: ChatCompletionRequestMessageRoleEnum.Assistant,
@@ -20,8 +19,8 @@ export abstract class GPTAIModel extends AIModel {
     [BaseUtils.ai.Role.USER]: ChatCompletionRequestMessageRoleEnum.User,
   };
 
-  constructor(config: Config, protected readonly contentModerationClient: ContentModerationClient) {
-    super(config);
+  constructor(config: Config) {
+    super(config.AI_GENERATION_TIMEOUT);
 
     if (isAzureBasedGPTConfig(config)) {
       // remove trailing slash
@@ -41,6 +40,7 @@ export abstract class GPTAIModel extends AIModel {
 
     if (isOpenAIGPTConfig(config)) {
       this.openAIClient = new OpenAIApi(new Configuration({ apiKey: config.OPENAI_API_KEY }));
+
       return;
     }
 

@@ -3,8 +3,10 @@ import { BaseUtils } from '@voiceflow/base-types';
 import VError from '@voiceflow/verror';
 import _merge from 'lodash/merge';
 
+import AI from '@/lib/clients/ai';
 import { getAPIBlockHandlerOptions } from '@/lib/services/runtime/handlers/api';
-import { fetchKnowledgeBase } from '@/lib/services/runtime/handlers/utils/knowledgeBase';
+import { fetchKnowledgeBase, promptSynthesis } from '@/lib/services/runtime/handlers/utils/knowledgeBase';
+import { answerSynthesis } from '@/lib/services/runtime/handlers/utils/knowledgeBase/answer';
 import log from '@/logger';
 import { callAPI } from '@/runtime/lib/Handlers/api/utils';
 import { ivmExecute } from '@/runtime/lib/Handlers/code/utils';
@@ -63,12 +65,7 @@ class TestController extends AbstractController {
 
     const { prompt } = req.body;
 
-    const answer = await this.services.aiSynthesis.promptSynthesis(
-      project._id,
-      project.teamID,
-      { ...settings.summarization, prompt },
-      {}
-    );
+    const answer = await promptSynthesis(project._id, project.teamID, { ...settings.summarization, prompt }, {});
 
     if (!answer?.output) return { output: null };
 
@@ -117,11 +114,7 @@ class TestController extends AbstractController {
 
     if (!synthesis) return { output: null, chunks };
 
-    const answer = await this.services.aiSynthesis.answerSynthesis({
-      question,
-      data,
-      options: settings?.summarization,
-    });
+    const answer = await answerSynthesis({ question, data, options: settings?.summarization });
 
     if (!answer?.output) return { output: null, chunks };
 
@@ -146,12 +139,12 @@ class TestController extends AbstractController {
   async testCompletion(
     req: Request<BaseUtils.ai.AIModelParams & BaseUtils.ai.AIContextParams & { workspaceID: string }>
   ) {
-    const model = this.services.ai.get(req.body.model);
+    const ai = AI.get(req.body.model);
 
-    if (!model) throw new VError('invalid model', VError.HTTP_STATUS.BAD_REQUEST);
+    if (!ai) throw new VError('invalid model', VError.HTTP_STATUS.BAD_REQUEST);
     if (typeof req.body.prompt !== 'string') throw new VError('invalid prompt', VError.HTTP_STATUS.BAD_REQUEST);
 
-    const { output, tokens } = await fetchPrompt(req.body, model);
+    const { output, tokens } = await fetchPrompt(req.body);
 
     if (typeof tokens === 'number' && tokens > 0) {
       await this.services.billing

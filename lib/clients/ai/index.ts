@@ -1,10 +1,9 @@
 import { BaseUtils } from '@voiceflow/base-types';
 
+import CONFIG from '@/config';
 import log from '@/logger';
 import type { Config } from '@/types';
 
-import ContentModerationClient from '../contentModeration';
-import { AbstractClient } from '../utils';
 import { ClaudeV1 } from './anthropic/claude_v1';
 import { ClaudeV1Instant } from './anthropic/claude_v1_instant';
 import { ClaudeV2 } from './anthropic/claude_v2';
@@ -13,19 +12,15 @@ import { GPT3_5 } from './openai/gpt3_5';
 import { GPT4 } from './openai/gpt4';
 import { AIModel } from './types';
 
-export class AIClient extends AbstractClient {
+class AIClient {
   private DEFAULT_MODEL = BaseUtils.ai.GPT_MODEL.GPT_3_5_turbo;
 
   models: Partial<Record<BaseUtils.ai.GPT_MODEL, AIModel>> = {};
 
-  constructor(config: Config, contentModerationClients: Record<BaseUtils.ai.GPT_MODEL, ContentModerationClient>) {
-    super(config);
-    const setModel = (
-      modelName: BaseUtils.ai.GPT_MODEL,
-      Model: new (config: Config, contentModerationClient: ContentModerationClient) => AIModel
-    ) => {
+  constructor(config: Config) {
+    const setModel = (modelName: BaseUtils.ai.GPT_MODEL, Model: new (config: Config) => AIModel) => {
       try {
-        this.models[modelName] = new Model(config, contentModerationClients[modelName]);
+        this.models[modelName] = new Model(config);
       } catch (error) {
         log.warn(`failed to initialize ${modelName} ${log.vars({ error })}`);
       }
@@ -50,4 +45,4 @@ export class AIClient extends AbstractClient {
   }
 }
 
-export default AIClient;
+export default new AIClient(CONFIG);
