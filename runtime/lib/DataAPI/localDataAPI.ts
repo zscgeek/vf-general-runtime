@@ -28,7 +28,7 @@ class LocalDataAPI<
 
   public getVersion = async () => this.version;
 
-  public getProgram = async (programID: string) => this.programs[programID];
+  public getProgram = async (_versionID: string, diagramID: string) => this.programs[diagramID] ?? null;
 
   public getProject = async () => this.project;
 }
