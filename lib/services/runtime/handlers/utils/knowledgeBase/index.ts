@@ -42,7 +42,7 @@ const FLAGGED_WORKSPACES_MAP = new Map<string, string[]>([
   [CloudEnv.JPMC, []],
 ]);
 
-const FAQ_FLAGGED_WORKSPACES_MAP = new Map<string, string[]>([[CloudEnv.Public, ['80627']]]);
+const FAQ_FLAGGED_WORKSPACES_MAP = new Map<string, string[]>([[CloudEnv.Public, ['28']]]);
 
 const { KL_RETRIEVER_SERVICE_HOST: host, KL_RETRIEVER_SERVICE_PORT: port } = Config;
 const scheme = process.env.NODE_ENV === 'e2e' ? 'https' : 'http';

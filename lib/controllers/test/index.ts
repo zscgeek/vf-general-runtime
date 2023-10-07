@@ -115,10 +115,6 @@ class TestController extends AbstractController {
 
     if (faq?.answer) return { output: faq.answer };
 
-    const faq = await fetchFaq(project._id, project.teamID, question, settings);
-
-    if (faq?.answer) return { output: faq.answer };
-
     const data = await fetchKnowledgeBase(project._id, project.teamID, question, settings, tags);
 
     if (!data) return { output: null, chunks: [] };
