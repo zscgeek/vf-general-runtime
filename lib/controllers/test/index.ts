@@ -3,8 +3,9 @@ import { BaseModels, BaseUtils } from '@voiceflow/base-types';
 import VError from '@voiceflow/verror';
 import _merge from 'lodash/merge';
 
+import { FeatureFlag } from '@/lib/feature-flags';
 import { getAPIBlockHandlerOptions } from '@/lib/services/runtime/handlers/api';
-import { fetchKnowledgeBase } from '@/lib/services/runtime/handlers/utils/knowledgeBase';
+import { fetchFaq, fetchKnowledgeBase } from '@/lib/services/runtime/handlers/utils/knowledgeBase';
 import log from '@/logger';
 import { callAPI } from '@/runtime/lib/Handlers/api/utils';
 import { ivmExecute } from '@/runtime/lib/Handlers/code/utils';
@@ -114,8 +115,12 @@ class TestController extends AbstractController {
 
     const settings = _merge({}, project.knowledgeBase?.settings, { search: { limit: chunkLimit } });
 
-    const data = await fetchKnowledgeBase(project._id, project.teamID, question, settings, tags);
+    if (this.services.unleash.client.isEnabled(FeatureFlag.FAQ_FF, { workspaceID: Number(project.teamID) })) {
+      const faq = await fetchFaq(project._id, project.teamID, question, settings);
+      if (faq?.answer) return { output: faq.answer };
+    }
 
+    const data = await fetchKnowledgeBase(project._id, project.teamID, question, settings, tags);
     if (!data) return { output: null, chunks: [] };
 
     // attach metadata to chunks

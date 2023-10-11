@@ -1,7 +1,9 @@
-import { BaseModels } from '@voiceflow/base-types';
+import { BaseModels, BaseNode, BaseTrace } from '@voiceflow/base-types';
+import { KnowledgeBaseCtxType } from '@voiceflow/base-types/build/cjs/node/knowledgeBase';
 import axios from 'axios';
 
 import Config from '@/config';
+import { FeatureFlag } from '@/lib/feature-flags';
 import AIAssist from '@/lib/services/aiAssist';
 import log from '@/logger';
 import { Runtime } from '@/runtime';
@@ -22,6 +24,15 @@ export interface KnowledgeBaseResponse {
   chunks: KnowledegeBaseChunk[];
 }
 
+export interface KnowledgeBaseFaq {
+  question?: string;
+  answer?: string;
+}
+
+export interface KnowledgeBaseFaqResponse {
+  faq: KnowledgeBaseFaq | null;
+}
+
 const FLAGGED_WORKSPACES_MAP = new Map<string, string[]>([
   [CloudEnv.Public, []],
   [CloudEnv.USBank, []],
@@ -32,7 +43,9 @@ const FLAGGED_WORKSPACES_MAP = new Map<string, string[]>([
 
 const { KL_RETRIEVER_SERVICE_HOST: host, KL_RETRIEVER_SERVICE_PORT: port } = Config;
 const scheme = process.env.NODE_ENV === 'e2e' ? 'https' : 'http';
-export const RETRIEVE_ENDPOINT = host && port ? new URL(`${scheme}://${host}:${port}/retrieve`).href : null;
+const baseApiUrl = host && port ? `${scheme}://${host}:${port}` : null;
+export const RETRIEVE_ENDPOINT = baseApiUrl ? new URL(`${baseApiUrl}/retrieve`).href : null;
+export const FAQ_RETRIEVAL_ENDPOINT = baseApiUrl ? new URL(`${baseApiUrl}/poc/retrieve/faq`).href : null;
 export const { KNOWLEDGE_BASE_LAMBDA_ENDPOINT } = Config;
 
 export const getAnswerEndpoint = (cloudEnv: string, workspaceID: string): string | null => {
@@ -44,6 +57,38 @@ export const getAnswerEndpoint = (cloudEnv: string, workspaceID: string): string
 
   if (!KNOWLEDGE_BASE_LAMBDA_ENDPOINT) return null;
   return `${KNOWLEDGE_BASE_LAMBDA_ENDPOINT}/answer`;
+};
+
+export const fetchFaq = async (
+  projectID: string,
+  workspaceID: string | undefined,
+  question: string,
+  settings?: BaseModels.Project.KnowledgeBaseSettings
+): Promise<KnowledgeBaseFaq | null> => {
+  if (FAQ_RETRIEVAL_ENDPOINT) {
+    const { data } = await axios.post<KnowledgeBaseFaqResponse>(FAQ_RETRIEVAL_ENDPOINT, {
+      projectID,
+      workspaceID,
+      question,
+      settings,
+    });
+    return data?.faq;
+  }
+
+  return null;
+};
+
+export const addFaqTrace = (runtime: Runtime, faqQuestion: string, faqAnswer: string, query: string) => {
+  runtime.trace.addTrace<BaseTrace.KnowledgeBase>({
+    type: BaseNode.Utils.TraceType.KNOWLEDGE_BASE,
+    payload: {
+      contextType: KnowledgeBaseCtxType.FAQ,
+      faqQuestion,
+      faqAnswer,
+      query,
+      message: faqAnswer,
+    },
+  });
 };
 
 export const fetchKnowledgeBase = async (
@@ -98,6 +143,27 @@ export const knowledgeBaseNoMatch = async (
       workspaceID: runtime.project.teamID,
     });
     if (!question?.output) return null;
+
+    if (
+      runtime.services.unleash.client.isEnabled(FeatureFlag.FAQ_FF, { workspaceID: Number(runtime.project.teamID) })
+    ) {
+      // before checking KB, check if it is an FAQ
+      const faq = await fetchFaq(
+        runtime.project._id,
+        runtime.project.teamID,
+        question.output,
+        runtime.project?.knowledgeBase?.settings
+      );
+      if (faq?.answer) {
+        addFaqTrace(runtime, faq.question || '', faq.answer, question.output);
+        return {
+          output: generateOutput(faq.answer, runtime.project),
+          tokens: question.queryTokens + question.answerTokens,
+          queryTokens: question.queryTokens,
+          answerTokens: question.answerTokens,
+        };
+      }
+    }
 
     const data = await fetchKnowledgeBase(
       runtime.project._id,
