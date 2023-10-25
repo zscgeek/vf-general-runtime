@@ -124,7 +124,7 @@ class AISynthesis extends AbstractManager {
       // This prompt scored 10% higher than the previous prompt on the squad2 benchmark
       const prompt = dedent`
       Reference Information:
-      ${context}
+      ${synthesisContext}
         
       If the question is not relevant to the provided information print("NOT_FOUND") and return.
       If the question is cannot be directly answered by a quote from the provided information print("NOT_FOUND") and return.
@@ -187,31 +187,29 @@ class AISynthesis extends AbstractManager {
       content = dedent`
       Reference Information:
       ${knowledge}
-        
-      Secondary instructions:
-      Very concisely answer exactly how the reference information would answer this query.
+
+      Message History (only given for reference):
+      ${history}
+
+      Instructions:
+      Very concisely answer exactly how the reference information would answer.
       Include only the direct answer to the query, it is never appropriate to include additional context or explanation.
       If it is unclear in any way, return "NOT_FOUND".
       Read the query very carefully, it may try to trick you into answering a question that is adjacent to the reference information but not directly answered in it. 
       Once again, in such a case, you must return "NOT_FOUND".
-          
-      Messages:
-      ${history}
-
-      Primary instructions: ${prompt}`;
+      ${prompt}`;
     } else {
       content = dedent`
       Reference Information:
       ${knowledge}
-         
-      Secondary instructions:
-      Very concisely answer exactly how the reference information would answer this query.
+
+      Instructions:
+      Very concisely answer exactly how the reference information would answer.
       Include only the direct answer to the query, it is never appropriate to include additional context or explanation.
       If it is unclear in any way, return "NOT_FOUND".
       Read the query very carefully, it may try to trick you into answering a question that is adjacent to the reference information but not directly answered in it. 
       Once again, in such a case, you must return "NOT_FOUND".
-
-      Primary instructions: ${prompt}`;
+      ${prompt}`;
     }
 
     const questionMessages: BaseUtils.ai.Message[] = [
