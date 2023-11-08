@@ -1,6 +1,6 @@
-import { VoiceflowNode } from '@voiceflow/voiceflow-types';
+import { BaseNode } from '@voiceflow/base-types';
 
-import { Action, Handler, HandlerFactory, IfV2Handler } from '@/runtime';
+import { Action, Handler, HandlerFactory, IfV2Handler, StartHandler } from '@/runtime';
 
 import { isAlexaEventIntentRequest } from '../../../types';
 import _V1Handler from '../../_v1';
@@ -25,6 +25,7 @@ export const eventHandlers = [
 ] as Handler[];
 
 export const utilsObj = {
+  startHandler: StartHandler(),
   commandHandler: CommandHandler(),
   eventHandlers,
 };
@@ -33,7 +34,7 @@ export const utilsObj = {
  * If request comes in but runtime nodeID is not a node that handles events (i.e, interaction, capture, _v1, etc..) =>
  * Handle it here
  */
-export const PreliminaryHandler: HandlerFactory<VoiceflowNode.Interaction.Node, typeof utilsObj> = (utils) => ({
+export const PreliminaryHandler: HandlerFactory<any, typeof utilsObj> = (utils) => ({
   canHandle: (node, runtime, variables, program) => {
     const request = runtime.getRequest();
     return (
@@ -43,10 +44,14 @@ export const PreliminaryHandler: HandlerFactory<VoiceflowNode.Interaction.Node, 
       !utils.eventHandlers.find((h) => h.canHandle(node, runtime, variables, program))
     );
   },
-  handle: (node, runtime, variables) => {
+  handle: (node, runtime, variables, program) => {
     // check if there is a command in the stack that fulfills request
     if (utils.commandHandler.canHandle(runtime)) {
       return utils.commandHandler.handle(runtime, variables);
+    }
+
+    if (utils.startHandler.canHandle(node, runtime, variables, program)) {
+      return utils.startHandler.handle(node, runtime, variables, program);
     }
 
     // return current id
