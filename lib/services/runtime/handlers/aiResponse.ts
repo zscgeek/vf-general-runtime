@@ -8,6 +8,7 @@ import { HandlerFactory } from '@/runtime';
 import { FrameType, Output } from '../types';
 import { addOutputTrace, getOutputTrace } from '../utils';
 import { AIResponse, checkTokens, consumeResources, fetchPrompt } from './utils/ai';
+import { getKBSettings } from './utils/knowledgeBase';
 import { generateOutput } from './utils/output';
 import { getVersionDefaultVoice } from './utils/version';
 
@@ -18,7 +19,16 @@ const AIResponseHandler: HandlerFactory<VoiceNode.AIResponse.Node> = () => ({
     const projectID = runtime.project?._id;
     const workspaceID = runtime.project?.teamID;
     const generativeModel = runtime.services.ai.get(node.model);
-    const kbModel = runtime.services.ai.get(runtime.project?.knowledgeBase?.settings?.summarization.model);
+    const kbSettings = getKBSettings(
+      runtime?.services.unleash,
+      workspaceID,
+      runtime?.version?.knowledgeBase?.settings,
+      runtime?.project?.knowledgeBase?.settings
+    );
+    const kbModel = runtime.services.ai.get(kbSettings?.summarization.model, {
+      projectID,
+      workspaceID,
+    });
 
     if (!(await checkTokens(runtime, node.type))) {
       addOutputTrace(
@@ -39,7 +49,7 @@ const AIResponseHandler: HandlerFactory<VoiceNode.AIResponse.Node> = () => ({
         const answer = await runtime.services.aiSynthesis.promptSynthesis(
           runtime.version!.projectID,
           workspaceID,
-          { ...runtime.project?.knowledgeBase?.settings?.summarization, prompt, mode },
+          { ...kbSettings?.summarization, prompt, mode },
           variables.getState(),
           runtime
         );

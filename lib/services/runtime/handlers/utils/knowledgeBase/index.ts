@@ -3,6 +3,7 @@ import { KnowledgeBaseCtxType } from '@voiceflow/base-types/build/cjs/node/knowl
 import axios from 'axios';
 
 import Config from '@/config';
+import UnleashClient from '@/lib/clients/unleash';
 import { FeatureFlag } from '@/lib/feature-flags';
 import AIAssist from '@/lib/services/aiAssist';
 import log from '@/logger';
@@ -104,6 +105,18 @@ export const fetchFaq = async (
   return null;
 };
 
+export const getKBSettings = (
+  unleashClient: UnleashClient,
+  teamID?: string,
+  versionSettings?: BaseModels.Project.KnowledgeBaseSettings,
+  projectSettings?: BaseModels.Project.KnowledgeBaseSettings
+): BaseModels.Project.KnowledgeBaseSettings | undefined => {
+  const useVersionedSettings = unleashClient.client.isEnabled(FeatureFlag.VERSIONED_KB_SETTINGS, {
+    workspaceID: Number(teamID),
+  });
+  return (useVersionedSettings && versionSettings) || projectSettings;
+};
+
 export const addFaqTrace = (runtime: Runtime, faqQuestion: string, faqAnswer: string, query: string) => {
   runtime.trace.addTrace<BaseTrace.KnowledgeBase>({
     type: BaseNode.Utils.TraceType.KNOWLEDGE_BASE,
@@ -163,6 +176,12 @@ export const knowledgeBaseNoMatch = async (
   try {
     // expiremental module, frame the question
     const memory = getMemoryMessages(runtime.variables.getState());
+    const kbSettings = getKBSettings(
+      runtime?.services.unleash,
+      runtime.project?.teamID,
+      runtime?.version?.knowledgeBase?.settings,
+      runtime?.project?.knowledgeBase?.settings
+    );
 
     const question = await runtime.services.aiSynthesis.questionSynthesis(input, memory, {
       projectID: runtime.project._id,
@@ -179,7 +198,7 @@ export const knowledgeBaseNoMatch = async (
         runtime.project.teamID,
         question.output,
         runtime.project?.knowledgeBase?.faqSets,
-        runtime.project?.knowledgeBase?.settings
+        kbSettings
       );
       if (faq?.answer) {
         addFaqTrace(runtime, faq.question || '', faq.answer, question.output);
@@ -192,18 +211,13 @@ export const knowledgeBaseNoMatch = async (
       }
     }
 
-    const data = await fetchKnowledgeBase(
-      runtime.project._id,
-      runtime.project.teamID,
-      question.output,
-      runtime.project?.knowledgeBase?.settings
-    );
+    const data = await fetchKnowledgeBase(runtime.project._id, runtime.project.teamID, question.output, kbSettings);
     if (!data) return null;
 
     const answer = await runtime.services.aiSynthesis.answerSynthesis({
       question: question.output,
       data,
-      options: runtime.project?.knowledgeBase?.settings?.summarization,
+      options: kbSettings?.summarization,
       variables: runtime.variables.getState(),
       context: { projectID: runtime.project._id, workspaceID: runtime.project.teamID },
     });

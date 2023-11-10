@@ -4,6 +4,7 @@ import express from 'express';
 import { BODY_PARSER_SIZE_LIMIT } from '@/backend/constants';
 import { ControllerMap, MiddlewareMap } from '@/lib';
 import { QuotaName } from '@/lib/services/billing';
+import { Request } from '@/types';
 
 export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
   const router = express.Router();
@@ -35,6 +36,11 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
   router.post(
     '/:workspaceID/knowledge-base',
     middlewares.auth.authorize(['workspace:READ']),
+    middlewares.auth.verifyParamConsistency((req: Request) => ({
+      projectID: req.body.projectID,
+      auth: req.headers.authorization,
+      versionID: req.body.versionID,
+    })),
     middlewares.billing.checkQuota(QuotaName.OPEN_API_TOKENS, (req) => req.params.workspaceID),
     middlewares.llmLimit.consumeResource((req) => req.headers.authorization || req.cookies.auth_vf, 'knowledge-base'),
     controllers.test.testKnowledgeBase
@@ -43,6 +49,12 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
   router.post(
     '/:workspaceID/knowledge-base-prompt',
     middlewares.auth.authorize(['workspace:READ']),
+    // eslint-disable-next-line sonarjs/no-identical-functions
+    middlewares.auth.verifyParamConsistency((req: Request) => ({
+      projectID: req.body.projectID,
+      auth: req.headers.authorization,
+      versionID: req.body.versionID,
+    })),
     middlewares.billing.checkQuota(QuotaName.OPEN_API_TOKENS, (req) => req.params.workspaceID),
     middlewares.llmLimit.consumeResource((req) => req.headers.authorization || req.cookies.auth_vf, 'knowledge-base'),
     controllers.test.testKnowledgeBasePrompt

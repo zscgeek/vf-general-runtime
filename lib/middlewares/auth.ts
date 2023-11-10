@@ -95,6 +95,33 @@ class Auth extends AbstractMiddleware {
 
     return this.verifyIdentity(req, res, next);
   }
+
+  verifyParamConsistency = (
+    mapFromRequest: (req: Request) => { projectID?: string; auth?: string; versionID?: string }
+  ) => {
+    return async (req: Request, _res: Response, next: Next) => {
+      try {
+        const { projectID, auth, versionID } = mapFromRequest(req);
+
+        const api = await this.services.dataAPI.get();
+        const authenticatedProject = auth ? await api.getProject(auth) : null;
+        const version = versionID ? await api.getVersion(versionID) : null;
+
+        const projectIDs = new Set([projectID, authenticatedProject?._id, version?.projectID].filter((item) => !!item));
+
+        // at least 1 and exactly 1 unique ID
+        const isConsistent = projectIDs.size === 1;
+
+        if (!isConsistent) {
+          throw new VError('Inconsistent projectIDs in request parameters');
+        }
+      } catch (err) {
+        return next(new VError('Unauthorized', VError.HTTP_STATUS.UNAUTHORIZED));
+      }
+
+      return next();
+    };
+  };
 }
 
 export default Auth;

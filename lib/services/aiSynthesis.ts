@@ -14,6 +14,7 @@ import {
   addFaqTrace,
   fetchFaq,
   fetchKnowledgeBase,
+  getKBSettings,
   KnowledgeBaseResponse,
 } from '@/lib/services/runtime/handlers/utils/knowledgeBase';
 import log from '@/logger';
@@ -271,6 +272,12 @@ class AISynthesis extends AbstractManager {
     variables: Record<string, any>,
     runtime?: Runtime
   ) {
+    const kbSettings = getKBSettings(
+      runtime?.services.unleash,
+      workspaceID,
+      runtime?.version?.knowledgeBase?.settings,
+      runtime?.project?.knowledgeBase?.settings
+    );
     try {
       const { prompt } = params;
 
@@ -291,7 +298,7 @@ class AISynthesis extends AbstractManager {
           workspaceID,
           query.output,
           runtime?.project?.knowledgeBase?.faqSets,
-          runtime?.project?.knowledgeBase?.settings
+          kbSettings
         );
         if (faq?.answer) {
           // eslint-disable-next-line max-depth
