@@ -24,8 +24,6 @@ const AISetHandler: HandlerFactory<BaseNode.AISet.Node, void, GeneralRuntime> = 
       runtime?.version?.knowledgeBase?.settings,
       runtime?.project?.knowledgeBase?.settings
     );
-    const kbModel = runtime.services.ai.get(kbSettings?.summarization.model);
-
     if (!node.sets?.length) return nextID;
 
     if (!(await checkTokens(runtime, node.type))) return nextID;
@@ -36,9 +34,10 @@ const AISetHandler: HandlerFactory<BaseNode.AISet.Node, void, GeneralRuntime> = 
           .filter((set) => !!set.prompt && !!set.variable)
           .map(
             async ({
+              mode,
               prompt,
               variable,
-              mode,
+              instruction,
             }): Promise<{ tokens: number; queryTokens: number; answerTokens: number }> => {
               const emptyResult = { tokens: 0, queryTokens: 0, answerTokens: 0 };
               if (!variable) return emptyResult;
@@ -61,13 +60,14 @@ const AISetHandler: HandlerFactory<BaseNode.AISet.Node, void, GeneralRuntime> = 
                   );
                 } else {
                   const settings = deepVariableSubstitution(
-                    _cloneDeep({ ...node, mode, prompt, sets: undefined }),
+                    _cloneDeep({ ...node, mode, instruction, prompt, sets: undefined }),
                     variables.getState()
                   );
                   response = await runtime.services.aiSynthesis.knowledgeBaseQuery({
                     version: runtime.version!,
                     project: runtime.project!,
                     question: settings.prompt,
+                    instruction: settings.instruction,
                     options: node.overrideParams ? { summarization: settings } : {},
                   });
 
@@ -115,6 +115,7 @@ const AISetHandler: HandlerFactory<BaseNode.AISet.Node, void, GeneralRuntime> = 
         { tokens: 0, queryTokens: 0, answerTokens: 0 }
       );
 
+      const kbModel = runtime.services.ai.get((node.overrideParams && node.model) || kbSettings?.summarization.model);
       const model = node.source === BaseUtils.ai.DATA_SOURCE.KNOWLEDGE_BASE ? kbModel : generativeModel;
 
       await consumeResources(
