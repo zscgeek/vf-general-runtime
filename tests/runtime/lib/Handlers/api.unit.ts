@@ -9,8 +9,12 @@ import * as APIUtils from '@/runtime/lib/Handlers/api/utils';
 import DebugLogging from '@/runtime/lib/Runtime/DebugLogging';
 import { getISO8601Timestamp } from '@/runtime/lib/Runtime/DebugLogging/utils';
 
-const ACTION_DATA = { foo: 'bar' };
-const AGENT_ACTION_DATA = { foo: 'bar', headers: [{ key: USER_AGENT_KEY, val: USER_AGENT }] };
+const ACTION_DATA = { foo: 'bar', url: 'http://test.com/test url' };
+const AGENT_ACTION_DATA = {
+  foo: 'bar',
+  url: 'http://test.com/test%20url',
+  headers: [{ key: USER_AGENT_KEY, val: USER_AGENT }],
+};
 const config = {
   requestTimeoutMs: 20_000,
   maxResponseBodySizeBytes: 1_000_000,
