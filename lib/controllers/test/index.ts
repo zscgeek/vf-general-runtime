@@ -1,7 +1,9 @@
 import { Validator } from '@voiceflow/backend-utils';
 import { BaseModels, BaseUtils } from '@voiceflow/base-types';
+import { BadRequestException } from '@voiceflow/exception';
 import VError from '@voiceflow/verror';
 import _merge from 'lodash/merge';
+import { z } from 'zod';
 
 import { getAPIBlockHandlerOptions } from '@/lib/services/runtime/handlers/api';
 import { getKBSettings } from '@/lib/services/runtime/handlers/utils/knowledgeBase';
@@ -9,12 +11,18 @@ import log from '@/logger';
 import { callAPI } from '@/runtime/lib/Handlers/api/utils';
 import { ivmExecute } from '@/runtime/lib/Handlers/code/utils';
 import { Request, Response } from '@/types';
+import { formatZodError } from '@/utils/zod-error/formatZodError';
 
 import { QuotaName } from '../../services/billing';
 import { fetchPrompt } from '../../services/runtime/handlers/utils/ai';
 import { validate } from '../../utils';
 import { AbstractController } from '../utils';
-import { TestFunctionBody, TestFunctionParams, TestFunctionResponse, TestFunctionStatus } from './interface';
+import {
+  TestFunctionRequestBody,
+  TestFunctionRequestBodyDTO,
+  TestFunctionResponse,
+  TestFunctionResponseDTO,
+} from './interface';
 
 const { body } = Validator;
 
@@ -176,35 +184,20 @@ class TestController extends AbstractController {
     return { output };
   }
 
-  async testFunction(req: Request<TestFunctionParams, TestFunctionBody>): Promise<TestFunctionResponse> {
-    const {
-      params: { functionID },
-      body: inputMapping,
-    } = req;
+  async testFunction(req: Request<Record<string, never>, TestFunctionRequestBody>): Promise<TestFunctionResponse> {
+    try {
+      await TestFunctionRequestBodyDTO.parseAsync(req.body);
+    } catch (err) {
+      throw new BadRequestException({
+        message: err instanceof z.ZodError ? formatZodError(err) : err.message,
+      });
+    }
 
-    await this.services.test.testFunction(functionID, inputMapping);
+    const { functionDefinition, inputMapping } = req.body;
 
-    return {
-      status: TestFunctionStatus.Success,
-      latencyMS: 483,
-      outputMapping: {
-        str_value: 'hello, world!',
-        num_value: 123456.789,
-        bool_value: true,
-        arr_value: ['a', 'b', 'c', ['1', '2', '3'], { a: '1', b: 2, c: false }],
-        obj_value: {
-          x: 1,
-          y: 'string',
-          z: true,
-          w: [1, '2', false, [1, 2, 3], { a: 1 }],
-          v: {
-            '1': 1,
-            2: 2,
-            '3': false,
-          },
-        },
-      },
-    };
+    const result = await this.services.test.testFunction(functionDefinition, inputMapping);
+
+    return TestFunctionResponseDTO.parse(result);
   }
 }
 

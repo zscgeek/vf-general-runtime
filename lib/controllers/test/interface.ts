@@ -1,16 +1,42 @@
-export type TestFunctionBody = Record<string, unknown>;
+import { FunctionVariableType } from '@voiceflow/dtos';
+import { z } from 'zod';
 
-export interface TestFunctionParams {
-  functionID: string;
-}
+import { RuntimeCommandDTO } from '@/runtime/lib/Handlers/function/runtime-command/runtime-command.dto';
 
-export enum TestFunctionStatus {
-  Success = 'success',
-  Failure = 'failure',
-}
+export const TestFunctionRequestBodyDTO = z
+  .object({
+    functionDefinition: z
+      .object({
+        code: z.string(),
+        pathCodes: z.array(z.string()),
+        inputVars: z.record(
+          z
+            .object({
+              type: z.literal(FunctionVariableType.STRING),
+            })
+            .strict()
+        ),
+        outputVars: z.record(
+          z
+            .object({
+              type: z.literal(FunctionVariableType.STRING),
+            })
+            .strict()
+        ),
+      })
+      .strict(),
+    inputMapping: z.record(z.string()),
+  })
+  .strict();
 
-export interface TestFunctionResponse {
-  status: TestFunctionStatus.Success;
-  latencyMS: number;
-  outputMapping: Record<string, unknown>;
-}
+export type TestFunctionRequestBody = z.infer<typeof TestFunctionRequestBodyDTO>;
+
+export const TestFunctionResponseDTO = z
+  .object({
+    success: z.boolean(),
+    latencyMS: z.number(),
+    runtimeCommands: RuntimeCommandDTO,
+  })
+  .strict();
+
+export type TestFunctionResponse = z.infer<typeof TestFunctionResponseDTO>;
