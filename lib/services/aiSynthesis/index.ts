@@ -79,7 +79,11 @@ class AISynthesis extends AbstractManager {
 
     const options = { model, system: systemWithTime, temperature, maxTokens };
 
-    if ([BaseUtils.ai.GPT_MODEL.GPT_3_5_turbo, BaseUtils.ai.GPT_MODEL.GPT_4].includes(model)) {
+    if (
+      [BaseUtils.ai.GPT_MODEL.GPT_3_5_turbo, BaseUtils.ai.GPT_MODEL.GPT_4, BaseUtils.ai.GPT_MODEL.GPT_4_turbo].includes(
+        model
+      )
+    ) {
       // for GPT-3.5 and 4.0 chat models
       const messages = [
         {
@@ -503,11 +507,19 @@ class AISynthesis extends AbstractManager {
       project.knowledgeBase?.settings
     );
     const settings = _merge({}, globalKBSettings, options);
+    // ML team needs to not have a hard model check
+    const settingsWithoutModel = { ...settings, summarization: { ...settings.summarization, model: undefined } };
 
-    const faq = await fetchFaq(project._id, project.teamID, question, project?.knowledgeBase?.faqSets, settings);
+    const faq = await fetchFaq(
+      project._id,
+      project.teamID,
+      question,
+      project?.knowledgeBase?.faqSets,
+      settingsWithoutModel
+    );
     if (faq?.answer) return { ...EMPTY_AI_RESPONSE, output: faq.answer, faqSet: faq.faqSet };
 
-    const data = await fetchKnowledgeBase(project._id, project.teamID, question, settings, tagsFilter);
+    const data = await fetchKnowledgeBase(project._id, project.teamID, question, settingsWithoutModel, tagsFilter);
     if (!data) return { ...EMPTY_AI_RESPONSE, chunks: [] };
 
     // attach metadata to chunks
