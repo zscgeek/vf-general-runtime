@@ -13,7 +13,7 @@ import { Context, ContextHandler, VersionTag } from '@/types';
 import { isConfidenceScoreAbove } from '../runtime/utils';
 import { AbstractManager, injectServices } from '../utils';
 import { handleNLCCommand } from './nlc';
-import { getNoneIntentRequest, mapChannelData } from './utils';
+import { getAvailableIntentsAndEntities, getNoneIntentRequest, mapChannelData } from './utils';
 
 export const utils = {};
 
@@ -61,6 +61,10 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
     dmRequest,
     workspaceID,
     intentConfidence = 0.6,
+    filteredIntents,
+    filteredEntities,
+    excludeFilteredIntents,
+    excludeFilteredEntities,
   }: {
     query: string;
     model?: BaseModels.PrototypeModel;
@@ -73,6 +77,10 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
     dmRequest?: BaseRequest.IntentRequestPayload;
     workspaceID: string;
     intentConfidence?: number;
+    filteredIntents?: Set<string>;
+    filteredEntities?: Set<string>;
+    excludeFilteredIntents?: boolean;
+    excludeFilteredEntities?: boolean;
   }): Promise<BaseRequest.IntentRequest> {
     // 1. first try restricted regex (no open slots) - exact string match
     if (model && locale) {
@@ -82,6 +90,9 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
       }
     }
 
+    const filteredIntentsArray = filteredIntents ? Array.from(filteredIntents) : undefined;
+    const filteredEntitiesArray = filteredEntities ? Array.from(filteredEntities) : undefined;
+
     // 2. next try to determine the intent of an utterance with an NLU
     if (nlp) {
       const { data } = await this.services.axios
@@ -89,6 +100,10 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
           utterance: query,
           tag,
           workspaceID,
+          filteredIntents: filteredIntentsArray,
+          filteredEntities: filteredEntitiesArray,
+          excludeFilteredIntents,
+          excludeFilteredEntities,
         })
         .catch(() => ({ data: null }));
 
@@ -129,6 +144,11 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
       };
     }
 
+    const { availableIntents, availableEntities } = await getAvailableIntentsAndEntities(
+      this.services.runtime,
+      context
+    );
+
     const version = await context.data.api.getVersion(context.versionID);
 
     const project = await context.data.api.getProject(version.projectID);
@@ -144,6 +164,10 @@ class NLU extends AbstractManager<{ utils: typeof utils }> implements ContextHan
       platform: version?.prototype?.platform as VoiceflowConstants.PlatformType,
       workspaceID: project.teamID,
       intentConfidence: version?.platformData?.settings?.intentConfidence,
+      filteredIntents: availableIntents,
+      filteredEntities: availableEntities,
+      excludeFilteredIntents: false,
+      excludeFilteredEntities: false,
     });
 
     return { ...context, request };
