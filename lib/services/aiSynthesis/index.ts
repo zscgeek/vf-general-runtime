@@ -26,7 +26,13 @@ import { Runtime } from '@/runtime';
 import { QuotaName } from '../billing';
 import { SegmentEventType } from '../runtime/types';
 import { AbstractManager } from '../utils';
-import { convertTagsFilterToIDs, generateAnswerSynthesisPrompt, generateTagLabelMap, stringifyChunks } from './utils';
+import {
+  convertTagsFilterToIDs,
+  generateAnswerSynthesisPrompt,
+  generateTagLabelMap,
+  removePromptLeak,
+  stringifyChunks,
+} from './utils';
 
 class AISynthesis extends AbstractManager {
   private readonly DEFAULT_ANSWER_SYNTHESIS_RETRY_DELAY_MS = 4000;
@@ -40,20 +46,12 @@ class AISynthesis extends AbstractManager {
 
   private readonly DEFAULT_QUESTION_SYNTHESIS_RETRIES = 2;
 
-  private readonly REGEX_PROMPT_TERMS = [/conversation_history/i, /user:/i, /assistant:/i, /<[^<>]*>/];
-
-  private readonly MAX_LLM_TRIES = 2;
-
   private filterNotFound(output: string) {
     const upperCase = output?.toUpperCase();
     if (upperCase?.includes('NOT_FOUND') || upperCase?.startsWith("I'M SORRY,") || upperCase?.includes('AS AN AI')) {
       return null;
     }
     return output;
-  }
-
-  private detectPromptLeak(output: string) {
-    return this.REGEX_PROMPT_TERMS.some((regex) => regex.test(output));
   }
 
   async answerSynthesis({
@@ -134,8 +132,10 @@ class AISynthesis extends AbstractManager {
       );
     }
 
+    response.output = response.output?.trim() || null;
     if (response.output) {
-      response.output = this.filterNotFound(response.output.trim());
+      response.output = this.filterNotFound(response.output);
+      response.output = removePromptLeak(response.output);
     }
 
     return response;
@@ -218,33 +218,12 @@ class AISynthesis extends AbstractManager {
         variables
       );
 
-    // log & retry the LLM call if we detect prompt leak
-    let response: AIResponse;
-    let leak: boolean;
-    for (let i = 0; i < this.MAX_LLM_TRIES; i++) {
-      // eslint-disable-next-line no-await-in-loop
-      response = await fetchChatTask();
-      leak = false;
-
-      if (response.output) {
-        response.output = this.filterNotFound(response.output.trim());
-      }
-
-      if (response.output && this.detectPromptLeak(response.output)) {
-        leak = true;
-        log.warn(
-          `prompt leak detected\nLLM response: ${response.output}\nAttempt: ${i + 1}
-          \nPrompt: ${content}\nLLM Settings: ${JSON.stringify(options)}`
-        );
-      }
-
-      if (!leak || options.temperature === 0) {
-        break;
-      }
+    const response = await fetchChatTask();
+    if (response.output) {
+      response.output = this.filterNotFound(response.output.trim());
     }
 
-    // will always be defined as long as MAX_LLM_TRIES is greater than 0
-    return response!;
+    return response;
   }
 
   /** @deprecated remove after all KB AI Response steps moved off */

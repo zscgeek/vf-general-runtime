@@ -88,3 +88,10 @@ export const generateAnswerSynthesisPrompt = ({
   ##Query:
   ${query}`;
 };
+
+export const removePromptLeak = (output: string | null) => {
+  // remove prompt leak and anything after it
+  const regex_prompt_leak = /\s*#+\s?(?:query|instructions|reference).*$/is;
+
+  return output?.replace(regex_prompt_leak, '') || null;
+};
