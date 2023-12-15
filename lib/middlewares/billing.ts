@@ -3,26 +3,31 @@ import { NextFunction, Response } from 'express';
 
 import { Request } from '@/types';
 
-import { QuotaName } from '../services/billing';
+import { ItemName, ResourceType } from '../services/billing';
 import { AbstractMiddleware } from './utils';
 
 export class BillingMiddleware extends AbstractMiddleware {
-  checkQuota = (quotaName: QuotaName, getWorkspaceID: (req: Request) => string | undefined) => {
-    return async (req: Request, _res: Response, next: NextFunction) => {
-      try {
-        const workspaceID = getWorkspaceID(req);
-        if (!workspaceID) {
-          return next(new VError('Unauthorized', VError.HTTP_STATUS.UNAUTHORIZED));
-        }
+  authorize = (params: {
+    resourceType: ResourceType | ((req: Request) => ResourceType);
+    resourceID: string | ((req: Request) => string);
+    item: ItemName | ((req: Request) => ItemName);
+    currentValue?: number | ((req: Request) => number | undefined);
+    value?: number | ((req: Request) => number | undefined);
+  }) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      const client = await this.services.billing.getClient();
+      if (!client) return next();
 
-        if (!(await this.services.billing.checkQuota(workspaceID, quotaName))) {
+      // eslint-disable-next-line import/no-extraneous-dependencies
+      const sdk = await import('@voiceflow/sdk-billing/express').catch(() => null);
+      if (!sdk) return next();
+
+      return sdk.createBillingAuthorizeMiddleware(client)(params)(req, res, (err: any) => {
+        if (err) {
           return next(new VError('Quota exceeded', VError.HTTP_STATUS.PAYMENT_REQUIRED));
         }
-
         return next();
-      } catch (err) {
-        return next(new VError('Unauthorized', VError.HTTP_STATUS.UNAUTHORIZED));
-      }
+      });
     };
   };
 }

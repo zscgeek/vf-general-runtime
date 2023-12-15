@@ -3,7 +3,7 @@ import express from 'express';
 
 import { BODY_PARSER_SIZE_LIMIT } from '@/backend/constants';
 import { ControllerMap, MiddlewareMap } from '@/lib';
-import { QuotaName } from '@/lib/services/billing';
+import { ItemName, ResourceType } from '@/lib/services/billing';
 import { Request } from '@/types';
 
 export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
@@ -41,7 +41,12 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
       auth: req.headers.authorization,
       versionID: req.body.versionID,
     })),
-    middlewares.billing.checkQuota(QuotaName.OPEN_API_TOKENS, (req) => req.params.workspaceID),
+    middlewares.billing.authorize({
+      resourceType: ResourceType.WORKSPACE,
+      resourceID: (req) => req.params.workspaceID,
+      item: ItemName.AITokens,
+      value: 0,
+    }),
     middlewares.llmLimit.consumeResource((req) => req.headers.authorization || req.cookies.auth_vf, 'knowledge-base'),
     controllers.test.testKnowledgeBase
   );
@@ -55,15 +60,24 @@ export default (middlewares: MiddlewareMap, controllers: ControllerMap) => {
       auth: req.headers.authorization,
       versionID: req.body.versionID,
     })),
-    middlewares.billing.checkQuota(QuotaName.OPEN_API_TOKENS, (req) => req.params.workspaceID),
+    middlewares.billing.authorize({
+      resourceType: ResourceType.WORKSPACE,
+      resourceID: (req) => req.params.workspaceID,
+      item: ItemName.AITokens,
+      value: 0,
+    }),
     middlewares.llmLimit.consumeResource((req) => req.headers.authorization || req.cookies.auth_vf, 'knowledge-base'),
     controllers.test.testKnowledgeBasePrompt
   );
 
   router.post(
     '/:workspaceID/completion',
-    middlewares.auth.authorize(['workspace:READ']),
-    middlewares.billing.checkQuota(QuotaName.OPEN_API_TOKENS, (req) => req.params.workspaceID),
+    middlewares.billing.authorize({
+      resourceType: ResourceType.WORKSPACE,
+      resourceID: (req) => req.params.workspaceID,
+      item: ItemName.AITokens,
+      value: 0,
+    }),
     middlewares.llmLimit.consumeResource((req) => req.headers.authorization || req.cookies.auth_vf, 'completion'),
     controllers.test.testCompletion
   );
