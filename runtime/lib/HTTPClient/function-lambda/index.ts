@@ -1,3 +1,4 @@
+import { HTTP_STATUS } from '@voiceflow/verror';
 import AWS from 'aws-sdk';
 
 import { FunctionLambdaRequest } from './interface';
@@ -46,7 +47,12 @@ export class FunctionLambdaClient {
         } else {
           const parsedPayload = JSON.parse(data.Payload as string);
           const responseBody = parsedPayload.body;
-          resolve(responseBody);
+
+          if (parsedPayload.statusCode !== HTTP_STATUS.OK) {
+            reject(responseBody);
+          } else {
+            resolve(responseBody);
+          }
         }
       });
     });
