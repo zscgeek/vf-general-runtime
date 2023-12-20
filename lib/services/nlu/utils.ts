@@ -1,5 +1,5 @@
 import { AlexaConstants } from '@voiceflow/alexa-types';
-import { BaseNode, BaseRequest } from '@voiceflow/base-types';
+import { BaseModels, BaseNode, BaseRequest } from '@voiceflow/base-types';
 import { CommandType, EventType } from '@voiceflow/base-types/build/cjs/node/utils';
 import { GoogleConstants } from '@voiceflow/google-types';
 import { VoiceflowConstants } from '@voiceflow/voiceflow-types';
@@ -10,18 +10,50 @@ import { Context } from '@/types';
 
 import { isIntentInInteraction, isIntentScopeInNode, isInteractionsInNode } from '../dialog/utils';
 import RuntimeManager from '../runtime';
+import { isConfidenceScoreAbove } from '../runtime/utils';
+import { NLUGatewayPredictResponse, PredictProps } from './types';
+
+export const adaptNLUPrediction = (prediction: NLUGatewayPredictResponse): BaseRequest.IntentRequest => {
+  return {
+    type: BaseRequest.RequestType.INTENT,
+    payload: {
+      query: prediction.utterance,
+      intent: {
+        name: prediction.predictedIntent,
+      },
+      entities: prediction.predictedSlots,
+      confidence: prediction.confidence,
+    },
+  };
+};
+
+export const resolveIntentConfidence = (
+  prediction: NLUGatewayPredictResponse,
+  { query, platform, intentConfidence = 0.6, hasChannelIntents }: PredictProps
+) => {
+  let intentRequest = adaptNLUPrediction(prediction);
+
+  const { confidence } = intentRequest.payload;
+  if (typeof confidence === 'number' && !isConfidenceScoreAbove(intentConfidence, confidence)) {
+    // confidence of a none intent is inverse to the confidence of the predicted intent
+    intentRequest = getNoneIntentRequest({ query, confidence: 1 - confidence });
+  }
+
+  return mapChannelData(intentRequest, platform, hasChannelIntents);
+};
 
 export const getNoneIntentRequest = ({
   query = '',
   confidence,
-}: { query?: string; confidence?: number } = {}): BaseRequest.IntentRequest => ({
+  entities = [],
+}: { query?: string; confidence?: number; entities?: BaseRequest.Entity[] } = {}): BaseRequest.IntentRequest => ({
   type: BaseRequest.RequestType.INTENT,
   payload: {
     query,
     intent: {
       name: VoiceflowConstants.IntentName.NONE,
     },
-    entities: [],
+    entities,
     confidence,
   },
 });
@@ -133,3 +165,6 @@ export const getAvailableIntentsAndEntities = async (
 
   return { availableIntents: commandIntentNames, availableEntities: commandEntityNames };
 };
+
+export const isHybridLLMStrategy = (nluSettings?: BaseModels.Project.NLUSettings) =>
+  nluSettings?.classifyStrategy === BaseModels.Project.ClassifyStrategy.VF_NLU_LLM_HYBRID;
