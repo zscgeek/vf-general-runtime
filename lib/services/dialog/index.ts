@@ -4,17 +4,13 @@
  */
 
 import { BaseModels, BaseNode, BaseRequest, BaseTrace, RuntimeLogs } from '@voiceflow/base-types';
-import { ChatModels } from '@voiceflow/chat-types';
 import { VF_DM_PREFIX } from '@voiceflow/common';
 import VError from '@voiceflow/verror';
-import { VoiceModels } from '@voiceflow/voice-types';
-import { VoiceflowConstants, VoiceflowUtils, VoiceflowVersion } from '@voiceflow/voiceflow-types';
+import { VoiceflowConstants } from '@voiceflow/voiceflow-types';
 import _ from 'lodash';
 
 import { hasElicit, setElicit } from '@/lib/services/runtime/handlers/utils/entity';
-import { inputToString } from '@/lib/services/runtime/handlers/utils/output';
 import log from '@/logger';
-import { Store } from '@/runtime';
 import DebugLogging from '@/runtime/lib/Runtime/DebugLogging';
 import { Context, ContextHandler, VersionTag } from '@/types';
 
@@ -23,14 +19,7 @@ import { isIntentRequest, StorageType } from '../runtime/types';
 import { addOutputTrace, getOutputTrace } from '../runtime/utils';
 import { AbstractManager, injectServices } from '../utils';
 import { rectifyEntityValue } from './synonym';
-import {
-  dmPrefix,
-  fillStringEntities,
-  getEntitiesMap,
-  getIntentEntityList,
-  getUnfulfilledEntity,
-  isIntentInScope,
-} from './utils';
+import { dmPrefix, findIntentEntity, getIntentEntityList, getUnfulfilledEntity, isIntentInScope } from './utils';
 
 export const utils = {
   addOutputTrace,
@@ -189,73 +178,69 @@ class DialogManagement extends AbstractManager<{ utils: typeof utils }> implemen
     // Set the DM state store without modifying the source context
     context = DialogManagement.setDMStore(context, dmStateStore);
 
-    // Are there any unfulfilled required entities?
-    // We need to use the stored DM state here to ensure that previously fulfilled entities are also considered!
-    const unfulfilledEntity = getUnfulfilledEntity(dmStateStore!.intentRequest, version.prototype.model);
+    if (typeof context.state.storage[StorageType.ENTITY_REPROMPT_NAME] !== 'string') {
+      const unfilledEntity = getUnfulfilledEntity(
+        dmStateStore!.intentRequest,
+        version.prototype!.model,
+        context.state.storage[StorageType.ENTITY_REPROMPT_LIST] ?? []
+      );
+
+      if (unfilledEntity) {
+        (context.state.storage as any)[StorageType.ENTITY_REPROMPT_NAME] = unfilledEntity.name;
+        (context.state.storage as any)[StorageType.ENTITY_REPROMPT_COUNTER] = 0;
+      } else {
+        (context.state.storage as any)[StorageType.ENTITY_REPROMPT_DONE] = true;
+      }
+    }
+
+    const unfulfilledEntity =
+      typeof context.state.storage[StorageType.ENTITY_REPROMPT_NAME] === 'string'
+        ? findIntentEntity(
+            version.prototype!.model,
+            dmStateStore!.intentRequest.payload.intent.name,
+            (name) => name === context.state.storage[StorageType.ENTITY_REPROMPT_NAME]
+          )
+        : undefined;
+
+    const trace: BaseTrace.AnyTrace[] = context.trace ? [...context.trace] : [];
+
+    const addTrace = (traceFrame: BaseNode.Utils.BaseTraceFrame): void => {
+      trace.push(traceFrame as any);
+    };
+
+    const debugLogging = new DebugLogging(addTrace);
+    debugLogging.refreshContext(context);
 
     if (unfulfilledEntity) {
-      // There are unfulfilled required entities -> return dialog management prompt
-      // Assemble return string by populating the inline entity values
-      const trace: BaseTrace.AnyTrace[] = context.trace ? [...context.trace] : [];
+      addTrace({
+        type: BaseTrace.TraceType.ENTITY_FILLING,
+        payload: {
+          entityToFill: unfulfilledEntity.name,
+          intent: dmStateStore.intentRequest,
+        },
+      });
+    }
 
-      const prompt = _.sample(unfulfilledEntity.dialog.prompt)! as
-        | ChatModels.Prompt
-        | VoiceModels.IntentPrompt<VoiceflowConstants.Voice>;
+    // There are unfulfilled required entities -> return dialog management prompt
+    // Assemble return string by populating the inline entity values
 
-      const addTrace = (traceFrame: BaseNode.Utils.BaseTraceFrame): void => {
-        trace.push(traceFrame as any);
+    if (hasElicit(incomingRequest)) {
+      debugLogging.recordGlobalLog(RuntimeLogs.Kinds.GlobalLogKind.NLU_INTENT_RESOLVED, {
+        confidence: dmStateStore.intentRequest.payload.confidence ?? 1,
+        resolvedIntent: dmStateStore.intentRequest.payload.intent.name,
+        utterance: dmStateStore.intentRequest.payload.query,
+        entities: Object.fromEntries(
+          dmStateStore.intentRequest.payload.entities.map((entity) => [entity.name, { value: entity.value }])
+        ),
+      });
+      return {
+        ...context,
+        end: true,
+        trace,
       };
-      const debugLogging = new DebugLogging(addTrace);
-      debugLogging.refreshContext(context);
+    }
 
-      if (!hasElicit(incomingRequest) && prompt) {
-        const variables = new Store(getEntitiesMap(dmStateStore!.intentRequest));
-
-        const output = VoiceflowUtils.prompt.isIntentVoicePrompt(prompt)
-          ? fillStringEntities(
-              dmStateStore!.intentRequest,
-              inputToString(prompt, (version as VoiceflowVersion.VoiceVersion).platformData.settings.defaultVoice)
-            )
-          : prompt.content;
-
-        const variableStore = new Store(context.state.variables);
-        utils.addOutputTrace(
-          { trace: { addTrace }, debugLogging },
-          // isPrompt is useful for adapters where we give the control of the capture to the NLU (like alexa)
-          // this way the adapter can ignore this prompt trace because the NLU will take care of it
-          utils.getOutputTrace({
-            output,
-            version,
-            variables,
-            isPrompt: true,
-          }),
-          { variables: variableStore }
-        );
-        context.state.variables = variableStore.getState();
-      }
-      if (prompt || hasElicit(incomingRequest)) {
-        trace.push({
-          type: BaseTrace.TraceType.ENTITY_FILLING,
-          payload: {
-            entityToFill: unfulfilledEntity.name,
-            intent: dmStateStore.intentRequest,
-          },
-        });
-
-        debugLogging.recordGlobalLog(RuntimeLogs.Kinds.GlobalLogKind.NLU_INTENT_RESOLVED, {
-          confidence: dmStateStore.intentRequest.payload.confidence ?? 1,
-          resolvedIntent: dmStateStore.intentRequest.payload.intent.name,
-          utterance: dmStateStore.intentRequest.payload.query,
-          entities: Object.fromEntries(
-            dmStateStore.intentRequest.payload.entities.map((entity) => [entity.name, { value: entity.value }])
-          ),
-        });
-        return {
-          ...context,
-          end: true,
-          trace,
-        };
-      }
+    if (context.state.storage[StorageType.ENTITY_REPROMPT_DONE] === true) {
       return {
         ...DialogManagement.setDMStore(context, { ...dmStateStore, intentRequest: undefined }),
         request: getNoneIntentRequest({ query }),

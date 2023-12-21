@@ -58,6 +58,10 @@ export enum StorageType {
   STREAM_FINISHED = 'streamFinished',
   NO_MATCHES_COUNTER = 'noMatchesCounter',
   NO_REPLIES_COUNTER = 'noRepliesCounter',
+  ENTITY_REPROMPT_NAME = 'entityRepromptName',
+  ENTITY_REPROMPT_COUNTER = 'entityRepromptCounter',
+  ENTITY_REPROMPT_LIST = 'entityRepromptList',
+  ENTITY_REPROMPT_DONE = 'entityRepromptDone',
 }
 
 export enum StreamAction {

@@ -60,6 +60,10 @@ export const CaptureV2Handler: HandlerFactory<VoiceflowNode.CaptureV2.Node, util
       // clean up no-matches and no-replies counters on new interaction
       runtime.storage.delete(StorageType.NO_MATCHES_COUNTER);
       runtime.storage.delete(StorageType.NO_REPLIES_COUNTER);
+      runtime.storage.delete(StorageType.ENTITY_REPROMPT_COUNTER);
+      runtime.storage.delete(StorageType.ENTITY_REPROMPT_LIST);
+      runtime.storage.delete(StorageType.ENTITY_REPROMPT_NAME);
+      runtime.storage.delete(StorageType.ENTITY_REPROMPT_DONE);
 
       // quit cycleStack without ending session by stopping on itself
       return node.id;
