@@ -190,9 +190,9 @@ class TestController extends AbstractController {
       });
     }
 
-    const { functionDefinition, inputMapping } = req.body;
+    const { definition, invocation } = req.body;
 
-    const result = await this.services.test.testFunction(functionDefinition, inputMapping);
+    const result = await this.services.test.testFunction(definition.code, definition, invocation);
 
     return TestFunctionResponseDTO.parse(result);
   }
