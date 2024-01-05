@@ -1,6 +1,8 @@
 import { BaseNode, BaseTrace } from '@voiceflow/base-types';
+import cuid from 'cuid';
 
 import {
+  SimpleCarouselTrace,
   SimpleTextTrace,
   SimpleTrace,
   SimpleTraceDTO,
@@ -33,6 +35,19 @@ const adaptVisualTrace = (trace: SimpleVisualTrace): BaseTrace.VisualTrace => ({
   },
 });
 
+const adaptCarouselTrace = (trace: SimpleCarouselTrace): BaseTrace.CarouselTrace => ({
+  ...trace,
+  payload: {
+    layout: BaseNode.Carousel.CarouselLayout.CAROUSEL,
+    ...trace.payload,
+    cards: trace.payload.cards.map((item) => ({
+      id: cuid.slug(),
+      buttons: [],
+      ...item,
+    })),
+  },
+});
+
 const isSimpleTrace = (trace: Trace): trace is SimpleTrace => SimpleTraceDTO.safeParse(trace).success;
 
 export function adaptTrace(trace: Trace): BaseTrace.BaseTraceFrame {
@@ -43,6 +58,8 @@ export function adaptTrace(trace: Trace): BaseTrace.BaseTraceFrame {
       return adaptTextTrace(trace);
     case BaseTrace.TraceType.VISUAL:
       return adaptVisualTrace(trace);
+    case BaseTrace.TraceType.CAROUSEL:
+      return adaptCarouselTrace(trace);
     default:
       return trace;
   }

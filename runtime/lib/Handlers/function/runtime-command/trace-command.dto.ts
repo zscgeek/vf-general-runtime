@@ -66,7 +66,7 @@ export type SimpleCardV2Trace = z.infer<typeof SimpleCardV2TraceDTO>;
 export const SimpleCarouselTraceDTO = TraceDTO.extend({
   type: z.literal(BaseTrace.TraceType.CAROUSEL),
   payload: z.object({
-    layout: z.nativeEnum(BaseNode.Carousel.CarouselLayout),
+    layout: z.nativeEnum(BaseNode.Carousel.CarouselLayout).optional(),
     cards: z.array(SimpleCardDTO),
   }),
 });
