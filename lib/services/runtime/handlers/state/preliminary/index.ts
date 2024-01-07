@@ -4,6 +4,7 @@ import { Action, Handler, HandlerFactory, IfV2Handler } from '@/runtime';
 
 import { isAlexaEventIntentRequest } from '../../../types';
 import _V1Handler from '../../_v1';
+import AICaptureHandler from '../../ai-capture/ai-capture.handler';
 import CaptureHandler from '../../capture';
 import CaptureV2Handler from '../../captureV2';
 import CardV2Handler from '../../cardV2';
@@ -16,6 +17,7 @@ const _v1Handler = _V1Handler();
 export const eventHandlers = [
   ...GoToHandler(),
   CaptureHandler(),
+  AICaptureHandler(),
   ...CaptureV2Handler(),
   ...InteractionHandler(),
   ...CardV2Handler(),
