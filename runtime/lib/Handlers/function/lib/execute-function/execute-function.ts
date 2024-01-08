@@ -2,9 +2,9 @@ import Config from '@/config';
 import { FunctionLambdaClient } from '@/runtime/lib/HTTPClient/function-lambda/function-lambda-client';
 
 import { ExecuteFunctionArgs } from './execute-function.interface';
-import { adaptTrace } from './lib/adaptTrace';
-import { validateNext } from './lib/validateNext';
-import { validateVariableValueTypes } from './lib/validateVariableValueTypes';
+import { adaptTrace } from './lib/adapt-trace';
+import { validateNext } from './lib/validate-next';
+import { validateVariableValueTypes } from './lib/validate-variable-value-types';
 
 export async function executeFunction(funcData: ExecuteFunctionArgs) {
   const { source, definition, invocation } = funcData;
