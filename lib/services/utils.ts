@@ -6,7 +6,11 @@ import { Config } from '@/types';
 
 import { FullServiceMap } from '.';
 
-export abstract class AbstractManager<T = Record<string, any>> extends BaseAbstractManager<FullServiceMap, Config, T> {}
+export abstract class AbstractManager<T extends Record<string, any> = Record<string, any>> extends BaseAbstractManager<
+  FullServiceMap,
+  Config,
+  T
+> {}
 
 type InjectedServiceMap<S extends Record<string, unknown>> = {
   [K in keyof S]: { new (services: FullServiceMap, config: Config): S[K] };
