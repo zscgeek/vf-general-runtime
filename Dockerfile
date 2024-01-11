@@ -24,8 +24,9 @@ COPY ./ ./
 # COPY .yarn/ ./.yarn/
 # COPY .yarnrc.yml ./.yarnrc.yml
 
-RUN rm -rf ./node_modules ./build .yarn .yarnrc.yml && \
-  yarn set version 3.2.1
+run rm -rf ./node_modules ./build .yarn .yarnrc.yml && \
+  yarn set version 3.2.1 && \
+  yarn config set nodeLinker node-modules
 
 RUN yarn config set -H 'npmRegistries["https://registry.yarnpkg.com"].npmAuthToken' "${NPM_TOKEN#"//registry.npmjs.org/:_authToken="}" && \
   yarn && \
