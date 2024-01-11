@@ -21,9 +21,7 @@ WORKDIR /target
 
 COPY ./ ./
 
-RUN rm -rf ./node_modules ./build .yarn .yarnrc.yml && \
-  yarn set version 3.2.1 && \
-  yarn config set nodeLinker node-modules
+RUN rm -rf ./node_modules ./build ./.yarn/cache ./.yarn/install-state.gz
 
 RUN yarn config set -h 'npmregistries["https://registry.yarnpkg.com"].npmauthtoken' "${npm_token#"//registry.npmjs.org/:_authtoken="}" && \
   yarn && \
