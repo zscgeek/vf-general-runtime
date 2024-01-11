@@ -3,5 +3,4 @@
 --use_strict
 --exit
 --recursive
--n --no-node-snapshot
 tests/setup.ts

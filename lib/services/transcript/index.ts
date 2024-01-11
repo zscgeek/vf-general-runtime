@@ -36,13 +36,15 @@ class TranscriptManager extends AbstractManager {
       }),
     };
 
-    return mongo.db
-      .collection<DeepPartial<TranscriptClientInfo>>('transcripts')
+    const { value: newTranscript } = await mongo.db
+      .collection('transcripts')
       .findOneAndUpdate(
         filter,
         { $set: updateData, $setOnInsert: insertData },
-        { upsert: true, returnDocument: 'after' }
+        { upsert: true, returnOriginal: false }
       );
+
+    return newTranscript;
   }
 }
 

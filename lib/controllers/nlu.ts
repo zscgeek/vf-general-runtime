@@ -1,6 +1,6 @@
 import { Validator } from '@voiceflow/backend-utils';
 import VError from '@voiceflow/verror';
-import { VoiceflowProject, VoiceflowVersion } from '@voiceflow/voiceflow-types';
+import { VoiceflowProject } from '@voiceflow/voiceflow-types';
 import { ObjectId } from 'mongodb';
 
 import { shallowObjectIdToString } from '@/runtime/lib/DataAPI/mongoDataAPI';
@@ -32,16 +32,12 @@ class NLUController extends AbstractController {
     const { versionID, projectID } = req.headers;
 
     const getVersion = async (versionID: string) => {
-      const version = await this.services.mongo?.db.collection('versions').findOne<VoiceflowVersion.Version>(
-        { _id: new ObjectId(versionID) },
-        {
-          projection: {
-            projectID: 1,
-            'prototype.model': 1,
-            'platformData.settings.intentConfidence': 1,
-          },
-        }
-      );
+      const version = await this.services.mongo?.db
+        .collection('versions')
+        .findOne(
+          { _id: new ObjectId(versionID) },
+          { projection: { projectID: 1, 'prototype.model': 1, 'platformData.settings.intentConfidence': 1 } }
+        );
 
       if (!version) throw new Error(`Version not found: ${versionID}`);
 
@@ -49,7 +45,7 @@ class NLUController extends AbstractController {
     };
 
     const getProject = async (projectID: string) => {
-      const project = await this.services.mongo?.db.collection('projects').findOne<VoiceflowProject.Project>(
+      const project = await this.services.mongo?.db.collection('projects').findOne(
         { _id: new ObjectId(projectID) },
         {
           projection: {
@@ -78,7 +74,7 @@ class NLUController extends AbstractController {
       query: req.query.query,
       tag: project.liveVersion === versionID ? VersionTag.PRODUCTION : VersionTag.DEVELOPMENT,
       nlp: !!project.prototype?.nlp,
-      hasChannelIntents: project?.platformData?.hasChannelIntents,
+      hasChannelIntents: (project as VoiceflowProject.Project)?.platformData?.hasChannelIntents,
       workspaceID: project.teamID,
       intentConfidence: version?.platformData?.settings?.intentConfidence,
       nluSettings: project.nluSettings,
