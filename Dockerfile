@@ -28,4 +28,4 @@ RUN echo $NPM_TOKEN > .npmrc && \
   yarn cache clean
 
 ENTRYPOINT [ "dumb-init" ]
-CMD ["node", "start.js"]
+CMD ["node", "--no-node-snapshot", "start.js"]
