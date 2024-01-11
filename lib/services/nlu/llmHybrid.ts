@@ -89,7 +89,7 @@ Promise<BaseRequest.IntentRequest> => {
       workspaceID: String(workspaceID),
       prompt,
       params: {
-        model: AIGPTModel.GPT_3_5_turbo,
+        model: AIGPTModel.GPT_4_TURBO,
         temperature: 0.1,
         maxTokens: 32,
       },
