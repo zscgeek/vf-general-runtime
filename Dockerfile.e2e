@@ -1,6 +1,9 @@
-FROM node:20-alpine
+FROM node:20.10-alpine as base
 
 RUN apk add --no-cache dumb-init ca-certificates python3 make g++
+
+FROM base as installer
+WORKDIR /app
 
 ARG NPM_TOKEN
 
@@ -18,10 +21,13 @@ WORKDIR /target
 
 COPY ./ ./
 
-RUN echo $NPM_TOKEN > .npmrc && \
-  yarn config set 'npmRegistries["https://registry.yarnpkg.com"].npmAuthToken' "${NPM_TOKEN#"//registry.npmjs.org/:_authToken="}" && \
-  yarn install && \
-  rm -f .npmrc && \
+RUN rm -rf ./node_modules ./build .yarn .yarnrc.yml && \
+  yarn set version 3.2.1
+
+RUN yarn config set -h 'npmregistries["https://registry.yarnpkg.com"].npmauthtoken' "${npm_token#"//registry.npmjs.org/:_authtoken="}" && \
+  yarn && \
+  yarn build && \
+  yarn config unset -h npmregistries && \
   yarn cache clean
 
 ENTRYPOINT [ "dumb-init" ]
