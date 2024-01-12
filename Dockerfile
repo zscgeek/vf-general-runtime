@@ -30,8 +30,8 @@ RUN yarn config set -H 'npmRegistries["https://registry.yarnpkg.com"].npmAuthTok
 FROM base as prod
 ARG NPM_TOKEN
 
-COPY --from=builder ./build ./
-COPY --from=builder ./.yarn ./.yarn
+COPY --from=builder /usr/src/app/build .
+COPY --from=builder /usr/src/app/.yarn ./.yarn
 
 RUN yarn config set -H 'npmRegistries["https://registry.yarnpkg.com"].npmAuthToken' "${NPM_TOKEN#"//registry.npmjs.org/:_authToken="}" && \
   yarn workspace focus -A --production && \
