@@ -15,14 +15,15 @@ ENV GIT_SHA=${build_GIT_SHA}
 ENV BUILD_URL=${build_BUILD_URL}
 
 WORKDIR /usr/src/app
-COPY build ./
-COPY package.json ./
-COPY yarn.lock ./
-COPY .yarn/ ./.yarn/
-COPY .yarnrc.yml ./.yarnrc.yml
+
+# Single COPY to only create 1 layer. Can use multi-line with COPY --link with buildx
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY ./.yarn/ ./.yarn/
 
 RUN yarn config set -H 'npmRegistries["https://registry.yarnpkg.com"].npmAuthToken' "${NPM_TOKEN#"//registry.npmjs.org/:_authToken="}" && \
-  yarn workspaces focus --all --production && \
+  rm -rf ./node_modules/ .yarn/cache/ .yarn/install-state.gz && \
+  yarn install --immutable && \
+  yarn build && \
   yarn config unset -H npmRegistries && \
   yarn cache clean
 
