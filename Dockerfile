@@ -34,7 +34,7 @@ COPY --from=builder /usr/src/app/build .
 COPY --from=builder /usr/src/app/.yarn ./.yarn
 
 RUN yarn config set -H 'npmRegistries["https://registry.yarnpkg.com"].npmAuthToken' "${NPM_TOKEN#"//registry.npmjs.org/:_authToken="}" && \
-  yarn workspace focus -A --production && \
+  yarn workspaces focus -A --production && \
   yarn config unset -H npmRegistries && \
   yarn cache clean
 
