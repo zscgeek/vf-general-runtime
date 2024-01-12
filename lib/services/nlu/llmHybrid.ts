@@ -94,7 +94,7 @@ Promise<BaseRequest.IntentRequest> => {
         maxTokens: 32,
       },
       options: {
-        timeout: 1000,
+        timeout: 3000,
       },
     })
     .catch((error) => {
