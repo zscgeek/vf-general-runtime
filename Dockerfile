@@ -32,6 +32,7 @@ ARG NPM_TOKEN
 
 COPY --from=builder /usr/src/app/build .
 COPY --from=builder /usr/src/app/.yarn ./.yarn
+COPY --from=builder /usr/src/app/.yarnrc.yml .
 
 RUN yarn config set -H 'npmRegistries["https://registry.yarnpkg.com"].npmAuthToken' "${NPM_TOKEN#"//registry.npmjs.org/:_authToken="}" && \
   yarn workspaces focus -A --production && \
