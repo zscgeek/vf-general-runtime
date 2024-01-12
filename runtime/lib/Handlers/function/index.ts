@@ -84,10 +84,12 @@ export const FunctionHandler: HandlerFactory<FunctionCompiledNode, typeof utilsO
         applyTraceCommand(trace, runtime);
       }
 
+      if (definition.pathCodes.length === 0) {
+        return invocation.paths.__vf__default ?? null;
+      }
       if (next) {
         return applyNextCommand(next, invocation.paths);
       }
-
       return null;
     } catch (err) {
       // !TODO! - Revamp `general-runtime` types to allow users to modify the built-in
