@@ -16,12 +16,10 @@ ENV BUILD_URL=${build_BUILD_URL}
 
 WORKDIR /usr/src/app
 
-# Single COPY to only create 1 layer. Can use multi-line with COPY --link with buildx
-COPY package.json yarn.lock .yarnrc.yml ./
-COPY ./.yarn/ ./.yarn/
+COPY . .
 
 RUN yarn config set -H 'npmRegistries["https://registry.yarnpkg.com"].npmAuthToken' "${NPM_TOKEN#"//registry.npmjs.org/:_authToken="}" && \
-  rm -rf ./node_modules/ .yarn/cache/ .yarn/install-state.gz && \
+  rm -rf ./node_modules/ .yarn/cache/ .yarn/install-state.gz ./build/ && \
   yarn install --immutable && \
   yarn build && \
   yarn config unset -H npmRegistries && \
