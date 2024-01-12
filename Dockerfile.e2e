@@ -18,10 +18,9 @@ WORKDIR /target
 
 COPY ./ ./
 
-RUN echo $NPM_TOKEN > .npmrc && \
-  yarn config set 'npmRegistries["https://registry.yarnpkg.com"].npmAuthToken' "${NPM_TOKEN#"//registry.npmjs.org/:_authToken="}" && \
-  yarn install && \
-  rm -f .npmrc && \
+RUN yarn config set -H 'npmRegistries["https://registry.yarnpkg.com"].npmAuthToken' "${NPM_TOKEN#"//registry.npmjs.org/:_authToken="}" && \
+  yarn workspaces focus --all --production && \
+  yarn config unset -H npmRegistries && \
   yarn cache clean
 
 ENTRYPOINT [ "dumb-init" ]
