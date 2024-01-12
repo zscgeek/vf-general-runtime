@@ -17,6 +17,8 @@ ENV BUILD_URL=${build_BUILD_URL}
 WORKDIR /usr/src/app
 
 FROM base as builder
+ARG NPM_TOKEN
+
 COPY . .
 
 RUN yarn config set -H 'npmRegistries["https://registry.yarnpkg.com"].npmAuthToken' "${NPM_TOKEN#"//registry.npmjs.org/:_authToken="}" && \
@@ -26,6 +28,7 @@ RUN yarn config set -H 'npmRegistries["https://registry.yarnpkg.com"].npmAuthTok
   yarn config unset -H npmRegistries
 
 FROM base as prod
+ARG NPM_TOKEN
 
 COPY --from=builder ./build ./
 COPY --from=builder ./.yarn ./.yarn
