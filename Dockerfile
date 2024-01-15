@@ -22,7 +22,6 @@ ARG NPM_TOKEN
 COPY . .
 
 RUN yarn config set -H 'npmRegistries["https://registry.yarnpkg.com"].npmAuthToken' "${NPM_TOKEN#"//registry.npmjs.org/:_authToken="}" && \
-  rm -rf ./node_modules/ .yarn/cache/ .yarn/install-state.gz ./build/ && \
   yarn install --immutable && \
   yarn build && \
   yarn config unset -H npmRegistries
