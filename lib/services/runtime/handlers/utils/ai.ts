@@ -51,13 +51,10 @@ export const fetchChat = async (
     content: replaceVariables(message.content, sanitizedVars),
   }));
 
-  const system = replaceVariables(params.system, sanitizedVars);
-  if (system) messages.unshift({ role: BaseUtils.ai.Role.SYSTEM, content: system });
-
   const { output, tokens, queryTokens, answerTokens, model, multiplier } =
     (await mlGateway.private.completion.generateChatCompletion({
       messages,
-      params,
+      params: { ...params, system: replaceVariables(params.system, sanitizedVars) },
       options,
       workspaceID: options.context.workspaceID,
       projectID: options.context.projectID,
