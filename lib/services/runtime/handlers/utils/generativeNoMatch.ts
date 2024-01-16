@@ -29,12 +29,14 @@ export const generateNoMatch = async (
     },
   ];
 
-  const response = await fetchChat({ ...context, messages }, runtime.services.mlGateway, {
+  // system injected as the most recent message
+  const response = await fetchChat({ ...context, system: undefined, messages }, runtime.services.mlGateway, {
     context: {
       projectID: runtime.project?._id,
       workspaceID: runtime.project!.teamID,
     },
   });
+
   if (!response.output) return null;
 
   return {

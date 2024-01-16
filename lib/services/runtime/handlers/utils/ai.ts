@@ -75,7 +75,6 @@ export const fetchPrompt = async (
 
   const sanitizedVars = sanitizeVariables(variablesState);
 
-  const system = replaceVariables(params.system, sanitizedVars);
   const prompt = replaceVariables(params.prompt, sanitizedVars);
 
   let messages: BaseUtils.ai.Message[] = [];
@@ -91,12 +90,13 @@ export const fetchPrompt = async (
     messages = [{ role: BaseUtils.ai.Role.USER, content: prompt }];
   }
 
-  if (system) messages.unshift({ role: BaseUtils.ai.Role.SYSTEM, content: system });
-
   const { output, tokens, queryTokens, answerTokens, model, multiplier } =
     (await mlGateway.private.completion.generateChatCompletion({
       messages,
-      params,
+      params: {
+        ...params,
+        system: replaceVariables(params.system, sanitizedVars),
+      },
       workspaceID: options.context.workspaceID,
       projectID: options.context.projectID,
       moderation: true,
