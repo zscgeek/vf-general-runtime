@@ -1,7 +1,10 @@
 import { InternalServerErrorException } from '@voiceflow/exception';
 import { HTTP_STATUS } from '@voiceflow/verror';
 import AWS from 'aws-sdk';
+import { performance } from 'perf_hooks';
 import { z } from 'zod';
+
+import log from '@/logger';
 
 import { FunctionCodeNotFoundException } from './exceptions/function-code-not-found.exception';
 import { InvalidRuntimeCommandException } from './exceptions/invalid-runtime-command.exception';
@@ -18,6 +21,8 @@ import {
 import { LambdaErrorCode } from './lambda-error-code.enum';
 
 export class FunctionLambdaClient {
+  private readonly errorLabel: string = 'FUNCTION-LAMBDA-ERROR';
+
   private readonly awsLambda: AWS.Lambda;
 
   private readonly functionLambdaARN: string;
@@ -77,6 +82,52 @@ export class FunctionLambdaClient {
     }
   }
 
+  private serializeAWSError(error: AWS.AWSError) {
+    const {
+      cause,
+      cfId,
+      code,
+      extendedRequestId,
+      hostname,
+      message,
+      name,
+      originalError,
+      region,
+      requestId,
+      retryDelay,
+      retryable,
+      stack,
+      statusCode,
+      time,
+    } = error;
+    return JSON.stringify(
+      {
+        cause,
+        cfId,
+        code,
+        extendedRequestId,
+        hostname,
+        message,
+        name,
+        originalError: {
+          cause: originalError?.cause,
+          message: originalError?.message,
+          name: originalError?.name,
+          stack: originalError?.stack?.substring(0, 1000),
+        },
+        region,
+        requestId,
+        retryDelay,
+        retryable,
+        stack: stack?.substring(0, 1000),
+        statusCode,
+        time,
+      },
+      null,
+      2
+    );
+  }
+
   private invokeLambda(request: FunctionLambdaRequest): Promise<FunctionLambdaSuccessResponse> {
     const params: AWS.Lambda.InvocationRequest = {
       FunctionName: this.functionLambdaARN,
@@ -86,18 +137,46 @@ export class FunctionLambdaClient {
 
     // Invoke the Lambda function
     return new Promise((resolve, reject) => {
+      const startTime = performance.now();
+
       this.awsLambda.invoke(params, (err, data) => {
+        const timeElapsed = performance.now() - startTime;
+
         if (err) {
+          log.error(
+            `[${
+              this.errorLabel
+            }]: \`function-lambda\` invocation returned an error object, latency=${timeElapsed} ms, error=${this.serializeAWSError(
+              err
+            )}`
+          );
+
           reject(err);
         } else if (!data.Payload) {
+          log.error(
+            `[${this.errorLabel}]: \`function-lambda\` did not send back a \`data.Payload\` property, latency=${timeElapsed} ms`
+          );
+
           reject(new Error('Lambda did not send back a response'));
         } else {
           const parsedPayload = JSON.parse(data.Payload as string);
           const responseBody = parsedPayload.body;
 
           if (parsedPayload.statusCode !== HTTP_STATUS.OK) {
+            log.error(
+              `[${
+                this.errorLabel
+              }]: Received non-200 status from \`function-lambda\`, latency=${timeElapsed} ms, responseBody=${JSON.stringify(
+                responseBody,
+                null,
+                2
+              )}`
+            );
+
             reject(responseBody);
           } else {
+            log.info(`Function lambda invocation was resolved, latency=${timeElapsed} ms`);
+
             resolve(responseBody);
           }
         }
@@ -123,9 +202,13 @@ export class FunctionLambdaClient {
         throw this.createLambdaException(lambdaError.data);
       }
 
+      const errorBody = (err.message ?? JSON.stringify(err, null, 2)).slice(0, 100);
+
+      log.error(`[${this.errorLabel}]: An unknown internal server error occurred, errorBody=${errorBody}`);
+
       throw new InternalServerErrorException({
         message: 'Unknown error occurred when executing the function',
-        cause: JSON.stringify(err).slice(0, 100),
+        cause: errorBody,
       });
     }
   }
