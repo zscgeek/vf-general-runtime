@@ -1,5 +1,4 @@
 import { InternalServerErrorException } from '@voiceflow/exception';
-import { HTTP_STATUS } from '@voiceflow/verror';
 import AWS from 'aws-sdk';
 import { performance } from 'perf_hooks';
 import { z } from 'zod';
@@ -18,6 +17,7 @@ import {
   FunctionLambdaSuccessResponse,
   FunctionLambdaSuccessResponseDTO,
 } from './function-lambda-client.interface';
+import { AWSSuccessResponsePayloadDTO } from './function-lambda-client.types';
 import { LambdaErrorCode } from './lambda-error-code.enum';
 
 export class FunctionLambdaClient {
@@ -128,6 +128,10 @@ export class FunctionLambdaClient {
     );
   }
 
+  private isLambdaErrorResponse(data: unknown): data is FunctionLambdaErrorResponse {
+    return FunctionLambdaErrorResponseDTO.safeParse(data).success;
+  }
+
   private invokeLambda(request: FunctionLambdaRequest): Promise<FunctionLambdaSuccessResponse> {
     const params: AWS.Lambda.InvocationRequest = {
       FunctionName: this.functionLambdaARN,
@@ -159,25 +163,37 @@ export class FunctionLambdaClient {
 
           reject(new Error('Lambda did not send back a response'));
         } else {
-          const parsedPayload = JSON.parse(data.Payload as string);
-          const responseBody = parsedPayload.body;
+          const rawPayload = JSON.parse(data.Payload.toString());
+          const zodParseResult = AWSSuccessResponsePayloadDTO.safeParse(rawPayload);
 
-          if (parsedPayload.statusCode !== HTTP_STATUS.OK) {
+          if (!zodParseResult.success) {
+            log.error(`Received unexpected payload from function lambda, data.Payload=${data.Payload.toString()}`);
+
+            reject(
+              new Error(`\`function-lambda\` sent back unexpected data, data.Payload= ${data.Payload.toString()}`)
+            );
+
+            return;
+          }
+
+          const parsedPayload = zodParseResult.data;
+
+          if (this.isLambdaErrorResponse(parsedPayload.body)) {
             log.error(
-              `[${
-                this.errorLabel
-              }]: Received non-200 status from \`function-lambda\`, latency=${timeElapsed} ms, responseBody=${JSON.stringify(
-                responseBody,
+              `[${this.errorLabel}]: Received ${
+                parsedPayload.statusCode
+              } status from \`function-lambda\`, latency=${timeElapsed} ms, responseBody=${JSON.stringify(
+                parsedPayload.body,
                 null,
                 2
               )}`
             );
 
-            reject(responseBody);
+            reject(parsedPayload.body);
           } else {
             log.info(`Function lambda invocation was resolved, latency=${timeElapsed} ms`);
 
-            resolve(responseBody);
+            resolve(parsedPayload.body);
           }
         }
       });
@@ -202,7 +218,7 @@ export class FunctionLambdaClient {
         throw this.createLambdaException(lambdaError.data);
       }
 
-      const errorBody = (err.message ?? JSON.stringify(err, null, 2)).slice(0, 100);
+      const errorBody = (err.message ?? JSON.stringify(err, null, 2)).slice(0, 2048);
 
       log.error(`[${this.errorLabel}]: An unknown internal server error occurred, errorBody=${errorBody}`);
 
