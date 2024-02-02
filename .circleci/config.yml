@@ -4,7 +4,7 @@ setup: true
 parameters:
   ssh-fingerprint:
     type: string
-    default: "61:71:13:8f:00:5f:da:63:a8:0c:6d:f3:b4:b1:17:b3"
+    default: "SHA256:6q9ufLz5CZrw1IfJdppGaN0daTTgbWMYHgFadDpbQxw"
 
 orbs:
   vfcommon: voiceflow/common@0.38.10
