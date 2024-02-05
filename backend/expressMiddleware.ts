@@ -62,9 +62,10 @@ class ExpressMiddleware {
       next();
     });
 
+    app.use(createLogMiddleware());
+
     // All valid routes handled here
     app.use(api(middlewares, controllers));
-    app.use(createLogMiddleware());
   }
 }
 
