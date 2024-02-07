@@ -21,7 +21,7 @@
     "@voiceflow/body-parser": "^1.21.1",
     "@voiceflow/chat-types": "2.13.91",
     "@voiceflow/common": "8.2.3",
-    "@voiceflow/dtos": "1.18.0",
+    "@voiceflow/dtos": "1.30.0",
     "@voiceflow/event-ingestion-service": "1.5.1",
     "@voiceflow/exception": "^1.5.1",
     "@voiceflow/google-types": "2.20.43",
@@ -149,6 +149,7 @@
     "@voiceflow/sdk-analytics": "^1.26.0",
     "@voiceflow/sdk-auth": "^2.7.5"
   },
+  "packageManager": "yarn@3.2.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/voiceflow/general-runtime.git"
@@ -190,6 +191,5 @@
   "volta": {
     "node": "16.20.2",
     "yarn": "3.2.1"
-  },
-  "packageManager": "yarn@3.2.1"
+  }
 }

@@ -1,10 +1,11 @@
 import { BaseModels, BaseRequest, BaseTrace } from '@voiceflow/base-types';
-import { Variable } from '@voiceflow/dtos';
+import { Variable, VariableDatatype } from '@voiceflow/dtos';
 import axios from 'axios';
 import _ from 'lodash';
 
 import { FrameType } from '@/lib/services/runtime/types';
 import { PartialContext, State } from '@/runtime';
+import { builtInVariableTypes } from '@/runtime/lib/Runtime/utils/variables';
 import { Context, InitContextHandler } from '@/types';
 
 import { AbstractManager, injectServices } from '../utils';
@@ -55,17 +56,43 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
     };
   }
 
+  parseDefaultValue(variableName: string, declare: any) {
+    const { defaultValue } = declare;
+
+    let type = declare.datatype;
+
+    if (declare.isSystem) {
+      const builtInType = builtInVariableTypes.get(variableName);
+      if (!builtInType) {
+        throw new Error(`Received an invalid built-in variable with no defined type`);
+      }
+      type = builtInType;
+    }
+
+    switch (type) {
+      case VariableDatatype.BOOLEAN:
+        return defaultValue.toLowerCase() === 'true';
+      case VariableDatatype.DATE:
+        return new Date(defaultValue);
+      case VariableDatatype.NUMBER:
+        return parseFloat(defaultValue);
+      case VariableDatatype.TEXT:
+      case VariableDatatype.IMAGE:
+      case VariableDatatype.ANY:
+        return defaultValue;
+      default:
+        throw new Error(`Received unexpected variable type '${type}'`);
+    }
+  }
+
   initializeFromCMSVariables(variables: Record<string, any>) {
-    return Object.values(variables).reduce<Record<string, string>>((acc, declare) => {
-      const currentDefaultValue = acc[declare.name];
-      const isLegacyVariable = declare.name === declare.id;
-      const cmsDefaultValue = !isLegacyVariable ? declare.defaultValue : currentDefaultValue;
-      const legacyDefaultValue = !isLegacyVariable ? currentDefaultValue : declare.defaultValue;
-      return {
+    return Object.entries(variables).reduce<Record<string, string | number | boolean | Date>>(
+      (acc, [name, declare]) => ({
         ...acc,
-        [declare.name]: cmsDefaultValue ?? legacyDefaultValue,
-      };
-    }, {});
+        [name]: this.parseDefaultValue(name, declare) ?? 0,
+      }),
+      {}
+    );
   }
 
   // initialize all entities and variables to 0, it is important that they are defined

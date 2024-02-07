@@ -3438,12 +3438,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@voiceflow/dtos@npm:1.18.0":
-  version: 1.18.0
-  resolution: "@voiceflow/dtos@npm:1.18.0"
+"@voiceflow/dtos@npm:1.30.0":
+  version: 1.30.0
+  resolution: "@voiceflow/dtos@npm:1.30.0"
   peerDependencies:
     zod: ^3.20.0
-  checksum: 7b4fbc661898d7d66247dfacb5eda482e0bbc5732af6cec7db41b1f8c2f7661567c6f2bb65c45a32ed5937da3476d15b8e29484f680b0fb00e4050905187ec0c
+  checksum: f1260a067a13391941029d7b4585a6816122c97f822e5a6c359e4dcb63fc8048ea7f4a073275d812386123fe77ef76021a39096e5bfde67c2047caab463c80fa
   languageName: node
   linkType: hard
 
@@ -3564,7 +3564,7 @@ __metadata:
     "@voiceflow/chat-types": 2.13.91
     "@voiceflow/commitlint-config": 2.0.0
     "@voiceflow/common": 8.2.3
-    "@voiceflow/dtos": 1.18.0
+    "@voiceflow/dtos": 1.30.0
     "@voiceflow/eslint-config": 6.1.0
     "@voiceflow/event-ingestion-service": 1.5.1
     "@voiceflow/exception": ^1.5.1
