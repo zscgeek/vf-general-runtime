@@ -57,11 +57,11 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
   }
 
   parseDefaultValue(variableName: string, declare: any) {
-    const { defaultValue } = declare;
+    const { defaultValue, isSystem, datatype } = declare;
 
-    let type = declare.datatype;
+    let type = datatype;
 
-    if (declare.isSystem) {
+    if (isSystem) {
       const builtInType = builtInVariableTypes.get(variableName);
       if (!builtInType) {
         throw new Error(`Received an invalid built-in variable with no defined type`);
