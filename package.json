@@ -12,6 +12,7 @@
     }
   },
   "dependencies": {
+    "@aws-sdk/client-lambda": "^3.507.0",
     "@aws-sdk/client-s3": "^3.179.0",
     "@opentelemetry/api-metrics": "0.26.0",
     "@types/workerpool": "^5.0.1",
@@ -34,7 +35,6 @@
     "@voiceflow/voice-types": "2.9.70",
     "@voiceflow/voiceflow-types": "3.26.32",
     "ajv": "6.12.3",
-    "aws-sdk": "^2.1518.0",
     "axios": "^0.21.1",
     "compression": "^1.7.4",
     "connect-timeout": "^1.9.0",
@@ -149,6 +149,7 @@
     "@voiceflow/sdk-analytics": "^1.26.0",
     "@voiceflow/sdk-auth": "^2.7.5"
   },
+  "packageManager": "yarn@3.2.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/voiceflow/general-runtime.git"
@@ -190,6 +191,5 @@
   "volta": {
     "node": "16.20.2",
     "yarn": "3.2.1"
-  },
-  "packageManager": "yarn@3.2.1"
+  }
 }
