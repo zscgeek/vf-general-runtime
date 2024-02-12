@@ -1,11 +1,11 @@
 import { BaseModels, BaseRequest, BaseTrace } from '@voiceflow/base-types';
-import { Variable, VariableDatatype } from '@voiceflow/dtos';
+import { Variable } from '@voiceflow/dtos';
+import { parseCMSVariableDefaultValue } from '@voiceflow/utils-designer';
 import axios from 'axios';
 import _ from 'lodash';
 
 import { FrameType } from '@/lib/services/runtime/types';
 import { PartialContext, State } from '@/runtime';
-import { builtInVariableTypes } from '@/runtime/lib/Runtime/utils/variables';
 import { Context, InitContextHandler } from '@/types';
 
 import { AbstractManager, injectServices } from '../utils';
@@ -56,38 +56,9 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
     };
   }
 
-  parseDefaultValue(variableName: string, declare: any) {
-    const { defaultValue, isSystem, datatype } = declare;
-
-    let type = datatype;
-
-    if (isSystem) {
-      const builtInType = builtInVariableTypes.get(variableName);
-      if (!builtInType) {
-        throw new Error(`Received an invalid built-in variable with no defined type`);
-      }
-      type = builtInType;
-    }
-
-    switch (type) {
-      case VariableDatatype.BOOLEAN:
-        return defaultValue.toLowerCase() === 'true';
-      case VariableDatatype.DATE:
-        return new Date(defaultValue);
-      case VariableDatatype.NUMBER:
-        return parseFloat(defaultValue);
-      case VariableDatatype.TEXT:
-      case VariableDatatype.IMAGE:
-      case VariableDatatype.ANY:
-        return defaultValue;
-      default:
-        throw new Error(`Received unexpected variable type '${type}'`);
-    }
-  }
-
   initializeFromCMSVariables(variables: Record<string, any>) {
     return Object.fromEntries(
-      Object.entries(variables).map(([name, declare]) => [name, this.parseDefaultValue(name, declare) ?? 0])
+      Object.entries(variables).map(([name, declare]) => [name, parseCMSVariableDefaultValue(name, declare) ?? 0])
     );
   }
 

@@ -31,6 +31,7 @@
     "@voiceflow/metrics": "1.4.1",
     "@voiceflow/natural-language-commander": "^0.5.1",
     "@voiceflow/sdk-http-ml-gateway": "2.12.4",
+    "@voiceflow/utils-designer": "1.9.3",
     "@voiceflow/verror": "^1.1.3",
     "@voiceflow/voice-types": "2.9.70",
     "@voiceflow/voiceflow-types": "3.26.32",
