@@ -87,7 +87,7 @@ class StateManager extends AbstractManager<{ utils: typeof utils }> implements I
 
   initializeFromCMSVariables(variables: Record<string, any>) {
     return Object.fromEntries(
-      Object.entries(variables).reduce(([name, declare]) => [name, this.parseDefaultValue(name, declare) ?? 0])
+      Object.entries(variables).map(([name, declare]) => [name, this.parseDefaultValue(name, declare) ?? 0])
     );
   }
 
