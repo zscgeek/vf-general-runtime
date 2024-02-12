@@ -1,4 +1,21 @@
+import { SystemVariable, VariableDatatype } from '@voiceflow/dtos';
+
 import Store from '@/runtime/lib/Runtime/Store';
+
+export const builtInVariableTypes = new Map(
+  Object.entries({
+    [SystemVariable.CHANNEL]: VariableDatatype.TEXT,
+    [SystemVariable.INTENT_CONFIDENCE]: VariableDatatype.NUMBER,
+    [SystemVariable.LAST_EVENT]: VariableDatatype.ANY,
+    [SystemVariable.LAST_RESPONSE]: VariableDatatype.TEXT,
+    [SystemVariable.LAST_UTTERANCE]: VariableDatatype.TEXT,
+    [SystemVariable.LOCALE]: VariableDatatype.TEXT,
+    [SystemVariable.PLATFORM]: VariableDatatype.TEXT,
+    [SystemVariable.SESSIONS]: VariableDatatype.NUMBER,
+    [SystemVariable.TIMESTAMP]: VariableDatatype.TEXT,
+    [SystemVariable.USER_ID]: VariableDatatype.TEXT,
+  })
+);
 
 export const createCombinedVariables = (global: Store, local: Store): Store => {
   return Store.merge(global, local);
