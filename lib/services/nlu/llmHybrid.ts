@@ -1,6 +1,6 @@
 import { BaseNode, BaseRequest, BaseTrace } from '@voiceflow/base-types';
 import { Utils } from '@voiceflow/common';
-import { AIGPTModel } from '@voiceflow/dtos';
+import { AIModel } from '@voiceflow/dtos';
 import { VoiceflowConstants } from '@voiceflow/voiceflow-types';
 import dedent from 'dedent';
 
@@ -89,7 +89,7 @@ Promise<BaseRequest.IntentRequest> => {
       workspaceID: String(workspaceID),
       prompt,
       params: {
-        model: AIGPTModel.GPT_4_TURBO,
+        model: AIModel.GPT_4_TURBO,
         temperature: 0.1,
         maxTokens: 32,
       },
@@ -181,7 +181,7 @@ Promise<BaseRequest.IntentRequest> => {
           workspaceID: String(workspaceID),
           prompt,
           params: {
-            model: AIGPTModel.GPT_3_5_turbo,
+            model: AIModel.GPT_3_5_TURBO,
             temperature: 0.1,
             maxTokens: 64,
           },

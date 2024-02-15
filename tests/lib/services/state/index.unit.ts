@@ -20,6 +20,7 @@ const version = {
     context: {
       variables: { variable1: 1, variable2: 2 },
     },
+    surveyorContext: {},
   },
   projectID: 'projectID',
   variables: ['variable1'],
