@@ -52,6 +52,9 @@ function applyNextCommand(command: NextCommand, paths: FunctionCompiledInvocatio
   return null;
 }
 
+const serializeVariables = (variables: Record<string, unknown>) =>
+  Object.fromEntries(Object.entries(variables).map(([key, value]) => [key, JSON.stringify(value)]));
+
 export const FunctionHandler: HandlerFactory<FunctionCompiledNode, typeof utilsObj> = (utils) => ({
   canHandle: (node) => node.type === NodeType.FUNCTION,
 
@@ -59,10 +62,11 @@ export const FunctionHandler: HandlerFactory<FunctionCompiledNode, typeof utilsO
     const { definition, invocation } = node.data;
 
     try {
+      const serializedVars = serializeVariables(variables.getState());
       const resolvedInputMapping = Object.entries(invocation.inputVars).reduce((acc, [varName, value]) => {
         return {
           ...acc,
-          [varName]: utils.replaceVariables(value, variables.getState()),
+          [varName]: utils.replaceVariables(value, serializedVars),
         };
       }, {});
 
