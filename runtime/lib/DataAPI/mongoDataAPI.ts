@@ -103,22 +103,25 @@ class MongoDataAPI<
 
   public hasKBDocuments = async (projectID: string): Promise<boolean> => {
     // more than 1 property in the object
-    const result = await this.client.db.collection(this.projectsCollection).aggregate([
-      {
-        $match: {
-          _id: new ObjectId(projectID),
-        },
-      },
-      {
-        $project: {
-          hasDocuments: {
-            $gt: [{ $size: { $objectToArray: '$knowledgeBase.documents' } }, 0],
+    const result = await this.client.db
+      .collection(this.projectsCollection)
+      .aggregate([
+        {
+          $match: {
+            _id: new ObjectId(projectID),
           },
         },
-      },
-    ]);
+        {
+          $project: {
+            hasDocuments: {
+              $gt: [{ $size: { $objectToArray: '$knowledgeBase.documents' } }, 0],
+            },
+          },
+        },
+      ])
+      .next();
 
-    return result.hasNext();
+    return !!result?.hasDocuments;
   };
 
   public getProject = async (projectIDOrAuth: string) => {
