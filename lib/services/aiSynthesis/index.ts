@@ -285,7 +285,12 @@ class AISynthesis extends AbstractManager {
 
       if (!answer?.output) return null;
 
-      if (runtime?.version) {
+      if (runtime) {
+        const documents = await runtime.getKBDocuments(
+          projectID,
+          data.chunks.map((chunk) => chunk.documentID)
+        );
+
         runtime.trace.addTrace({
           type: 'knowledgeBase',
           payload: {
@@ -293,7 +298,7 @@ class AISynthesis extends AbstractManager {
               data.chunks.map(async ({ score, documentID }) => ({
                 score,
                 documentID,
-                documentData: (await runtime.getKBDocument(runtime.version!.projectID, documentID))?.data,
+                documentData: documents?.[documentID]?.data,
               }))
             ),
             query: {
