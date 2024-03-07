@@ -294,7 +294,7 @@ class AISynthesis extends AbstractManager {
         runtime.trace.addTrace({
           type: 'knowledgeBase',
           payload: {
-            chunks: data.chunks.map(async ({ score, documentID }) => ({
+            chunks: data.chunks.map(({ score, documentID }) => ({
               score,
               documentID,
               documentData: documents?.[documentID]?.data,
