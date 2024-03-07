@@ -230,7 +230,7 @@ export const knowledgeBaseNoMatch = async (runtime: Runtime): Promise<AIResponse
     if (!answer.output) return { ...answer, tokens, queryTokens, answerTokens };
 
     // only add KB trace if result is success
-    const documents = await runtime.getKBDocuments(
+    const documents = await runtime.api.getKBDocuments(
       runtime.version!.projectID,
       data.chunks.map(({ documentID }) => documentID)
     );
