@@ -191,10 +191,6 @@ class Runtime<
     return this.programManager.get(versionID, diagramID);
   }
 
-  public getKBDocuments(projectID: string, documentIDs: string[]) {
-    return this.api.getKBDocuments(projectID, documentIDs);
-  }
-
   private async injectBaseProgram() {
     if (this.stack.get(0)?.getDiagramID() === this.versionID) {
       return;

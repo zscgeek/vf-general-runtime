@@ -286,7 +286,7 @@ class AISynthesis extends AbstractManager {
       if (!answer?.output) return null;
 
       if (runtime) {
-        const documents = await runtime.getKBDocuments(
+        const documents = await runtime.api.getKBDocuments(
           projectID,
           data.chunks.map((chunk) => chunk.documentID)
         );

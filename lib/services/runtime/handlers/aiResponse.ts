@@ -66,7 +66,7 @@ const AIResponseHandler: HandlerFactory<VoiceNode.AIResponse.Node, void, General
 
           if (!answer.output && settings.notFoundPath) return elseID;
 
-          const documents = await runtime.getKBDocuments(
+          const documents = await runtime.api.getKBDocuments(
             runtime.version!.projectID,
             queryAnswer.chunks?.map(({ documentID }) => documentID) || []
           );
