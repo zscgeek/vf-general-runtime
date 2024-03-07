@@ -17,8 +17,6 @@ export const isValidObjectID = (id: unknown) =>
 interface Client {
   db: Db;
 }
-
-// this is a test change, please delete
 class MongoDataAPI<
   P extends BaseModels.Program.Model<any, any>,
   V extends BaseModels.Version.Model<any>,
@@ -72,6 +70,42 @@ class MongoDataAPI<
     return shallowObjectIdToString(version);
   };
 
+  public getKBDocuments = async (
+    projectID: string,
+    documentIDs: string[]
+  ): Promise<Record<string, BaseModels.Project.KnowledgeBaseDocument | null>> => {
+    const project = await this.client.db.collection(this.projectsCollection).findOne<PJ>(
+      {
+        _id: new ObjectId(projectID),
+      },
+      {
+        projection: Object.fromEntries(documentIDs.map((documentID) => [`knowledgeBase.documents.${documentID}`, 1])),
+      }
+    );
+
+    return project?.knowledgeBase?.documents || {};
+  };
+
+  public hasKBDocuments = async (projectID: string): Promise<boolean> => {
+    // more than 1 property in the object
+    const result = await this.client.db.collection(this.projectsCollection).aggregate([
+      {
+        $match: {
+          _id: new ObjectId(projectID),
+        },
+      },
+      {
+        $project: {
+          hasDocuments: {
+            $gt: [{ $size: { $objectToArray: '$knowledgeBase.documents' } }, 0],
+          },
+        },
+      },
+    ]);
+
+    return result.hasNext();
+  };
+
   public getProject = async (projectIDOrAuth: string) => {
     if (!isValidObjectID(projectIDOrAuth)) {
       return this.getProjectByAPIKey(projectIDOrAuth);
@@ -79,9 +113,16 @@ class MongoDataAPI<
 
     const project = await this.client.db
       .collection(this.projectsCollection)
-      .findOne<(PJ & { _id: ObjectId; devVersion: ObjectId; liveVersion: ObjectId }) | null>({
-        _id: new ObjectId(projectIDOrAuth),
-      });
+      .findOne<(PJ & { _id: ObjectId; devVersion: ObjectId; liveVersion: ObjectId }) | null>(
+        {
+          _id: new ObjectId(projectIDOrAuth),
+        },
+        {
+          projection: {
+            'knowledgeBase.documents': 0,
+          },
+        }
+      );
 
     if (!project) throw new Error(`Project not found: ${projectIDOrAuth}`);
 
@@ -101,9 +142,16 @@ class MongoDataAPI<
 
     const project = await this.client.db
       .collection(this.projectsCollection)
-      .findOne<(PJ & { _id: ObjectId; devVersion: ObjectId; liveVersion: ObjectId }) | null>({
-        _id: new ObjectId(apiKey.projectID),
-      });
+      .findOne<(PJ & { _id: ObjectId; devVersion: ObjectId; liveVersion: ObjectId }) | null>(
+        {
+          _id: new ObjectId(apiKey.projectID),
+        },
+        {
+          projection: {
+            'knowledgeBase.documents': 0,
+          },
+        }
+      );
 
     if (!project) throw new Error(`Project not found: ${apiKey}`);
 

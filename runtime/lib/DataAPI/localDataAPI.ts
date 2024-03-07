@@ -31,6 +31,10 @@ class LocalDataAPI<
   public getProgram = async (_versionID: string, diagramID: string) => this.programs[diagramID] ?? null;
 
   public getProject = async () => this.project;
+
+  public getKBDocuments = async () => this.project.knowledgeBase?.documents || {};
+
+  public hasKBDocuments = async () => Object.keys(this.project.knowledgeBase?.documents || {}).length > 0;
 }
 
 export default LocalDataAPI;
