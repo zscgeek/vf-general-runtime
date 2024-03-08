@@ -286,13 +286,18 @@ class AISynthesis extends AbstractManager {
       if (!answer?.output) return null;
 
       if (runtime) {
+        const documents = await runtime.api.getKBDocuments(
+          projectID,
+          data.chunks.map((chunk) => chunk.documentID)
+        );
+
         runtime.trace.addTrace({
           type: 'knowledgeBase',
           payload: {
             chunks: data.chunks.map(({ score, documentID }) => ({
               score,
               documentID,
-              documentData: runtime.project?.knowledgeBase?.documents[documentID]?.data,
+              documentData: documents?.[documentID]?.data,
             })),
             query: {
               messages: query.messages,
@@ -493,13 +498,17 @@ class AISynthesis extends AbstractManager {
     if (!data) return { ...EMPTY_AI_RESPONSE, chunks: [] };
 
     // attach metadata to chunks
+    const api = await this.services.dataAPI.get();
+    const documents = await api.getKBDocuments(
+      project._id,
+      data.chunks.map((chunk) => chunk.documentID)
+    );
+
     const chunks = data.chunks.map((chunk) => ({
       ...chunk,
       source: {
-        ...project.knowledgeBase?.documents?.[chunk.documentID]?.data,
-        tags: project.knowledgeBase?.documents?.[chunk.documentID]?.tags?.map(
-          (tagID) => (project?.knowledgeBase?.tags ?? {})[tagID]?.label
-        ),
+        ...documents?.[chunk.documentID]?.data,
+        tags: documents?.[chunk.documentID]?.tags?.map((tagID) => (project?.knowledgeBase?.tags ?? {})[tagID]?.label),
       },
     }));
 
