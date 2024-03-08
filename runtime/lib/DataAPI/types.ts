@@ -14,4 +14,11 @@ export interface DataAPI<
   getVersion(versionID: string): Promise<V>;
 
   getProject(projectID: string): Promise<PJ>;
+
+  getKBDocuments(
+    projectID: string,
+    documentIDs: string[]
+  ): Promise<Record<string, BaseModels.Project.KnowledgeBaseDocument | null>>;
+
+  hasKBDocuments(projectID: string): Promise<boolean>;
 }

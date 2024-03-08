@@ -28,6 +28,14 @@ class CacheDataAPI implements DataAPI<VoiceflowProgram.Program, VoiceflowVersion
 
     return this.projects[projectID];
   }
+
+  async getKBDocuments(projectID: string, documentIDs: string[]) {
+    return this.api.getKBDocuments(projectID, documentIDs);
+  }
+
+  async hasKBDocuments(projectID: string) {
+    return this.api.hasKBDocuments(projectID);
+  }
 }
 
 export default CacheDataAPI;
