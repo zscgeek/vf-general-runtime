@@ -10,6 +10,11 @@ const MOCK_QUERY = { _id: new ObjectId(MOCK_ID) };
 
 const VERSION_ID = '111111111111111111111111';
 const DIAGRAM_ID = '222222222222222222222222';
+const PROJECT_PROJECTION = {
+  projection: {
+    'knowledgeBase.documents': 0,
+  },
+};
 
 const MOCK_PROGRAM_QUERY = { versionID: new ObjectId(VERSION_ID), diagramID: new ObjectId(DIAGRAM_ID) };
 
@@ -43,7 +48,7 @@ describe('mongoDataAPI client unit tests', () => {
 
     expect(await api.getProject(MOCK_ID)).to.eql(MOCK_RETURN_VALUE);
     expect(client.db.collection.args).to.eql([['projects']]);
-    expect(collection.findOne.args).to.eql([[MOCK_QUERY]]);
+    expect(collection.findOne.args).to.eql([[MOCK_QUERY, PROJECT_PROJECTION]]);
   });
 
   it('overrides collection names', async () => {
@@ -58,7 +63,7 @@ describe('mongoDataAPI client unit tests', () => {
     expect(await api.getProject(MOCK_ID)).to.eql(MOCK_RETURN_VALUE);
 
     expect(client.db.collection.args).to.eql([['custom-programs'], ['custom-versions'], ['custom-projects']]);
-    expect(collection.findOne.args).to.eql([[MOCK_PROGRAM_QUERY], [MOCK_QUERY], [MOCK_QUERY]]);
+    expect(collection.findOne.args).to.eql([[MOCK_PROGRAM_QUERY], [MOCK_QUERY], [MOCK_QUERY, PROJECT_PROJECTION]]);
   });
 
   it('throws error on null find', async () => {

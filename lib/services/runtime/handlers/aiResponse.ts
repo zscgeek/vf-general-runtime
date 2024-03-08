@@ -66,13 +66,18 @@ const AIResponseHandler: HandlerFactory<VoiceNode.AIResponse.Node, void, General
 
           if (!answer.output && settings.notFoundPath) return elseID;
 
+          const documents = await runtime.api.getKBDocuments(
+            runtime.version!.projectID,
+            queryAnswer.chunks?.map(({ documentID }) => documentID) || []
+          );
+
           runtime.trace.addTrace({
             type: 'knowledgeBase',
             payload: {
               chunks: queryAnswer.chunks?.map(({ score, documentID }) => ({
                 score,
                 documentID,
-                documentData: runtime.project?.knowledgeBase?.documents[documentID]?.data,
+                documentData: documents[documentID]?.data,
               })),
               query: {
                 messages: answer.messages,

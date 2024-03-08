@@ -75,7 +75,7 @@ const getOutput = async (
     try {
       // use knowledge base if it exists OR if the user has FAQs
       if (
-        Object.values(runtime.project?.knowledgeBase?.documents || {}).length > 0 ||
+        (await runtime.api.hasKBDocuments(runtime.project._id)) ||
         runtime.services.unleash.client.isEnabled(FeatureFlag.FAQ_FF, { workspaceID: Number(runtime.project?.teamID) })
       ) {
         result = await knowledgeBaseNoMatch(runtime);
