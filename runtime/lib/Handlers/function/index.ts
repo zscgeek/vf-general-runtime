@@ -52,7 +52,7 @@ function resolveVariable(value: string, variables: Record<string, unknown>) {
   const trimmedValue = value.trim();
   const onlyVariableRegex = /^{[A-Z_a-z]\w*}$/;
   if (onlyVariableRegex.test(trimmedValue)) {
-    const variableName = trimmedValue.substring(0, trimmedValue.length - 1);
+    const variableName = trimmedValue.substring(1, trimmedValue.length - 1);
     return variables[variableName];
   }
   return replaceVariables(value, variables);
