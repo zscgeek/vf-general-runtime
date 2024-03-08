@@ -156,7 +156,7 @@
     "url": "git+https://github.com/voiceflow/general-runtime.git"
   },
   "scripts": {
-    "build": "tsc -p ./tsconfig.build.json && tsc-alias -p ./tsconfig.build.json && cpy app.config.js yarn.lock build/",
+    "build": "rm -rf build && tsc -p ./tsconfig.build.json && tsc-alias -p ./tsconfig.build.json && cpy app.config.js yarn.lock build/",
     "commit": "cz",
     "connect:cli": "vfcli mesh connect general-runtime -c \"/bin/bash\"",
     "dev": "ts-node-dev --files --respawn --exit-child --transpile-only -r tsconfig-paths/register --inspect -- start.ts",
