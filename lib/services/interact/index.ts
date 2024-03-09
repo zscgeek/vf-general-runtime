@@ -42,12 +42,9 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
       analytics,
       runtime,
       metrics,
-      nlu,
       tts,
-      dialog,
       asr,
       speak,
-      slots,
       state: stateManager,
       filter,
       aiAssist,
@@ -80,7 +77,7 @@ class Interact extends AbstractManager<{ utils: typeof utils }> {
 
     const turn = new this.services.utils.TurnBuilder<Context>(stateManager);
 
-    turn.addHandlers(asr, nlu, aiAssist, slots, dialog, runtime);
+    turn.addHandlers(asr, aiAssist, runtime);
     turn.addHandlers(analytics);
 
     if (config.tts) {

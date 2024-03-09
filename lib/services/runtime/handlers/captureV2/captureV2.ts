@@ -1,9 +1,9 @@
-import { BaseNode, BaseTrace, RuntimeLogs } from '@voiceflow/base-types';
+import { BaseNode, BaseRequest, BaseTrace, RuntimeLogs } from '@voiceflow/base-types';
 import { VoiceflowConstants, VoiceflowNode } from '@voiceflow/voiceflow-types';
 
 import { Action, HandlerFactory, Runtime, Store } from '@/runtime';
 
-import { isIntentRequest, StorageType } from '../../types';
+import { GeneralRuntime, isIntentRequest, isTextRequest, StorageType } from '../../types';
 import { addButtonsIfExists, addOutputTrace, getOutputTrace, isConfidenceScoreAbove, mapEntities } from '../../utils';
 import CommandHandler from '../command';
 import NoReplyHandler, { addNoReplyTimeoutIfExists } from '../noReply';
@@ -35,10 +35,36 @@ type utilsObjType = typeof utilsObj & {
   addPromptIfExists?: (node: VoiceflowNode.CaptureV2.Node, runtime: Runtime, variables: Store) => void;
 };
 
-export const CaptureV2Handler: HandlerFactory<VoiceflowNode.CaptureV2.Node, utilsObjType> = (utils) => ({
+export const CaptureV2Handler: HandlerFactory<VoiceflowNode.CaptureV2.Node, utilsObjType, GeneralRuntime> = (utils) => ({
   canHandle: (node) => node.type === BaseNode.NodeType.CAPTURE_V2,
   // eslint-disable-next-line sonarjs/cognitive-complexity
-  handle: (node, runtime, variables) => {
+  handle: async (node, runtime, variables) => {
+    const incomingRequest = runtime.getRequest();
+
+     // Classify into an intent request
+     if (isTextRequest(incomingRequest)) {
+      const prediction = await runtime.services.classification.predict(runtime, incomingRequest.payload, {
+        filteredEntities: node.intent?.name ? [node.intent.name] : [],
+      });
+
+      if (!prediction) {
+
+        return node.id;
+      }
+
+      runtime.setRequest({
+        type: BaseRequest.RequestType.INTENT,
+        payload: {
+          query: prediction.utterance,
+          intent: {
+            name: prediction.predictedIntent,
+          },
+          entities: prediction.predictedSlots,
+          confidence: prediction.confidence,
+        },
+      });
+    }
+
     const request = runtime.getRequest();
     const captureIntentName = node.intent?.name;
 
@@ -50,12 +76,12 @@ export const CaptureV2Handler: HandlerFactory<VoiceflowNode.CaptureV2.Node, util
         utils.addPromptIfExists(node, runtime, variables);
       }
 
-      if (captureIntentName) {
-        runtime.trace.addTrace<BaseTrace.GoToTrace>({
-          type: BaseTrace.TraceType.GOTO,
-          payload: { request: setElicit(entityFillingRequest(captureIntentName, node.intent?.entities ?? []), true) },
-        });
-      }
+      // if (captureIntentName) {
+      //   runtime.trace.addTrace<BaseTrace.GoToTrace>({
+      //     type: BaseTrace.TraceType.GOTO,
+      //     payload: { request: setElicit(entityFillingRequest(captureIntentName, node.intent?.entities ?? []), true) },
+      //   });
+      // }
 
       // clean up no-matches and no-replies counters on new interaction
       runtime.storage.delete(StorageType.NO_MATCHES_COUNTER);
@@ -71,8 +97,9 @@ export const CaptureV2Handler: HandlerFactory<VoiceflowNode.CaptureV2.Node, util
 
     // If capturing the entire user response, we need a high confidence to leave to another capture step
     const lowConfidence =
-      isNodeCapturingEntireResponse(node) &&
-      !isConfidenceScoreAbove(ENTIRE_RESPONSE_CONFIDENCE_THRESHOLD, request.payload?.confidence);
+      isNodeCapturingEntireResponse(node)
+      && isIntentRequest(request)
+      && !isConfidenceScoreAbove(ENTIRE_RESPONSE_CONFIDENCE_THRESHOLD, request.payload?.confidence);
 
     const isLocalScope = node.intentScope === BaseNode.Utils.IntentScope.NODE;
 
@@ -86,7 +113,7 @@ export const CaptureV2Handler: HandlerFactory<VoiceflowNode.CaptureV2.Node, util
     }
 
     // on successful match
-    if (isIntentRequest(request)) {
+    if (isIntentRequest(request) && request.payload.intent.name === captureIntentName) {
       const { query, intent } = request.payload;
 
       const handleCapturePath = () => {

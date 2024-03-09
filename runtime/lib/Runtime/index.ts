@@ -167,6 +167,10 @@ class Runtime<
     return this.request;
   }
 
+  setRequest(request: Request | null): void {
+    this.request = request;
+  }
+
   public setAction(type: Action): void {
     this.action = type;
   }

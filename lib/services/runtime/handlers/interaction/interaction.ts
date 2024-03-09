@@ -1,9 +1,9 @@
-import { BaseNode, BaseTrace } from '@voiceflow/base-types';
+import { BaseNode, BaseRequest, BaseTrace } from '@voiceflow/base-types';
 import { VoiceflowConstants, VoiceflowNode } from '@voiceflow/voiceflow-types';
 
 import { Action, HandlerFactory, Runtime, Store } from '@/runtime';
 
-import { StorageType } from '../../types';
+import { GeneralRuntime, StorageType, isIntentRequest, isTextRequest } from '../../types';
 import { addButtonsIfExists } from '../../utils';
 import CommandHandler from '../command';
 import { findEventMatcher } from '../event';
@@ -25,9 +25,9 @@ type utilsObjType = typeof utilsObj & {
   addNoReplyIfExists?: (node: VoiceflowNode.Interaction.Node, runtime: Runtime, variables: Store) => void;
 };
 
-export const InteractionHandler: HandlerFactory<VoiceflowNode.Interaction.Node, utilsObjType> = (utils) => ({
+export const InteractionHandler: HandlerFactory<VoiceflowNode.Interaction.Node, utilsObjType, GeneralRuntime> = (utils) => ({
   canHandle: (node) => !!node.interactions,
-  handle: (node, runtime, variables) => {
+  handle: async (node, runtime, variables) => {
     const runtimeAction = runtime.getAction();
 
     if (runtimeAction === Action.RUNNING) {
@@ -49,6 +49,25 @@ export const InteractionHandler: HandlerFactory<VoiceflowNode.Interaction.Node, 
 
     if (utils.noReplyHandler.canHandle(runtime)) {
       return utils.noReplyHandler.handle(node, runtime, variables);
+    }
+
+    const request = runtime.getRequest();
+
+    // Classify into an intent request
+    if (isTextRequest(request)) {
+      const prediction = await runtime.services.classification.predict(runtime, request.payload);
+
+      runtime.setRequest({
+        type: BaseRequest.RequestType.INTENT,
+        payload: {
+          query: prediction.utterance,
+          intent: {
+            name: prediction.predictedIntent,
+          },
+          entities: prediction.predictedSlots,
+          confidence: prediction.confidence,
+        },
+      })
     }
 
     for (let i = 0; i < node.interactions.length; i++) {

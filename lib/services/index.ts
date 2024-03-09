@@ -20,6 +20,7 @@ import StateManagement from './stateManagement';
 import { TestService } from './test';
 import Transcript from './transcript';
 import TTS from './tts';
+import { ClassificationService } from './classification';
 
 export interface ServiceMap {
   runtime: Runtime;
@@ -40,6 +41,7 @@ export interface ServiceMap {
   test: TestService;
   transcript: Transcript;
   stateManagement: StateManagement;
+  classification: ClassificationService
 }
 
 export interface FullServiceMap extends ClientMap, ServiceMap {}
@@ -54,6 +56,7 @@ const buildServices = (config: Config, clients: ClientMap): FullServiceMap => {
 
   // order here matters, services defined after runtime are not available inside of it
   services.aiSynthesis = new AISynthesis(services, config);
+  services.classification = new ClassificationService(services, config);
   services.runtime = new Runtime(services, config);
   services.state = new State(services, config);
   services.asr = new ASR(services, config);
