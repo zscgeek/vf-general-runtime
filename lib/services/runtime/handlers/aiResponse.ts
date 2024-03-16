@@ -7,6 +7,7 @@ import _cloneDeep from 'lodash/cloneDeep';
 import _merge from 'lodash/merge';
 
 import { GPT4_ABLE_PLAN } from '@/lib/clients/ai/ai-model.interface';
+import log from '@/logger';
 import { HandlerFactory } from '@/runtime';
 
 import { FrameType, GeneralRuntime, Output } from '../types';
@@ -37,6 +38,16 @@ const AIResponseHandler: HandlerFactory<VoiceNode.AIResponse.Node, void, General
         let answer: AIResponse | null = EMPTY_AI_RESPONSE;
         const isDeprecated = node.overrideParams === undefined;
         if (isDeprecated) {
+          log.warn(
+            `[AIResponseHandler] [DEPRECATEDpromptSynthesis] ${log.vars({
+              workspaceID,
+              projectID,
+              versionID: runtime.versionID,
+              programID: runtime.stack.top()?.getDiagramID(),
+              nodeID: node.id,
+            })}`
+          );
+
           const { prompt, mode } = node;
           answer = await runtime.services.aiSynthesis.DEPRECATEDpromptSynthesis(
             runtime.version!.projectID,

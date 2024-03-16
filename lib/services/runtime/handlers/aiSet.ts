@@ -3,6 +3,7 @@ import { deepVariableSubstitution } from '@voiceflow/common';
 import _cloneDeep from 'lodash/cloneDeep';
 
 import { GPT4_ABLE_PLAN } from '@/lib/clients/ai/ai-model.interface';
+import log from '@/logger';
 import { HandlerFactory } from '@/runtime';
 
 import { GeneralRuntime } from '../types';
@@ -36,6 +37,16 @@ const AISetHandler: HandlerFactory<BaseNode.AISet.Node, void, GeneralRuntime> = 
 
               let response: AIResponse | null = EMPTY_AI_RESPONSE;
               if (isDeprecated) {
+                log.warn(
+                  `[AISetHandler] [DEPRECATEDpromptSynthesis] ${log.vars({
+                    workspaceID,
+                    projectID,
+                    versionID: runtime.versionID,
+                    programID: runtime.stack.top()?.getDiagramID(),
+                    nodeID: node.id,
+                  })}`
+                );
+
                 response = await runtime.services.aiSynthesis.DEPRECATEDpromptSynthesis(
                   runtime.version!.projectID,
                   workspaceID,
