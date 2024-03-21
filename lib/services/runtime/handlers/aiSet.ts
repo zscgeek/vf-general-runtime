@@ -1,8 +1,10 @@
 import { BaseNode, BaseUtils } from '@voiceflow/base-types';
 import { deepVariableSubstitution } from '@voiceflow/common';
+import { VoiceflowConstants } from '@voiceflow/voiceflow-types';
 import _cloneDeep from 'lodash/cloneDeep';
 
 import { GPT4_ABLE_PLAN } from '@/lib/clients/ai/ai-model.interface';
+import { FeatureFlag } from '@/lib/feature-flags';
 import log from '@/logger';
 import { HandlerFactory } from '@/runtime';
 
@@ -63,13 +65,24 @@ const AISetHandler: HandlerFactory<BaseNode.AISet.Node, void, GeneralRuntime> = 
                   _cloneDeep({ ...node, mode, instruction, prompt, sets: undefined }),
                   variables.getState()
                 );
-                response = await runtime.services.aiSynthesis.knowledgeBaseQuery({
+                const queryAnswer = await runtime.services.aiSynthesis.knowledgeBaseQuery({
                   version: runtime.version!,
                   project: runtime.project!,
                   question: settings.prompt,
                   instruction: settings.instruction,
                   options: node.overrideParams ? { summarization: settings } : {},
                 });
+
+                // just for typescript typing purposes (AIResponse) doesn't contain "chunks"
+                // remove after isDeprecated is gone
+                response = queryAnswer;
+
+                const chunks = queryAnswer?.chunks?.map((chunk) => JSON.stringify(chunk)) ?? [];
+                const workspaceID = Number(runtime.project?.teamID);
+
+                if (runtime.services.unleash.client.isEnabled(FeatureFlag.VF_CHUNKS_VARIABLE, { workspaceID })) {
+                  variables.set(VoiceflowConstants.BuiltInVariable.VF_CHUNKS, chunks);
+                }
 
                 if (response.output === null) response.output = BaseUtils.ai.KNOWLEDGE_BASE_NOT_FOUND;
               }
