@@ -142,7 +142,7 @@ export const createExecutionResultLogger =
         },
         `Code execution results between ${methodA.name} and ${methodB.name} are different`
       );
-    } else {
+    } else if (!isDeepStrictEqual(resultA.value, resultB.value)) {
       log.warn(
         { ...context, [methodA.name]: resultA.value, [methodB.name]: resultB.value },
         `Code execution results between ${methodA.name} and ${methodB.name} are different`
