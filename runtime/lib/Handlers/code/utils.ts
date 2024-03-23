@@ -116,10 +116,7 @@ export const createExecutionResultLogger =
           `Code execution ${methodA.name} rejected when ${methodB.name} succeeded`
         );
       } else {
-        log.error(
-          { ...context, [methodA.name]: resultA.reason, [methodB.name]: resultB.reason },
-          `Code execution ${methodA.name} and ${methodB.name} both rejected`
-        );
+        // no point in logging the case both are rejected
       }
     } else if (isRejected(resultB)) {
       log.warn(
@@ -133,15 +130,16 @@ export const createExecutionResultLogger =
           differentProperties.add(key);
         }
       });
-
-      log.warn(
-        {
-          ...context,
-          [methodA.name]: _.pick(resultA.value, [...differentProperties]),
-          [methodB.name]: _.pick(resultB.value, [...differentProperties]),
-        },
-        `Code execution results between ${methodA.name} and ${methodB.name} are different`
-      );
+      if (differentProperties.size !== 0) {
+        log.warn(
+          {
+            ...context,
+            [methodA.name]: _.pick(resultA.value, [...differentProperties]),
+            [methodB.name]: _.pick(resultB.value, [...differentProperties]),
+          },
+          `Code execution results between ${methodA.name} and ${methodB.name} are different`
+        );
+      }
     } else if (!isDeepStrictEqual(resultA.value, resultB.value)) {
       log.warn(
         { ...context, [methodA.name]: resultA.value, [methodB.name]: resultB.value },
