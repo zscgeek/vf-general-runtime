@@ -115,8 +115,6 @@ export const createExecutionResultLogger =
           { ...context, [methodA.name]: resultA.reason },
           `Code execution ${methodA.name} rejected when ${methodB.name} succeeded`
         );
-      } else {
-        // no point in logging the case both are rejected
       }
     } else if (isRejected(resultB)) {
       log.warn(
@@ -124,18 +122,22 @@ export const createExecutionResultLogger =
         `Code execution ${methodA.name} succeeded when ${methodB.name} rejected`
       );
     } else if (Utils.object.isObject(resultA.value) && Utils.object.isObject(resultB.value)) {
-      const differentProperties = new Set<string>();
+      const differentPropertiesA: Record<string, string> = {};
+      const differentPropertiesB: Record<string, string> = {};
+
       Utils.array.unique([...Object.keys(resultA.value), ...Object.keys(resultB.value)]).forEach((key) => {
         if (!isDeepStrictEqual(resultA.value[key], resultB.value[key])) {
-          differentProperties.add(key);
+          differentPropertiesA[key] = JSON.stringify(resultA.value[key]);
+          differentPropertiesB[key] = JSON.stringify(resultB.value[key]);
         }
       });
-      if (differentProperties.size !== 0) {
+
+      if (Object.keys(differentPropertiesA).length || Object.keys(differentPropertiesB).length) {
         log.warn(
           {
             ...context,
-            [methodA.name]: _.pick(resultA.value, [...differentProperties]),
-            [methodB.name]: _.pick(resultB.value, [...differentProperties]),
+            [methodA.name]: differentPropertiesA,
+            [methodB.name]: differentPropertiesB,
           },
           `Code execution results between ${methodA.name} and ${methodB.name} are different`
         );
@@ -143,7 +145,7 @@ export const createExecutionResultLogger =
     } else if (!isDeepStrictEqual(resultA.value, resultB.value)) {
       log.warn(
         { ...context, [methodA.name]: resultA.value, [methodB.name]: resultB.value },
-        `Code execution results between ${methodA.name} and ${methodB.name} are different`
+        `Code execution results between ${methodA.name} and ${methodB.name} are high-level different`
       );
     }
   };
