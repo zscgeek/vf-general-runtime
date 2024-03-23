@@ -1,8 +1,8 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 import { Utils } from '@voiceflow/common';
 import type { Logger } from '@voiceflow/logger';
 import axios from 'axios';
 import ivm from 'isolated-vm';
-import _ from 'lodash';
 import { isDeepStrictEqual } from 'node:util';
 import requireFromUrl from 'require-from-url/sync';
 
@@ -127,8 +127,12 @@ export const createExecutionResultLogger =
 
       Utils.array.unique([...Object.keys(resultA.value), ...Object.keys(resultB.value)]).forEach((key) => {
         if (!isDeepStrictEqual(resultA.value[key], resultB.value[key])) {
-          differentPropertiesA[key] = JSON.stringify(resultA.value[key]);
-          differentPropertiesB[key] = JSON.stringify(resultB.value[key]);
+          const JSONValueA = JSON.stringify(resultA.value[key]);
+          const JSONValueB = JSON.stringify(resultB.value[key]);
+          if (JSONValueA !== JSONValueB) {
+            differentPropertiesA[key] = JSON.stringify(resultA.value[key]);
+            differentPropertiesB[key] = JSON.stringify(resultB.value[key]);
+          }
         }
       });
 
