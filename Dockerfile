@@ -29,17 +29,20 @@ COPY --link . ./
 FROM sourced as testing
 
 FROM testing as linter
-RUN yarn lint:report || echo 'Failure'
+RUN yarn lint:report 2>&1 | tee /var/log/eslint.log
 
 FROM testing as dep-check
 RUN yarn test:dependencies 2>&1 | tee /var/log/dep-check.log
 
 FROM testing as unit-tests
-RUN yarn test:unit 2>&1 | tee /var/log/unit-tests.log
+RUN yarn test:unit:ci 2>&1 | tee /var/log/unit-tests.log
 
 FROM scratch as checks
-COPY --link --from=linter /src/linting/lint.xml /
+COPY --link --from=linter /src/reports/eslint.xml /
+COPY --link --from=linter /var/log/eslint.log /
+COPY --link --from=linter /src/sonar/report.json /
 COPY --link --from=dep-check /var/log/dep-check.log /
+COPY --link --from=unit-tests /src/reports/mocha/unit-tests.xml /
 COPY --link --from=unit-tests /var/log/unit-tests.log /
 
 

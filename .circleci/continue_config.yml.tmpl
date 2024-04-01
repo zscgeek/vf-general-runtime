@@ -71,6 +71,31 @@ jobs:
           post_steps:
             - store_test_results:
                 path: ci-reports
+            - run:
+                name: ESLint
+                when: always
+                command: |
+                  set +o pipefail
+                  ls -lah ./ci-reports/
+                  cat ./ci-reports/report.json
+                  cat ./ci-reports/eslint.log
+                  cat ./ci-reports/eslint.xml | grep 'failures="' | ( ! grep -qE 'failures="[1-9]+' )
+
+            - run:
+                name: Depcheck
+                when: always
+                command: |
+                  set +o pipefail
+                  cat ./ci-reports/dep-check.log
+                  grep -q "No depcheck issue" ./ci-reports/dep-check.log
+            - run:
+                name: Unit Tests
+                when: always
+                command: |
+                  set +o pipefail
+                  cat ./ci-reports/unit-tests.log
+                  cat ./ci-reports/unit-tests.xml | grep 'failures="' | ( ! grep -qE 'failures="[1-9]+' )
+                  set -o pipefail
       - vfcommon/staged_buildx:
           image_repo: << pipeline.parameters.container-image-url >>
           image_tag: build
@@ -147,6 +172,7 @@ workflows:
           use_buildkit: true
           remote_docker_version: default
           extra_build_args: *node_version_arg
+          enable_cache_to: {{ eq .values.branch "master" }}
           requires:
             {{- if eq .values.branch "master" }}
             - test
