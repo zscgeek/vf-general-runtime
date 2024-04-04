@@ -1,7 +1,8 @@
-import { BaseTrace } from '@voiceflow/base-types';
+import { BaseTrace, BaseVersion } from '@voiceflow/base-types';
 import { BaseTraceFrame } from '@voiceflow/base-types/build/cjs/trace';
 import { replaceVariables } from '@voiceflow/common';
 import {
+  FunctionCompiledData,
   FunctionCompiledDefinition,
   FunctionCompiledInvocation,
   FunctionCompiledNode,
@@ -52,11 +53,34 @@ function applyNextCommand(command: NextCommand, paths: FunctionCompiledInvocatio
   return null;
 }
 
+function resolveFunctionDefinition(
+  definition: FunctionCompiledData['definition'],
+  version: BaseVersion.Version
+): FunctionCompiledDefinition {
+  if ('functionId' in definition) {
+    const functionDefinition = version.prototype?.surveyorContext.functionDefinitions;
+
+    if (!functionDefinition) {
+      throw new Error('prototype is missing function definitions');
+    }
+
+    const resolvedDefinition = functionDefinition[definition.functionId];
+    if (!resolvedDefinition) {
+      throw new Error(`unable to resolve function definition, the definition was not found`);
+    }
+    return resolvedDefinition;
+  }
+
+  return definition;
+}
+
 export const FunctionHandler: HandlerFactory<FunctionCompiledNode, typeof utilsObj> = (utils) => ({
   canHandle: (node) => node.type === NodeType.FUNCTION,
 
   handle: async (node, runtime, variables): Promise<string | null> => {
     const { definition, invocation } = node.data;
+
+    const resolvedDefinition = resolveFunctionDefinition(definition, runtime.version!);
 
     try {
       const resolvedInputMapping = Object.entries(invocation.inputVars).reduce((acc, [varName, value]) => {
@@ -68,8 +92,9 @@ export const FunctionHandler: HandlerFactory<FunctionCompiledNode, typeof utilsO
 
       const { next, outputVars, trace } = await executeFunction({
         ...node.data,
+        definition: resolvedDefinition,
         source: {
-          codeId: definition.codeId,
+          codeId: resolvedDefinition.codeId,
         },
         invocation: {
           inputVars: resolvedInputMapping,
@@ -77,14 +102,14 @@ export const FunctionHandler: HandlerFactory<FunctionCompiledNode, typeof utilsO
       });
 
       if (outputVars) {
-        applyOutputCommand(outputVars, runtime, variables, definition.outputVars, invocation.outputVars);
+        applyOutputCommand(outputVars, runtime, variables, resolvedDefinition.outputVars, invocation.outputVars);
       }
 
       if (trace) {
         applyTraceCommand(trace, runtime);
       }
 
-      if (definition.pathCodes.length === 0) {
+      if (resolvedDefinition.pathCodes.length === 0) {
         return invocation.paths.__vf__default ?? null;
       }
       if (next) {
