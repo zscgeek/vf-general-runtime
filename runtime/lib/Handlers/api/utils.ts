@@ -264,7 +264,7 @@ export const callAPI = async (nodeData: APINodeData, config: Partial<APIHandlerC
 
   const { response, requestOptions } = await fetchMethod(_.merge(DEFAULT_API_HANDLER_CONFIG, config), nodeData);
 
-  const { newVariables, responseJSON } = transformResponseBody(response.json, nodeData);
+  const { newVariables, responseJSON } = transformResponseBody(response, nodeData);
 
   return {
     variables: newVariables,
