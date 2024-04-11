@@ -3,8 +3,6 @@ import { deepVariableSubstitution } from '@voiceflow/common';
 import safeJSONStringify from 'json-stringify-safe';
 import _cloneDeep from 'lodash/cloneDeep';
 
-import CONFIG from '@/config';
-import log from '@/logger';
 import Handler from '@/runtime/lib/Handler';
 
 import DebugLogging, { SimpleStepMessage } from '../../Runtime/DebugLogging';
@@ -95,17 +93,6 @@ const APIHandler = (config: Partial<APIHandlerConfig>): Handler<BaseNode.Integra
     try {
       data = await makeAPICall(actionBodyData, runtime, config);
     } catch (error) {
-      if (CONFIG.FUNCTION_API_PROXY) {
-        log.error(
-          error,
-          `[function api proxy error] ${JSON.stringify({
-            versionID: runtime?.getVersionID?.(),
-            diagramID: runtime?.stack?.top()?.getDiagramID(),
-            nodeID: node.id,
-          })}`
-        );
-      }
-
       runtime.trace.debug(
         `API call failed - Error: \n${safeJSONStringify(error?.message || error)}`,
         BaseNode.NodeType.API

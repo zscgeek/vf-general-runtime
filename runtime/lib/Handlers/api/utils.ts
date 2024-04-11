@@ -12,6 +12,7 @@ import { setTimeout as sleep } from 'timers/promises';
 import validator from 'validator';
 
 import CONFIG from '@/config';
+import log from '@/logger';
 import Runtime from '@/runtime/lib/Runtime';
 
 import { createS3Client, readFileFromS3 } from '../../HTTPClient/AWSClient';
@@ -153,28 +154,34 @@ const doProxyFetch = async (
   // this is actual unuse by the lambda, but just for the sake of downstream functions
   const requestOptions = await createRequest(nodeData, config);
 
-  const functionLambdaClient = new FunctionLambdaClient({
-    functionLambdaARN: CONFIG.FUNCTION_LAMBDA_ARN,
-    accessKeyId: CONFIG.FUNCTION_LAMBDA_ACCESS_KEY_ID,
-    secretAccessKey: CONFIG.FUNCTION_LAMBDA_SECRET_ACCESS_KEY,
-    region: CONFIG.AWS_REGION,
-  });
+  let result: any;
+  try {
+    const functionLambdaClient = new FunctionLambdaClient({
+      functionLambdaARN: CONFIG.FUNCTION_LAMBDA_ARN,
+      accessKeyId: CONFIG.FUNCTION_LAMBDA_ACCESS_KEY_ID,
+      secretAccessKey: CONFIG.FUNCTION_LAMBDA_SECRET_ACCESS_KEY,
+      region: CONFIG.AWS_REGION,
+    });
 
-  const result = await functionLambdaClient.invokeLambda({
-    type: 'API_PROXY',
-    request: nodeData,
-    config: {
-      requestTimeoutMs: config.requestTimeoutMs,
-      maxResponseBodySizeBytes: config.maxResponseBodySizeBytes,
-      maxRequestBodySizeBytes: config.maxRequestBodySizeBytes,
-    },
-    tls: await fetchTLS(config, nodeData.tls),
-  } as any);
+    result = await functionLambdaClient.invokeLambda({
+      type: 'API_PROXY',
+      request: nodeData,
+      config: {
+        requestTimeoutMs: config.requestTimeoutMs,
+        maxResponseBodySizeBytes: config.maxResponseBodySizeBytes,
+        maxRequestBodySizeBytes: config.maxRequestBodySizeBytes,
+      },
+      tls: await fetchTLS(config, nodeData.tls),
+    } as any);
 
-  return {
-    response: result.body.response,
-    requestOptions,
-  };
+    return {
+      response: result.body.response,
+      requestOptions,
+    };
+  } catch (error) {
+    log.error({ error, nodeData, body: result.body }, `[function api proxy error] ${nodeData.method} ${nodeData.url}`);
+    throw error;
+  }
 };
 
 const doDirectFetch = async (
