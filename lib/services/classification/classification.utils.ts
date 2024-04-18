@@ -1,11 +1,15 @@
+import { BaseModels } from '@voiceflow/base-types';
 import {
   IntentClassificationLLMSettings,
   IntentClassificationNLUSettings,
   IntentClassificationSettings,
+  IntentClassificationSettingsDTO,
   PrototypeModel,
   Version,
 } from '@voiceflow/dtos';
-import { VoiceflowVersion } from '@voiceflow/voiceflow-types';
+import { VoiceflowProject, VoiceflowVersion } from '@voiceflow/voiceflow-types';
+
+import { DEFAULT_NLU_INTENT_CLASSIFICATION, LEGACY_LLM_INTENT_CLASSIFICATION } from './classification.const';
 
 export const isIntentClassificationNLUSettings = (
   settings: IntentClassificationSettings
@@ -19,17 +23,42 @@ export const isIntentClassificationLLMSettings = (
   return settings.type === 'llm';
 };
 
+export const isIntentClassificationSettings = (
+  intentClassificationSettings?: unknown
+): intentClassificationSettings is IntentClassificationSettings => {
+  return IntentClassificationSettingsDTO.safeParse(intentClassificationSettings).success;
+};
+
 export const castToDTO = (
-  version: VoiceflowVersion.Version
+  version: VoiceflowVersion.Version,
+  project: VoiceflowProject.Project
 ): {
-  settings: Version['settings'];
+  intentClassificationSettings: IntentClassificationSettings;
   intents?: PrototypeModel['intents'];
   slots?: PrototypeModel['slots'];
 } => {
   const { settings, prototype } = version as unknown as Version;
   const { intents, slots } = prototype?.model ?? {};
+
+  let intentClassificationSettings: IntentClassificationSettings;
+
+  if (settings?.intentClassification && isIntentClassificationSettings(settings.intentClassification)) {
+    intentClassificationSettings = settings.intentClassification;
+  } else if (project.nluSettings?.classifyStrategy === BaseModels.Project.ClassifyStrategy.VF_NLU_LLM_HYBRID) {
+    // remove after migration PL-846
+    intentClassificationSettings = LEGACY_LLM_INTENT_CLASSIFICATION;
+  } else if (version?.platformData?.settings?.intentConfidence) {
+    // remove after migration PL-846
+    intentClassificationSettings = {
+      type: 'nlu',
+      params: { confidence: version.platformData.settings.intentConfidence },
+    };
+  } else {
+    intentClassificationSettings = DEFAULT_NLU_INTENT_CLASSIFICATION;
+  }
+
   return {
-    settings,
+    intentClassificationSettings,
     intents,
     slots,
   };
